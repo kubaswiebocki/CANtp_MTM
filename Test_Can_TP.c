@@ -26,14 +26,14 @@ void Test_CanTp_Shutdown(enum CanTp_StateType, enum expected)
 	
 }
 
-void test(void)
+void test()
 {
 
-test_CanTp_Init(CANTP_ON, CanTp_Init(const CanTpConfig *CfgPtr));   
-test_CanTp_Shutdown(CANTP_OFF,CanTp_Shutdown(void));       
+Test_CanTp_Init(CANTP_ON, CanTp_Init(const CanTpConfig *CfgPtr));   
+Test_CanTp_Shutdown(CANTP_OFF,CanTp_Shutdown());       
 }
 
-void all_tests(void)
+void all_tests()
 {
   test();   
 }
