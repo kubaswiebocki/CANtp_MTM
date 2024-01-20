@@ -248,9 +248,10 @@ void CanTp_TxConfirmation(PduIdType TxPduId)
                 }
             }
         }
+}
 
 
-Std_ReturnType CanTp_Transmit(PduIdType CanTpTxSduId, const PduInfoType *CanTpTxInfoPtr) {
+Std_ReturnType CanTp_Transmit(PduIdType CanTpTxSduId, const PduInfoType *CanTpTxInfoPtr){
     CanTp_NSduType *N_Sdu = NULL_PTR;
     Std_ReturnType r = E_NOT_OK;
 
@@ -361,7 +362,7 @@ Std_ReturnType CanTp_CancelReceive(PduIdType CanTpRxSduId)
 
     return r;
 }
-}
+
 
 
 #if (CANTP_E_PARAM_ID  == STD_ON)

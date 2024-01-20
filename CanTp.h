@@ -15,6 +15,7 @@
 #define CANTP_E_COM (0xB0u)
 #define CANTP_E_RX_COM (0xC0u)
 #define CANTP_E_TX_COM (0xD0u)
+#define CANTP_CANCEL_TRANSMIT (0x4Au)
 
 #define CANTP_RX (0x01u)
 
@@ -23,6 +24,10 @@
 #define CANTP_SHUTDOWN (0x02u)
 #define CANTP_TRANSMIT (0x49u)
 
+#define CANTP_MODULE_ID (0x0Eu)
+#define CANTP_SW_MAJOR_V (0x00u) 
+#define CANTP_SW_MINOR_V (0x01u) 
+#define CANTP_SW_PATCH_V (0x00u) 
 
 #define run_test()
 #define test_start() 
