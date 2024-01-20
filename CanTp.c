@@ -197,6 +197,15 @@ void CanTp_Init(const CanTpConfig *CfgPtr)
     }
 }
 
+void CanTp_GetVersionInfo(Std_VersionInfoType *versioninfo) {
+    if (versioninfo != NULL_PTR) {
+    	versioninfo->sw_major_version = CANTP_SW_MAJOR_V;
+    	versioninfo->sw_minor_version = CANTP_SW_MINOR_V;
+    	versioninfo->sw_patch_version = CANTP_SW_PATCH_V;
+    	versioninfo->moduleID = (uint16)CANTP_MODULE_ID;
+    	versioninfo->vendorID = 0x00u;
+    }
+}
 
 void CanTp_Shutdown(void) {
     if ((CanTp_StateType)CanTpState != (CanTp_StateType)CANTP_OFF) {
@@ -586,14 +595,3 @@ Std_ReturnType CanTp_ReadParameter(PduIdType id, TPParameterType parameter, uint
     return r;
 }
 #endif /* #if (CANTP_READ_PARAMETER_API == STD_ON) */
-
-void CanTp_GetVersionInfo(Std_VersionInfoType *versioninfo) {
-    if (versioninfo != NULL_PTR) {
-    	versioninfo->sw_major_version = CANTP_SW_MAJOR_V;
-    	versioninfo->sw_minor_version = CANTP_SW_MINOR_V;
-    	versioninfo->sw_patch_version = CANTP_SW_PATCH_V;
-    	versioninfo->moduleID = (uint16)CANTP_MODULE_ID;
-    	versioninfo->vendorID = 0x00u;
-    }
-}
-

@@ -21,6 +21,7 @@
 #define CANTP_RX_INDICATION (0x42u)
 
 #define CANTP_I_NONE (0xFFu)
+
 #define CANTP_TX (0x02u)
 
 #define CANTP_SHUTDOWN (0x02u)
