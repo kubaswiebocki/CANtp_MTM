@@ -14,6 +14,14 @@
 #endif /* #ifndef PDUR_H */
 #include "Std_Types.h"
 
+#define CANTP_N_PCI_TYPE_SF (0x00u) // Single Frame
+#define CANTP_N_PCI_TYPE_FF (0x01u) // First Frame
+#define CANTP_N_PCI_TYPE_CF (0x02u) // Consecutive Frame
+#define CANTP_N_PCI_TYPE_FC (0x03u) // Flow Control
+#define CANTP_CAN_FRAME_SIZE (0x08u)
+
+typedef uint8 CanTp_NPciType;
+
 typedef enum
 {
     CANTP_WAIT = 0x00u,
@@ -199,55 +207,170 @@ void CanTp_Shutdown(void) {
     }
 }
 
-//void CanTp_RxIndication(
-//	PduIdType RxPduId,
-//	const PduInfoType* PduInfoPtr
-//)
-
-
-//void CanTp_TxConfirmation(
-//	PduIdType TxPduId,
-//	Std_ReturnType result
-//)
-
-
-void CanTp_TxConfirmation(PduIdType TxPduId)
+void CanTp_RxIndication(PduIdType rxPduId, const PduInfoType *pPduInfo)
 {
     CanTp_FrameStateType next_state;
+    CanTp_NPciType pci;
+    PduLengthType n_ae_field_size;
     CanTp_NSduType *p_n_sdu;
 
-            if ((p_n_sdu->dir & CANTP_RX) != 0x00u) {
-                next_state = CANTP_FRAME_STATE_INVALID;
-                if (p_n_sdu->rx.shared.state == CANTP_RX_FRAME_STATE_FC_TX_CONFIRMATION) {
-                    next_state = CanTp_LDataConRFC(p_n_sdu);
-                }
+    if (pPduInfo != NULL_PTR)
+    {
+        if (CanTp_GetNSduFromPduId(rxPduId, &p_n_sdu) == E_OK)
+        {
+            if ((p_n_sdu->dir & CANTP_RX) != 0x00u)
+            {
+                n_ae_field_size = CanTp_GetAddrInfoSizeInPayload(p_n_sdu->rx.cfg->af);
 
-                if (next_state != CANTP_FRAME_STATE_INVALID) {
-                    p_n_sdu->rx.shared.state = next_state;
+                if (CanTp_DecodePCIValue(&pci, &pPduInfo->SduDataPtr[n_ae_field_size]) == E_OK)
+                {
+                    /* SWS_CanTp_00345: If frames with a payload <= 8 (either CAN 2.0 frames or
+                     * small CAN FD frames) are used for a Rx N-SDU and CanTpRxPaddingActivation is
+                     * equal to CANTP_ON, then CanTp receives by means of CanTp_RxIndication() call
+                     * an SF Rx N-PDU belonging to that N-SDU, with a length smaller than eight
+                     * bytes (i.e. PduInfoPtr.SduLength < 8), CanTp shall reject the reception. The
+                     * runtime error code CANTP_E_PADDING shall be reported to the Default Error
+                     * Tracer. */
+                    if (((CanTp_StateType)p_n_sdu->rx.cfg->padding == (CanTp_StateType)CANTP_ON) &&
+                        (pPduInfo->SduLength < CANTP_CAN_FRAME_SIZE))
+                    {
+                        PduR_CanTpRxIndication(p_n_sdu->rx.cfg->nSduId, E_NOT_OK);
+
+                        CanTp_ReportRuntimeError(0x00u,
+                                                 CANTP_RX,
+                                                 CANTP_E_PADDING);
+
+                        next_state = CANTP_FRAME_STATE_OK;
+                    }
+                    /* SWS_CanTp_00093: If a multiple segmented session occurs (on both receiver and
+                     * sender side) with a handle whose communication type is functional, the CanTp
+                     * module shall reject the request and report the runtime error code
+                     * CANTP_E_INVALID_TATYPE to the Default Error Tracer. */
+                    else if ((p_n_sdu->rx.cfg->taType == CANTP_FUNCTIONAL) &&
+                             (pci == CANTP_N_PCI_TYPE_FF))
+                    {
+                        CanTp_ReportRuntimeError(0x00u,
+                                                 CANTP_RX_INDICATION,
+                                                 CANTP_E_INVALID_TATYPE);
+
+                        next_state = CANTP_FRAME_STATE_OK;
+                    }
+                    else if (pci == CANTP_N_PCI_TYPE_SF)
+                    {
+                        next_state = CanTp_LDataIndRSF(p_n_sdu, pPduInfo, n_ae_field_size);
+                    }
+                    else if (pci == CANTP_N_PCI_TYPE_FF)
+                    {
+                        next_state = CanTp_LDataIndRFF(p_n_sdu, pPduInfo, n_ae_field_size);
+                    }
+                    else if ((pci == CANTP_N_PCI_TYPE_CF) &&
+                             (p_n_sdu->rx.shared.state == CANTP_RX_FRAME_STATE_CF_RX_INDICATION))
+                    {
+                        next_state = CanTp_LDataIndRCF(p_n_sdu, pPduInfo, n_ae_field_size);
+                    }
+                    else
+                    {
+                        next_state = CANTP_FRAME_STATE_INVALID;
+                    }
+
+                    if (next_state != CANTP_FRAME_STATE_INVALID)
+                    {
+                        p_n_sdu->rx.shared.state = next_state;
+                    }
                 }
             }
 
             if ((p_n_sdu->dir & CANTP_TX) != 0x00u)
             {
+                n_ae_field_size = CanTp_GetAddrInfoSizeInPayload(p_n_sdu->tx.cfg->af);
+
+                if (CanTp_DecodePCIValue(&pci, &pPduInfo->SduDataPtr[n_ae_field_size]) == E_OK)
+                {
+                    if (p_n_sdu->tx.shared.state == CANTP_TX_FRAME_STATE_FC_RX_INDICATION)
+                    {
+                        next_state = CanTp_LDataIndTFC(p_n_sdu, pPduInfo, n_ae_field_size);
+                    }
+                    else
+                    {
+                        next_state = CANTP_FRAME_STATE_INVALID;
+                    }
+
+                    if (next_state != CANTP_FRAME_STATE_INVALID)
+                    {
+                        p_n_sdu->tx.shared.state = next_state;
+                    }
+                }
+            }
+        }
+        else
+        {
+            CanTp_ReportError(0x00u, CANTP_RX_INDICATION, CANTP_E_INVALID_RX_ID);
+        }
+    }
+    else
+    {
+        CanTp_ReportError(0x00u, CANTP_RX_INDICATION, CANTP_E_PARAM_POINTER);
+    }
+}
+
+void CanTp_TxConfirmation(PduIdType txPduId, Std_ReturnType result)
+{
+    CanTp_FrameStateType next_state;
+    CanTp_NSduType *p_n_sdu;
+
+    if (CanTp_GetNSduFromPduId(txPduId, &p_n_sdu) == E_OK)
+    {
+        if (result == E_OK)
+        {
+            if ((p_n_sdu->dir & CANTP_RX) != 0x00u)
+            {
                 next_state = CANTP_FRAME_STATE_INVALID;
-                switch(p_n_sdu->tx.shared.state) {
-                case(CANTP_TX_FRAME_STATE_SF_TX_CONFIRMATION):
-					next_state = CanTp_LDataConTSF(p_n_sdu);
-                	break;
-                case(CANTP_TX_FRAME_STATE_FF_TX_CONFIRMATION):
-					next_state = CanTp_LDataConTFF(p_n_sdu);
-                	break;
-                case(CANTP_TX_FRAME_STATE_CF_TX_CONFIRMATION):
-					next_state = CanTp_LDataConTFC(p_n_sdu);
-                	break;
-                default:
-                	break;
+
+                if (p_n_sdu->rx.shared.state == CANTP_RX_FRAME_STATE_FC_TX_CONFIRMATION)
+                {
+                    next_state = CanTp_LDataConRFC(p_n_sdu);
+                }
+
+                if (next_state != CANTP_FRAME_STATE_INVALID)
+                {
+                    p_n_sdu->rx.shared.state = next_state;
+                }
+            }
+
+            if ((p_n_sdu->dir & CANTP_RX) != 0x00u)
+            {
+                next_state = CANTP_FRAME_STATE_INVALID;
+
+                if (p_n_sdu->tx.shared.state == CANTP_TX_FRAME_STATE_SF_TX_CONFIRMATION)
+                {
+                    next_state = CanTp_LDataConTSF(p_n_sdu);
+                }
+                else if (p_n_sdu->tx.shared.state == CANTP_TX_FRAME_STATE_FF_TX_CONFIRMATION)
+                {
+                    next_state = CanTp_LDataConTFF(p_n_sdu);
+                }
+                else if (p_n_sdu->tx.shared.state == CANTP_TX_FRAME_STATE_CF_TX_CONFIRMATION)
+                {
+                    next_state = CanTp_LDataConTCF(p_n_sdu);
+                }
+                else
+                {
+                    /* MISRA C, do nothing. */
+                }
+
                 if (next_state != CANTP_FRAME_STATE_INVALID)
                 {
                     p_n_sdu->tx.shared.state = next_state;
                 }
             }
         }
+        else
+        {
+            /* SWS_CanTp_00355: CanTp shall abort the corresponding session, when
+             * CanTp_TxConfirmation() is called with the result E_NOT_OK. */
+            CanTp_AbortTxSession(p_n_sdu, CANTP_I_NONE, FALSE);
+        }
+    }
 }
 
 
