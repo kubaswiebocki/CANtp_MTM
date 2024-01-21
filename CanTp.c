@@ -217,6 +217,31 @@ Std_ReturnType CanTp_Transmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr){
     return ret;
 }
 
+/**
+  @brief CanTp_CancelTransmit
+
+  Przerwanie trwającej transmisji PDU [SWS_CANTP_00246]
+  Wypełnia:
+   [SWS_CANTP_00254]
+   [SWS_CANTP_00255]
+   [SWS_CANTP_00256]
+*/
+Std_ReturnType CanTp_CancelTransmit ( PduIdType TxPduId ){
+
+    Std_ReturnType ret;             
+    if(CanTp_VariablesTX.CanTp_Current_TxId == TxPduId ){
+        /* Wypełnia [SWS_CANTP_00255]*/
+        PduR_CanTpTxConfirmation(CanTp_VariablesTX.CanTp_Current_TxId, E_NOT_OK);
+        CanTp_ResetTX();
+        /* Wypełnia [SWS_CANTP_00256]*/
+        ret = E_OK;
+    }
+    else{
+        /* Wypełnia [SWS_CANTP_00254]*/
+        ret = E_NOT_OK;
+    }
+    return ret;
+}
 
 
 /*====================================================================================================================*\
