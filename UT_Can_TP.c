@@ -17,7 +17,8 @@
 DEFINE_FFF_GLOBALS; 
 
 FAKE_VALUE_FUNC(BufReq_ReturnType, PduR_CanTpCopyTxData, PduIdType, const PduInfoType*, const RetryInfoType*, PduLengthType*);
-FAKE_VOID_FUNC(PduR_CanTpTxConfirmation, PduIdType, Std_ReturnType );
+FAKE_VOID_FUNC(PduR_CanTpTxConfirmation, PduIdType, Std_ReturnType);
+FAKE_VOID_FUNC(PduR_CanTpRxIndication, PduIdType, Std_ReturnType);
 
 FAKE_VALUE_FUNC( Std_ReturnType, CanIf_Transmit, PduIdType, const PduInfoType* );
 
@@ -272,7 +273,7 @@ void Test_Of_CanTp_CancelTransmit(void){
     TEST_CHECK(CanTp_VariablesTX.frame_nr_FC == 0);
     TEST_CHECK(CanTp_VariablesTX.message_legth == 0);
     TEST_CHECK(CanTp_VariablesTX.sent_bytes == 0);
-    TEST_CHECK( ret == E_OK );
+    TEST_CHECK(ret == E_OK);
 
   /*
                     TEST 2
@@ -292,15 +293,67 @@ void Test_Of_CanTp_CancelTransmit(void){
     TEST_CHECK(CanTp_VariablesTX.frame_nr_FC == 1);
     TEST_CHECK(CanTp_VariablesTX.message_legth == 100);
     TEST_CHECK(CanTp_VariablesTX.sent_bytes == 95);
-    TEST_CHECK( ret == E_NOT_OK );
+    TEST_CHECK(ret == E_NOT_OK);
 
 }
 
+/**
+  @brief Test przerwania odbioru
+
+  Funkcja testująca przerwanie odbioru PDU.
+*/
+void Test_Of_CanTp_CancelReceive(void){
+
+    Std_ReturnType ret;
+
+  /*
+                     TEST 1 
+              Zwracane - E_OK (Zgodne ID)
+  */
+
+    CanTp_VariablesRX.CanTp_StateRX == CANTP_RX_PROCESSING;
+    CanTp_VariablesRX.blocks_to_next_cts = 1;
+    CanTp_VariablesRX.CanTp_Current_RxId = 0x1;
+    CanTp_VariablesRX.expected_CF_SN = 1;
+    CanTp_VariablesRX.sended_bytes = 1;
+
+    ret = CanTp_CancelReceive(0x1);
+
+    TEST_CHECK(CanTp_VariablesRX.CanTp_StateRX == CANTP_RX_WAIT);
+    TEST_CHECK(CanTp_VariablesRX.blocks_to_next_cts == 0);
+    TEST_CHECK(CanTp_VariablesRX.CanTp_Current_RxId == 0);
+    TEST_CHECK(CanTp_VariablesRX.expected_CF_SN == 0);
+    TEST_CHECK(CanTp_VariablesRX.sended_bytes == 0);
+    TEST_CHECK(ret == E_OK);
+
+   /*
+                    TEST 2
+              Zwracane E_NOT_OK (Błędne ID)
+  */
+    CanTp_VariablesRX.CanTp_StateRX = CANTP_RX_PROCESSING;
+    CanTp_VariablesRX.blocks_to_next_cts = 1;
+    CanTp_VariablesRX.CanTp_Current_RxId = 0x3;
+    CanTp_VariablesRX.expected_CF_SN = 1;
+    CanTp_VariablesRX.sended_bytes = 1;
+
+    ret = CanTp_CancelReceive(0x1);
+
+    TEST_CHECK(CanTp_VariablesRX.CanTp_StateRX == CANTP_RX_PROCESSING);
+    TEST_CHECK(CanTp_VariablesRX.blocks_to_next_cts == 1);
+    TEST_CHECK(CanTp_VariablesRX.CanTp_Current_RxId == 0x3);
+    TEST_CHECK(CanTp_VariablesRX.expected_CF_SN == 1);
+    TEST_CHECK(CanTp_VariablesRX.sended_bytes == 1);
+    TEST_CHECK(ret == E_NOT_OK);
+
+}
+
+
 TEST_LIST = {
+    { "TestOf_CanTp_CancelReceive", Test_Of_CanTp_CancelReceive },
     { "TestOf_CanTp_CancelTransmit", Test_Of_CanTp_CancelTransmit },
-    // { "TestOf_CanTp_Transmit", TestOf_CanTp_Transmit },
-    // { "Test of CanTp_Init", Test_Of_CanTp_Init },
-    // { "Test of CanTp_Shutdown", Test_Of_CanTp_Shutdown },
-	  // { "Test of CanTp_GetVersionInfo", Test_Of_CanTp_GetVersionInfo },
+    { "TestOf_CanTp_Transmit", TestOf_CanTp_Transmit },
+    { "Test of CanTp_Init", Test_Of_CanTp_Init },
+    { "Test of CanTp_Shutdown", Test_Of_CanTp_Shutdown },
+	  { "Test of CanTp_GetVersionInfo", Test_Of_CanTp_GetVersionInfo },
     { NULL, NULL }                           
 };

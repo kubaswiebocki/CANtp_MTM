@@ -226,7 +226,7 @@ Std_ReturnType CanTp_Transmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr){
    [SWS_CANTP_00255]
    [SWS_CANTP_00256]
 */
-Std_ReturnType CanTp_CancelTransmit ( PduIdType TxPduId ){
+Std_ReturnType CanTp_CancelTransmit(PduIdType TxPduId){
 
     Std_ReturnType ret;             
     if(CanTp_VariablesTX.CanTp_Current_TxId == TxPduId ){
@@ -238,6 +238,34 @@ Std_ReturnType CanTp_CancelTransmit ( PduIdType TxPduId ){
     }
     else{
         /* Wypełnia [SWS_CANTP_00254]*/
+        ret = E_NOT_OK;
+    }
+    return ret;
+}
+
+/**
+  @brief CanTp_CancelReceive
+
+  Przerwanie trwającego odbioru PDU [SWS_CANTP_00257]
+  Wypełnia:
+   [SWS_CANTP_00260]
+   [SWS_CANTP_00261]
+   [SWS_CANTP_00262]
+   [SWS_CANTP_00263]
+*/
+
+Std_ReturnType CanTp_CancelReceive(PduIdType RxPduId){
+    Std_ReturnType ret;             
+    if( CanTp_VariablesRX.CanTp_Current_RxId == RxPduId ){
+        /* Wypełnia [SWS_CANTP_00263]*/
+        PduR_CanTpRxIndication(CanTp_VariablesRX.CanTp_Current_RxId, E_NOT_OK);
+        CanTp_ResetRX();
+        /* Wypełnia [SWS_CANTP_00261]*/
+        ret = E_OK;
+    }
+    else{
+        /* Wypełnia [SWS_CANTP_00260]*/
+        /* Wypełnia [SWS_CANTP_00262]*/
         ret = E_NOT_OK;
     }
     return ret;
