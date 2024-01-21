@@ -326,14 +326,11 @@ void Test_Of_CanTp_CancelTransmit(void){
   Funkcja testująca przerwanie odbioru PDU.
 */
 void Test_Of_CanTp_CancelReceive(void){
-
     Std_ReturnType ret;
-
   /*
                      TEST 1 
               Zwracane - E_OK (Zgodne ID)
   */
-
     CanTp_VariablesRX.CanTp_StateRX == CANTP_RX_PROCESSING;
     CanTp_VariablesRX.blocks_to_next_cts = 1;
     CanTp_VariablesRX.CanTp_Current_RxId = 0x1;
