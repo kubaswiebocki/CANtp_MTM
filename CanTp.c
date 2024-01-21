@@ -107,7 +107,18 @@ void CanTp_GetVersionInfo(Std_VersionInfoType *versioninfo) {
     }
 }
 
+/**
+  @brief CanTp_Shutdown
 
+  Funckja wywoływana w celu wyłączenia modułu CanTp. [SWS_CANTP_00211]
+*/
+void CanTp_Shutdown(void){
+    /* Wypełnia [SWS_CANTP_00202]*/
+    CanTp_ResetRX();
+    CanTp_ResetTX();
+    /* Wypełnia [SWS_CANTP_00200]*/
+    CanTp_State = CANTP_OFF;
+}
 
 
 
