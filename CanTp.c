@@ -72,6 +72,13 @@ typedef struct{
     uint8 FS; // Flow Status
     uint8 ST; // Separation Time
 } CanPCI_Type;
+
+typedef enum{
+    FC_OVFLW = 0,
+    FC_WAIT = 1,
+    FC_CTS = 2
+} FlowControlStatus_type;
+
 /*====================================================================================================================*\
     Zmienne globalne
 \*====================================================================================================================*/
@@ -89,11 +96,23 @@ CanTp_VariablesRX_type CanTp_VariablesRX;
 static void CanTp_ResetRX(void);
 static void CanTp_ResetTX(void);
 
+static Std_ReturnType CanTp_GetPCI(const PduInfoType* can_data, CanPCI_Type* CanFrameInfo);
 static Std_ReturnType CanTp_PrepareSegmenetedFrame(CanPCI_Type *CanPCI, PduInfoType *CanPdu_Info, uint8_t *Can_payload);
 
 static Std_ReturnType CanTp_SendSingleFrame(PduIdType id, uint8* payload, uint32 size);
 static Std_ReturnType CanTp_SendFirstFrame(PduIdType id, uint32 message_lenght);
 
+static uint16 CanTp_Calculate_Available_Blocks(uint16 buffer_size);
+
+static void CanTp_FirstFrameReception(PduIdType RxPduId, const PduInfoType *PduInfoPtr, CanPCI_Type *Can_PCI);
+static void CanTp_SingleFrameReception(PduIdType RxPduId, CanPCI_Type *Can_PCI, const PduInfoType* PduInfoPtr);
+static void CanTp_ConsecutiveFrameReception(PduIdType RxPduId, CanPCI_Type *Can_PCI, const PduInfoType* PduInfoPtr);
+static void CanTp_FlowControlReception(PduIdType RxPduId, CanPCI_Type *Can_PCI);
+
+static Std_ReturnType CanTp_SendConsecutiveFrame(PduIdType id, uint8 SN, uint8* payload, uint32 size);
+static Std_ReturnType CanTp_SendFlowControl(PduIdType ID, uint8 BlockSize, FlowControlStatus_type FC_Status, uint8 SeparationTime );
+static void CanTp_SendNextCF(void);
+static void CanTp_set_blocks_to_next_cts(uint8 blocks);
 /*====================================================================================================================*\
     Kod funkcji
 \*====================================================================================================================*/
@@ -272,6 +291,85 @@ Std_ReturnType CanTp_CancelReceive(PduIdType RxPduId){
 }
 
 
+/**
+  @brief CanTp_RxIndication
+
+  Wskazanie odebranej jednostki PDU [SWS_CANTP_00214]
+  Wypełnia:
+   [SWS_CANTP_00235]
+   [SWS_CANTP_00322]
+*/
+
+void CanTp_RxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr){
+
+    CanPCI_Type Can_PCI;
+    PduInfoType Extracted_Data;   
+    uint8 temp_data[8];           
+
+    if(CanTp_State == CANTP_ON){
+        if( CanTp_VariablesRX.CanTp_StateRX == CANTP_RX_WAIT){
+        
+            CanTp_GetPCI(PduInfoPtr, &Can_PCI);
+
+            if( Can_PCI.frame_type == FF ){
+                CanTp_FirstFrameReception(RxPduId, PduInfoPtr, &Can_PCI);
+            }
+            else if( Can_PCI.frame_type == SF ){
+                CanTp_SingleFrameReception(RxPduId, &Can_PCI, PduInfoPtr);           
+            } 
+            else if( Can_PCI.frame_type == FC ){
+                CanTp_FlowControlReception(RxPduId, &Can_PCI);
+            }
+            else
+            {
+                CanTp_VariablesRX.CanTp_StateRX = CANTP_RX_WAIT; 
+            } 
+        }
+        else if(CanTp_VariablesRX.CanTp_StateRX == CANTP_RX_PROCESSING){
+             CanTp_GetPCI(PduInfoPtr, &Can_PCI);
+             if(Can_PCI.frame_type == CF){
+                CanTp_ConsecutiveFrameReception(RxPduId, &Can_PCI, PduInfoPtr);
+            }
+            else if(Can_PCI.frame_type == FC){
+                CanTp_FlowControlReception(RxPduId, &Can_PCI);
+            }
+            else if(Can_PCI.frame_type == FF){            
+                PduR_CanTpRxIndication (CanTp_VariablesRX.CanTp_Current_RxId, E_NOT_OK);
+                CanTp_ResetRX();
+                CanTp_FirstFrameReception(RxPduId, PduInfoPtr, &Can_PCI);
+            }
+            else if(Can_PCI.frame_type == SF){            
+                PduR_CanTpRxIndication (CanTp_VariablesRX.CanTp_Current_RxId, E_NOT_OK);
+                CanTp_ResetRX();
+                CanTp_SingleFrameReception(RxPduId, &Can_PCI, PduInfoPtr);
+            }
+            else{
+            }
+        }
+        else {    
+            CanTp_GetPCI(PduInfoPtr, &Can_PCI);
+            if(Can_PCI.frame_type == FC){
+                CanTp_FlowControlReception(RxPduId, &Can_PCI);
+            }
+            else if(Can_PCI.frame_type == FF) {            
+                PduR_CanTpRxIndication (CanTp_VariablesRX.CanTp_Current_RxId, E_NOT_OK);
+                CanTp_ResetRX();
+                CanTp_FirstFrameReception(RxPduId, PduInfoPtr, &Can_PCI);
+            }
+            else if(Can_PCI.frame_type == SF) {            
+                PduR_CanTpRxIndication (CanTp_VariablesRX.CanTp_Current_RxId, E_NOT_OK);
+                CanTp_ResetRX();
+                CanTp_SingleFrameReception(RxPduId, &Can_PCI, PduInfoPtr);
+            }
+            else {
+                PduR_CanTpRxIndication (CanTp_VariablesRX.CanTp_Current_RxId, E_NOT_OK);
+                CanTp_ResetRX();
+            }
+        }
+    }
+}
+
+
 /*====================================================================================================================*\
     Definicja funkcji lokalnych
 \*====================================================================================================================*/
@@ -303,7 +401,7 @@ static Std_ReturnType CanTp_PrepareSegmenetedFrame(CanPCI_Type *CanPCI, PduInfoT
         switch(CanPCI->frame_type){
             case SF:
                 *(CanPdu_Info->SduDataPtr) = 0;
-                *(CanPdu_Info->SduDataPtr) = CANTP_N_PCI_TYPE_SF << 4;
+                *(CanPdu_Info->SduDataPtr) = SF << 4;
         
                 if(CanPCI->frame_lenght <= 7){
                     *(CanPdu_Info->SduDataPtr) = 0x0F & CanPCI->frame_lenght; 
@@ -317,7 +415,7 @@ static Std_ReturnType CanTp_PrepareSegmenetedFrame(CanPCI_Type *CanPCI, PduInfoT
             break;
             case CF: 
                 *(CanPdu_Info->SduDataPtr) = 0;
-                *(CanPdu_Info->SduDataPtr) = CANTP_N_PCI_TYPE_CF << 4;
+                *(CanPdu_Info->SduDataPtr) = CF << 4;
                 if(CanPCI->SN < 7){
                     *(CanPdu_Info->SduDataPtr) |= (0x0F & CanPCI->SN);
                     *(CanPdu_Info->SduDataPtr + 1) = *(Can_payload);
@@ -335,7 +433,7 @@ static Std_ReturnType CanTp_PrepareSegmenetedFrame(CanPCI_Type *CanPCI, PduInfoT
             break;
             case FF:    
                 *(CanPdu_Info->SduDataPtr) = 0;
-                *(CanPdu_Info->SduDataPtr) = CANTP_N_PCI_TYPE_FF << 4;
+                *(CanPdu_Info->SduDataPtr) = FF << 4;
 
                 if(CanPCI->frame_lenght <= 4095){
                     *(CanPdu_Info->SduDataPtr) |= (0x0F & (CanPCI->frame_lenght >> 8));
@@ -362,7 +460,7 @@ static Std_ReturnType CanTp_PrepareSegmenetedFrame(CanPCI_Type *CanPCI, PduInfoT
             break;
             case FC:
                 *(CanPdu_Info->SduDataPtr) = 0;
-                *(CanPdu_Info->SduDataPtr) = CANTP_N_PCI_TYPE_FC << 4;
+                *(CanPdu_Info->SduDataPtr) = FC << 4;
 
                 if(CanPCI->FS < 7){
                     *(CanPdu_Info->SduDataPtr) |= (0x0F & CanPCI->FS);
@@ -427,3 +525,309 @@ static Std_ReturnType CanTp_SendFirstFrame(PduIdType id, uint32 message_lenght){
     return ret;
 }
 
+static Std_ReturnType CanTp_GetPCI(const PduInfoType* can_data, CanPCI_Type* CanFrameInfo){
+    Std_ReturnType ret = E_OK;
+
+    if(NE_NULL_PTR(can_data) && NE_NULL_PTR(CanFrameInfo) && (NE_NULL_PTR(can_data->SduDataPtr))){
+
+        CanFrameInfo->frame_type = DEFAULT;
+        CanFrameInfo->frame_lenght = 0;
+        CanFrameInfo->BS = 0;
+        CanFrameInfo->FS = 0;
+        CanFrameInfo->ST = 0;
+        CanFrameInfo->SN = 0;
+
+        switch((can_data->SduDataPtr[0]) >> 4){
+            case CANTP_N_PCI_TYPE_SF:
+                CanFrameInfo->frame_type = SF;
+                CanFrameInfo->frame_lenght = can_data->SduDataPtr[0];
+            break;
+
+            case CANTP_N_PCI_TYPE_FF:
+                CanFrameInfo->frame_type = FF;
+                if( (can_data->SduDataPtr[0] & 0x0F) | can_data->SduDataPtr[1] ) {
+                    CanFrameInfo->frame_lenght =  can_data->SduDataPtr[0] & 0x0F;
+                    CanFrameInfo->frame_lenght =  (CanFrameInfo->frame_lenght << 8) | can_data->SduDataPtr[1]; 
+                }
+                else{
+                    CanFrameInfo->frame_lenght =  can_data->SduDataPtr[2];
+                    CanFrameInfo->frame_lenght =  (CanFrameInfo->frame_lenght << 8) | can_data->SduDataPtr[3]; 
+                    CanFrameInfo->frame_lenght =  (CanFrameInfo->frame_lenght << 8) | can_data->SduDataPtr[4];
+                    CanFrameInfo->frame_lenght =  (CanFrameInfo->frame_lenght << 8) | can_data->SduDataPtr[5];
+                }
+            break;
+
+            case CANTP_N_PCI_TYPE_CF:
+                CanFrameInfo->frame_type = CF;
+                CanFrameInfo->SN= (can_data->SduDataPtr[0] & 0x0F );
+            break;
+
+            case CANTP_N_PCI_TYPE_FC:
+                CanFrameInfo->frame_type = FC;
+                CanFrameInfo->FS = can_data->SduDataPtr[0] & 0x0F; 
+                CanFrameInfo->BS = can_data->SduDataPtr[1]; 
+                CanFrameInfo->ST = can_data->SduDataPtr[2]; 
+            break;
+
+            default:
+                CanFrameInfo->frame_type = DEFAULT;
+                ret = E_NOT_OK;
+            break;
+        }
+    }
+    else{
+        ret = E_NOT_OK;
+    }
+    return ret;
+}
+
+static void CanTp_FirstFrameReception(PduIdType RxPduId, const PduInfoType *PduInfoPtr, CanPCI_Type *Can_PCI){
+         
+    PduLengthType buffer_size; 
+    BufReq_ReturnType Buf_State; 
+    uint16 current_block_size;
+    Buf_State = PduR_CanTpStartOfReception( RxPduId, PduInfoPtr, Can_PCI->frame_lenght, &buffer_size);
+    if(Buf_State == BUFREQ_OK){
+        CanTp_VariablesRX.message_length = Can_PCI->frame_lenght;
+        CanTp_VariablesRX.CanTp_Current_RxId = RxPduId;
+        current_block_size = CanTp_Calculate_Available_Blocks( buffer_size ); 
+        if( current_block_size > 0){    
+            CanTp_SendFlowControl(CanTp_VariablesRX.CanTp_Current_RxId, current_block_size, FC_CTS, DEFAULT_ST);   
+            CanTp_set_blocks_to_next_cts( current_block_size );
+            CanTp_VariablesRX.CanTp_StateRX = CANTP_RX_PROCESSING;
+        }
+        else{
+            CanTp_set_blocks_to_next_cts( current_block_size );
+            CanTp_SendFlowControl(CanTp_VariablesRX.CanTp_Current_RxId, current_block_size, FC_WAIT, DEFAULT_ST );   
+            CanTp_VariablesRX.CanTp_StateRX = CANTP_RX_PROCESSING_SUSPEND;
+           
+        }
+        CanTp_VariablesRX.expected_CF_SN = 1; 
+    } 
+    else if ( Buf_State == BUFREQ_OVFL ){
+        CanTp_SendFlowControl(CanTp_VariablesRX.CanTp_Current_RxId, current_block_size, FC_OVFLW, DEFAULT_ST );
+        CanTp_ResetRX();
+        CanTp_VariablesRX.CanTp_StateRX = CANTP_RX_WAIT;
+    }
+    else {
+        CanTp_ResetRX();
+    }
+}
+
+static void CanTp_SingleFrameReception(PduIdType RxPduId, CanPCI_Type *Can_PCI, const PduInfoType* PduInfoPtr){
+    PduLengthType buffer_size;     
+    BufReq_ReturnType Buf_State;  
+    PduInfoType Extracted_Data;
+
+    CanTp_VariablesRX.CanTp_StateRX = CANTP_RX_WAIT;
+    Buf_State = PduR_CanTpStartOfReception( RxPduId, PduInfoPtr, Can_PCI->frame_lenght, &buffer_size);
+
+    if((Buf_State == BUFREQ_OK)){             
+        if(buffer_size >= Can_PCI->frame_lenght){
+            Extracted_Data.SduLength = Can_PCI->frame_lenght;
+            Extracted_Data.SduDataPtr = (PduInfoPtr->SduDataPtr+1);
+            Buf_State = PduR_CanTpCopyRxData(RxPduId,  &Extracted_Data, &buffer_size);
+            PduR_CanTpRxIndication(RxPduId, Buf_State);        
+        }
+        else{
+            PduR_CanTpRxIndication(RxPduId, E_NOT_OK);
+        }
+    }
+    else{}
+}
+
+static void CanTp_ConsecutiveFrameReception(PduIdType RxPduId, CanPCI_Type *Can_PCI, const PduInfoType* PduInfoPtr){
+    PduLengthType buffer_size;      
+    BufReq_ReturnType Buf_State;   
+    PduInfoType Extracted_Data;
+    uint16 current_block_size;
+
+    if(CanTp_VariablesRX.CanTp_Current_RxId ==  RxPduId){
+        if(CanTp_VariablesRX.expected_CF_SN == Can_PCI->SN){
+            Extracted_Data.SduLength = Can_PCI->frame_lenght;
+            Extracted_Data.SduDataPtr = (PduInfoPtr->SduDataPtr+1);
+            Buf_State = PduR_CanTpCopyRxData(RxPduId,  &Extracted_Data, &buffer_size);
+            if(Buf_State == BUFREQ_OK){
+                CanTp_VariablesRX.sended_bytes += PduInfoPtr->SduLength;
+                CanTp_VariablesRX.blocks_to_next_cts--;
+                if( CanTp_VariablesRX.sended_bytes == CanTp_VariablesRX.message_length){
+                    PduR_CanTpRxIndication(CanTp_VariablesRX.CanTp_Current_RxId, E_OK);
+                    CanTp_ResetRX();
+                }     
+                else{ 
+                    CanTp_VariablesRX.expected_CF_SN++;
+                    CanTp_VariablesRX.expected_CF_SN%8;
+                    current_block_size = CanTp_Calculate_Available_Blocks( buffer_size);
+                    if(current_block_size > 0){
+                        if(CanTp_VariablesRX.blocks_to_next_cts == 0 ){
+                            CanTp_SendFlowControl(CanTp_VariablesRX.CanTp_Current_RxId, current_block_size, FC_CTS, DEFAULT_ST );
+                            CanTp_set_blocks_to_next_cts(current_block_size);
+                        }
+                        CanTp_VariablesRX.CanTp_StateRX = CANTP_RX_PROCESSING;         
+                    }
+                    else{
+                        CanTp_VariablesRX.CanTp_StateRX = CANTP_RX_PROCESSING_SUSPEND;
+                        CanTp_SendFlowControl(CanTp_VariablesRX.CanTp_Current_RxId, current_block_size, FC_WAIT, DEFAULT_ST ); 
+                    }
+                }
+            }
+            else{ 
+                PduR_CanTpRxIndication(CanTp_VariablesRX.CanTp_Current_RxId, E_NOT_OK);
+                CanTp_ResetRX();
+            }
+        }
+        else{ 
+            PduR_CanTpRxIndication(CanTp_VariablesRX.CanTp_Current_RxId, E_NOT_OK);
+            CanTp_ResetRX();
+        }
+    }
+    else {
+        PduR_CanTpRxIndication(CanTp_VariablesRX.CanTp_Current_RxId, E_NOT_OK);
+        CanTp_ResetRX();
+    }
+}
+
+static void CanTp_FlowControlReception(PduIdType RxPduId, CanPCI_Type *Can_PCI){
+    if( CanTp_VariablesTX.CanTp_StateTX == CANTP_TX_PROCESSING_SUSPENDED ){
+        if(CanTp_VariablesTX.CanTp_Current_TxId == RxPduId ){
+            if(Can_PCI->FS == FC_CTS){
+                CanTp_VariablesTX.frame_nr_FC = Can_PCI->BS; 
+                CanTp_SendNextCF();
+            }   
+            else if( Can_PCI->FS == FC_WAIT ){
+            }
+            else if( Can_PCI->FS == FC_OVFLW){
+                PduR_CanTpTxConfirmation(CanTp_VariablesTX.CanTp_Current_TxId, E_NOT_OK);
+                CanTp_ResetTX();
+            }
+            else{
+                PduR_CanTpTxConfirmation(CanTp_VariablesTX.CanTp_Current_TxId, E_NOT_OK);
+                CanTp_ResetTX();
+            }
+        }
+        else{
+        }
+    }
+    else{   
+    }
+}
+
+static uint16 CanTp_Calculate_Available_Blocks(uint16 buffer_size){
+    uint16 retval; 
+    uint16 remaining_bytes = CanTp_VariablesRX.message_length - CanTp_VariablesRX.sended_bytes;
+    if(buffer_size >= remaining_bytes){
+        retval = remaining_bytes / 7;
+        if(CanTp_VariablesRX.message_length%7 > 0) retval++; 
+    }
+    else{
+        retval = buffer_size / 7;
+    }
+    return retval;
+} 
+
+static void CanTp_SendNextCF(void){
+    BufReq_ReturnType BufReq_State;
+    PduInfoType PduInfoPtr;
+    PduLengthType Pdu_Len;
+    Std_ReturnType ret;
+    uint8 bytes_to_send;
+    uint8_t payload[8];
+
+    PduInfoPtr.SduDataPtr = payload;
+    PduInfoPtr.MetaDataPtr = NULL;
+    
+    if(CanTp_VariablesTX.sent_bytes == CanTp_VariablesTX.message_legth){
+        PduR_CanTpTxConfirmation(CanTp_VariablesTX.CanTp_Current_TxId, E_OK);
+        CanTp_ResetTX();
+    }
+    else{
+        if(CanTp_VariablesTX.message_legth - CanTp_VariablesTX.sent_bytes < 7) bytes_to_send = CanTp_VariablesTX.message_legth - CanTp_VariablesTX.sent_bytes;
+        else bytes_to_send = 7;
+        PduInfoPtr.SduLength = bytes_to_send;
+        BufReq_State = PduR_CanTpCopyTxData(CanTp_VariablesTX.CanTp_Current_TxId, &PduInfoPtr, NULL, &Pdu_Len);
+        if(BufReq_State == BUFREQ_OK){
+            ret = CanTp_SendConsecutiveFrame(CanTp_VariablesTX.CanTp_Current_TxId, CanTp_VariablesTX.next_SN, PduInfoPtr.SduDataPtr, bytes_to_send);
+            if( ret == E_OK ){
+                CanTp_VariablesTX.sent_bytes = CanTp_VariablesTX.sent_bytes + bytes_to_send;
+                CanTp_VariablesTX.frame_nr_FC--;
+                CanTp_VariablesTX.next_SN = (CanTp_VariablesTX.next_SN + 1)%8;
+                if((CanTp_VariablesTX.frame_nr_FC == 0) && (CanTp_VariablesTX.sent_bytes != CanTp_VariablesTX.message_legth))CanTp_VariablesTX.CanTp_StateTX = CANTP_TX_PROCESSING_SUSPENDED;
+                else CanTp_VariablesTX.CanTp_StateTX = CANTP_TX_PROCESSING;        
+            }
+            else{
+                CanTp_ResetTX();
+            }
+        }
+        else if(BufReq_State == BUFREQ_E_NOT_OK){
+            PduR_CanTpTxConfirmation(CanTp_VariablesTX.CanTp_Current_TxId, E_NOT_OK);
+            CanTp_ResetTX();         
+        }
+        else {
+            CanTp_VariablesTX.CanTp_StateTX = CANTP_TX_PROCESSING_SUSPENDED;
+        }
+    }
+}
+
+
+static Std_ReturnType CanTp_SendConsecutiveFrame(PduIdType id, uint8 SN, uint8* payload, uint32 size){
+    PduInfoType PduInfo;
+    uint8 SduDataPtr[8];
+    uint8 *MetaDataPtr;
+    PduInfo.MetaDataPtr = MetaDataPtr;
+    PduInfo.SduDataPtr = SduDataPtr;
+    PduInfo.SduLength = size;
+    CanPCI_Type CanPCI;
+
+    CanPCI.frame_type = CF;
+    CanPCI.SN = SN;
+
+    Std_ReturnType ret = E_OK;
+    CanTp_PrepareSegmenetedFrame(&CanPCI, &PduInfo, payload);
+    if(CanIf_Transmit(id , &PduInfo) == E_OK){}
+    else{
+        PduR_CanTpTxConfirmation(id, E_NOT_OK);
+        ret = E_NOT_OK;
+    }
+    return ret;
+}
+
+static void CanTp_set_blocks_to_next_cts(uint8 blocks){
+    CanTp_VariablesRX.blocks_to_next_cts = blocks;
+}
+
+
+static Std_ReturnType CanTp_SendFlowControl(PduIdType ID, uint8 BlockSize, FlowControlStatus_type FC_Status, uint8 SeparationTime ){
+    Std_ReturnType ret = E_OK;
+    PduInfoType PduInfoPtr;
+    CanPCI_Type CanPCI;
+    uint8 payloadx[8];
+    uint8 *MetaDataPtr;
+    uint8 SduDataPtr[8];
+    CanPCI.frame_type = FC;
+    CanPCI.FS = FC_Status;
+    CanPCI.BS = BlockSize;
+    CanPCI.ST = SeparationTime;
+    PduInfoPtr.SduLength = 0;
+    PduInfoPtr.MetaDataPtr = MetaDataPtr;
+    PduInfoPtr.SduDataPtr = SduDataPtr;
+
+   if(( FC_Status == FC_OVFLW )||
+      ( FC_Status == FC_WAIT  )||
+      ( FC_Status == FC_CTS   ))
+    {
+       CanTp_PrepareSegmenetedFrame(&CanPCI, &PduInfoPtr, payloadx );
+        ret = CanIf_Transmit(ID, &PduInfoPtr);
+        if( ret == E_NOT_OK ){
+            CanTp_ResetRX();
+            PduR_CanTpRxIndication(ID, E_NOT_OK);
+        }
+        else{
+            if(FC_Status == FC_CTS){}
+            else if(FC_Status == FC_WAIT){}
+        } 
+    }
+    else{
+       ret = E_NOT_OK; 
+    }
+    return ret;
+}

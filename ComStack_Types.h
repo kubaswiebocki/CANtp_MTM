@@ -7,11 +7,6 @@
 typedef uint16 PduIdType;
 typedef uint32 PduLengthType;
 
-//ograniczamy się do Cana 2.0 
-// można definiować własne funkcje 
-// raz wołana funkcje może być inline 
-//det - można zrobić mocki, używany tylko w developemencie, nie wysyłamy do klienta
-
 //Variables of this type shall be used to store the result of a buffer request.
 typedef enum {
     BUFREQ_OK,       // buffer request accomplished successful

@@ -19,13 +19,17 @@ DEFINE_FFF_GLOBALS;
 FAKE_VALUE_FUNC(BufReq_ReturnType, PduR_CanTpCopyTxData, PduIdType, const PduInfoType*, const RetryInfoType*, PduLengthType*);
 FAKE_VOID_FUNC(PduR_CanTpTxConfirmation, PduIdType, Std_ReturnType);
 FAKE_VOID_FUNC(PduR_CanTpRxIndication, PduIdType, Std_ReturnType);
+FAKE_VALUE_FUNC(BufReq_ReturnType, PduR_CanTpCopyRxData, PduIdType, const PduInfoType*, PduLengthType*);
+FAKE_VALUE_FUNC(BufReq_ReturnType, PduR_CanTpStartOfReception, PduIdType, const PduInfoType*, PduLengthType, PduLengthType* );
 
-FAKE_VALUE_FUNC( Std_ReturnType, CanIf_Transmit, PduIdType, const PduInfoType* );
+FAKE_VALUE_FUNC(Std_ReturnType, CanIf_Transmit, PduIdType, const PduInfoType*);
 
 uint8 PduR_CanTpCopyTxData_sdu_data[20][7];
 PduLengthType *PduR_CanTpCopyTxData_availableDataPtr; 
+PduLengthType* PduR_CanTpCopyRxData_buffSize_array;
+PduLengthType *PduR_CanTpStartOfReception_buffSize_array;
 
-BufReq_ReturnType PduR_CanTpCopyTxData_FF ( PduIdType id, const PduInfoType* info, const RetryInfoType* retry, PduLengthType* availableDataPtr ){
+BufReq_ReturnType PduR_CanTpCopyTxData_FF(PduIdType id, const PduInfoType* info, const RetryInfoType* retry, PduLengthType* availableDataPtr ){
     static int i = 0;
     int loop_ctr;
     i = PduR_CanTpCopyTxData_fake.call_count - 1;
@@ -35,6 +39,25 @@ BufReq_ReturnType PduR_CanTpCopyTxData_FF ( PduIdType id, const PduInfoType* inf
     *availableDataPtr = PduR_CanTpCopyTxData_availableDataPtr[i];
     return PduR_CanTpCopyTxData_fake.return_val_seq[i];
 }
+
+BufReq_ReturnType PduR_CanTpStartOfReception_FF(PduIdType id, const PduInfoType* info, PduLengthType TpSduLength, PduLengthType* bufferSizePtr ){
+    static int i = 0;
+    i = PduR_CanTpStartOfReception_fake.call_count - 1;
+    *bufferSizePtr = PduR_CanTpStartOfReception_buffSize_array[i];
+   return PduR_CanTpStartOfReception_fake.return_val_seq[i];
+}
+
+BufReq_ReturnType PduR_CanTpCopyRxData_FF(PduIdType id, const PduInfoType* info, PduLengthType* bufferSizePtr ){
+    static int i = 0;
+    i = PduR_CanTpCopyRxData_fake.call_count - 1;
+    *bufferSizePtr = PduR_CanTpCopyRxData_buffSize_array[i];
+    return PduR_CanTpCopyRxData_fake.return_val_seq[i];
+}
+
+
+/** ==================================================================================================================*\
+                                TESTY JEDNOSTKOWE
+\*====================================================================================================================*/
 
 /**
   @brief Test inicjalizacji
@@ -349,9 +372,9 @@ void Test_Of_CanTp_CancelReceive(void){
 
 
 TEST_LIST = {
-    { "TestOf_CanTp_CancelReceive", Test_Of_CanTp_CancelReceive },
-    { "TestOf_CanTp_CancelTransmit", Test_Of_CanTp_CancelTransmit },
-    { "TestOf_CanTp_Transmit", TestOf_CanTp_Transmit },
+    { "Test of CanTp_CancelReceive", Test_Of_CanTp_CancelReceive },
+    { "Test of CanTp_CancelTransmit", Test_Of_CanTp_CancelTransmit },
+    { "Test of CanTp_Transmit", TestOf_CanTp_Transmit },
     { "Test of CanTp_Init", Test_Of_CanTp_Init },
     { "Test of CanTp_Shutdown", Test_Of_CanTp_Shutdown },
 	  { "Test of CanTp_GetVersionInfo", Test_Of_CanTp_GetVersionInfo },
