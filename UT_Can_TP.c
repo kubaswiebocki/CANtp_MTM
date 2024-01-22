@@ -505,7 +505,44 @@ void Test_Of_CanTp_TxConfirmation(void){
   CanTp_ResetTX();
 }
 
+/** ==================================================================================================================*\
+                                TESTY FUNKCJI POMOCNICZYCH
+\*====================================================================================================================*/
+
+void Test_Of_CanTp_ResetRX(){     
+    CanTp_VariablesRX.CanTp_StateRX == CANTP_RX_PROCESSING;
+    CanTp_VariablesRX.expected_CF_SN == 1;
+    CanTp_VariablesRX.message_length == 5;
+    CanTp_VariablesRX.sended_bytes == 4;
+    CanTp_VariablesRX.blocks_to_next_cts == 2;
+    CanTp_VariablesRX.CanTp_Current_RxId == 2;
+    CanTp_ResetRX();
+    TEST_CHECK(CanTp_VariablesRX.CanTp_StateRX == CANTP_RX_WAIT);
+    TEST_CHECK(CanTp_VariablesRX.expected_CF_SN == 0);
+    TEST_CHECK(CanTp_VariablesRX.message_length == 0);
+    TEST_CHECK(CanTp_VariablesRX.sended_bytes == 0);
+    TEST_CHECK(CanTp_VariablesRX.blocks_to_next_cts == 0);
+    TEST_CHECK(CanTp_VariablesRX.CanTp_Current_RxId == 0);
+}
+
+void Test_Of_CanTp_ResetTX(void){
+    CanTp_VariablesTX.CanTp_StateTX = CANTP_TX_PROCESSING;
+    CanTp_VariablesTX.frame_nr_FC = 2;
+    CanTp_VariablesTX.CanTp_Current_TxId = 3;
+    CanTp_VariablesTX.message_legth = 4;
+    CanTp_VariablesTX.sent_bytes = 5;
+    CanTp_ResetTX();
+    TEST_CHECK(CanTp_VariablesTX.CanTp_StateTX == CANTP_TX_WAIT);
+    TEST_CHECK(CanTp_VariablesTX.frame_nr_FC == 0);
+    TEST_CHECK(CanTp_VariablesTX.CanTp_Current_TxId == 0);
+    TEST_CHECK(CanTp_VariablesTX.message_legth == 0);
+    TEST_CHECK(CanTp_VariablesTX.sent_bytes == 0);
+}
+
+
 TEST_LIST = {
+    { "Test of CanTp_ResetTX", Test_Of_CanTp_ResetTX },
+    { "Test of CanTp_ResetRX", Test_Of_CanTp_ResetRX },
     { "Test of CanTp_TxConfirmation", Test_Of_CanTp_TxConfirmation },
     { "Test of CanTp_CancelReceive", Test_Of_CanTp_CancelReceive },
     { "Test of CanTp_CancelTransmit", Test_Of_CanTp_CancelTransmit },

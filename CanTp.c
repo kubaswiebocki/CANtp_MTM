@@ -376,7 +376,7 @@ void CanTp_RxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr){
   Wypełnia:
    [SWS_CANTP_00236]
 */
-void CanTp_TxConfirmation (PduIdType TxPduId, Std_ReturnType result){
+void CanTp_TxConfirmation(PduIdType TxPduId, Std_ReturnType result){
 if( CanTp_State == CANTP_ON ){  
     if(CanTp_VariablesRX.CanTp_Current_RxId == TxPduId){
         if( (CanTp_VariablesRX.CanTp_StateRX == CANTP_RX_PROCESSING ) || (CanTp_VariablesRX.CanTp_StateRX == CANTP_RX_PROCESSING_SUSPEND)){
