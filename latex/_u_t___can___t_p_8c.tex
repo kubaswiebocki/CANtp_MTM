@@ -1,0 +1,273 @@
+\doxysection{UT\+\_\+\+Can\+\_\+\+TP.\+c File Reference}
+\hypertarget{_u_t___can___t_p_8c}{}\label{_u_t___can___t_p_8c}\index{UT\_Can\_TP.c@{UT\_Can\_TP.c}}
+
+
+Testy jednostkowe do Can\+Tp \texorpdfstring{$\ast$}{*}====================================================================================================================.  
+
+
+{\ttfamily \#include "{}acutest.\+h"{}}\newline
+{\ttfamily \#include "{}Std\+\_\+\+Types.\+h"{}}\newline
+{\ttfamily \#include "{}Can\+Tp.\+c"{}}\newline
+{\ttfamily \#include $<$stdio.\+h$>$}\newline
+{\ttfamily \#include $<$string.\+h$>$}\newline
+{\ttfamily \#include "{}fff.\+h"{}}\newline
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{_u_t___can___t_p_8c_a6f9a0546573eec66d2dc2155ef040715}\label{_u_t___can___t_p_8c_a6f9a0546573eec66d2dc2155ef040715} 
+{\bfseries FAKE\+\_\+\+VALUE\+\_\+\+FUNC} (Buf\+Req\+\_\+\+Return\+Type, Pdu\+R\+\_\+\+Can\+Tp\+Copy\+Tx\+Data, Pdu\+Id\+Type, const \mbox{\hyperlink{struct_pdu_info_type}{Pdu\+Info\+Type}} \texorpdfstring{$\ast$}{*}, const \mbox{\hyperlink{struct_retry_info_type}{Retry\+Info\+Type}} \texorpdfstring{$\ast$}{*}, Pdu\+Length\+Type \texorpdfstring{$\ast$}{*})
+\item 
+\Hypertarget{_u_t___can___t_p_8c_ab3a781f9229aa1c0fea86cdb8391a54e}\label{_u_t___can___t_p_8c_ab3a781f9229aa1c0fea86cdb8391a54e} 
+{\bfseries FAKE\+\_\+\+VOID\+\_\+\+FUNC} (Pdu\+R\+\_\+\+Can\+Tp\+Tx\+Confirmation, Pdu\+Id\+Type, Std\+\_\+\+Return\+Type)
+\item 
+\Hypertarget{_u_t___can___t_p_8c_a7a75f51d8f628a114938cf1b49b638b7}\label{_u_t___can___t_p_8c_a7a75f51d8f628a114938cf1b49b638b7} 
+{\bfseries FAKE\+\_\+\+VOID\+\_\+\+FUNC} (Pdu\+R\+\_\+\+Can\+Tp\+Rx\+Indication, Pdu\+Id\+Type, Std\+\_\+\+Return\+Type)
+\item 
+\Hypertarget{_u_t___can___t_p_8c_a12fe644b69e504bfa572a0efadd4d977}\label{_u_t___can___t_p_8c_a12fe644b69e504bfa572a0efadd4d977} 
+{\bfseries FAKE\+\_\+\+VALUE\+\_\+\+FUNC} (Buf\+Req\+\_\+\+Return\+Type, Pdu\+R\+\_\+\+Can\+Tp\+Copy\+Rx\+Data, Pdu\+Id\+Type, const \mbox{\hyperlink{struct_pdu_info_type}{Pdu\+Info\+Type}} \texorpdfstring{$\ast$}{*}, Pdu\+Length\+Type \texorpdfstring{$\ast$}{*})
+\item 
+\Hypertarget{_u_t___can___t_p_8c_a9f899e5b2cac58a09751a7a4521c3d43}\label{_u_t___can___t_p_8c_a9f899e5b2cac58a09751a7a4521c3d43} 
+{\bfseries FAKE\+\_\+\+VALUE\+\_\+\+FUNC} (Buf\+Req\+\_\+\+Return\+Type, Pdu\+R\+\_\+\+Can\+Tp\+Start\+Of\+Reception, Pdu\+Id\+Type, const \mbox{\hyperlink{struct_pdu_info_type}{Pdu\+Info\+Type}} \texorpdfstring{$\ast$}{*}, Pdu\+Length\+Type, Pdu\+Length\+Type \texorpdfstring{$\ast$}{*})
+\item 
+\Hypertarget{_u_t___can___t_p_8c_a3dac10647d6cde54b1b8789555212eae}\label{_u_t___can___t_p_8c_a3dac10647d6cde54b1b8789555212eae} 
+{\bfseries FAKE\+\_\+\+VALUE\+\_\+\+FUNC} (Std\+\_\+\+Return\+Type, Can\+If\+\_\+\+Transmit, Pdu\+Id\+Type, const \mbox{\hyperlink{struct_pdu_info_type}{Pdu\+Info\+Type}} \texorpdfstring{$\ast$}{*})
+\item 
+\Hypertarget{_u_t___can___t_p_8c_aa2d022ed1ba43ff49d8ac3f55aaca609}\label{_u_t___can___t_p_8c_aa2d022ed1ba43ff49d8ac3f55aaca609} 
+Buf\+Req\+\_\+\+Return\+Type {\bfseries Pdu\+R\+\_\+\+Can\+Tp\+Copy\+Tx\+Data\+\_\+\+FF} (Pdu\+Id\+Type id, const \mbox{\hyperlink{struct_pdu_info_type}{Pdu\+Info\+Type}} \texorpdfstring{$\ast$}{*}info, const \mbox{\hyperlink{struct_retry_info_type}{Retry\+Info\+Type}} \texorpdfstring{$\ast$}{*}retry, Pdu\+Length\+Type \texorpdfstring{$\ast$}{*}available\+Data\+Ptr)
+\item 
+\Hypertarget{_u_t___can___t_p_8c_af7c45d62cdd8b0494eedb91d45ee7c0c}\label{_u_t___can___t_p_8c_af7c45d62cdd8b0494eedb91d45ee7c0c} 
+Buf\+Req\+\_\+\+Return\+Type {\bfseries Pdu\+R\+\_\+\+Can\+Tp\+Start\+Of\+Reception\+\_\+\+FF} (Pdu\+Id\+Type id, const \mbox{\hyperlink{struct_pdu_info_type}{Pdu\+Info\+Type}} \texorpdfstring{$\ast$}{*}info, Pdu\+Length\+Type Tp\+Sdu\+Length, Pdu\+Length\+Type \texorpdfstring{$\ast$}{*}buffer\+Size\+Ptr)
+\item 
+\Hypertarget{_u_t___can___t_p_8c_ab0751bcf7d761dd8e03ce83bfa1b3be8}\label{_u_t___can___t_p_8c_ab0751bcf7d761dd8e03ce83bfa1b3be8} 
+Buf\+Req\+\_\+\+Return\+Type {\bfseries Pdu\+R\+\_\+\+Can\+Tp\+Copy\+Rx\+Data\+\_\+\+FF} (Pdu\+Id\+Type id, const \mbox{\hyperlink{struct_pdu_info_type}{Pdu\+Info\+Type}} \texorpdfstring{$\ast$}{*}info, Pdu\+Length\+Type \texorpdfstring{$\ast$}{*}buffer\+Size\+Ptr)
+\item 
+void \mbox{\hyperlink{_u_t___can___t_p_8c_a69314bd1f71d3d9fbc7604c8394baad9}{Test\+\_\+\+Of\+\_\+\+Can\+Tp\+\_\+\+Init}} (void)
+\begin{DoxyCompactList}\small\item\em Test inicjalizacji. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{_u_t___can___t_p_8c_a3d1a4af7da20131c97b084320760e158}{Test\+\_\+\+Of\+\_\+\+Can\+Tp\+\_\+\+Get\+Version\+Info}} (void)
+\begin{DoxyCompactList}\small\item\em Test wersji. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{_u_t___can___t_p_8c_ab3be32808e216d07fad48d32da686690}{Test\+\_\+\+Of\+\_\+\+Can\+Tp\+\_\+\+Shutdown}} (void)
+\begin{DoxyCompactList}\small\item\em Test Wyłączenia modułu. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{_u_t___can___t_p_8c_a4696e1cd1abd0baf53325ea7316b3f0b}{Test\+Of\+\_\+\+Can\+Tp\+\_\+\+Transmit}} (void)
+\begin{DoxyCompactList}\small\item\em Test żądania transmisji. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{_u_t___can___t_p_8c_a39c936aae176ffc1ae8a5f8433f3bf2c}{Test\+\_\+\+Of\+\_\+\+Can\+Tp\+\_\+\+Cancel\+Transmit}} (void)
+\begin{DoxyCompactList}\small\item\em Test przerwania transmisji. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{_u_t___can___t_p_8c_aa680b0bf3e0011d63c7b1ab464047d19}{Test\+\_\+\+Of\+\_\+\+Can\+Tp\+\_\+\+Cancel\+Receive}} (void)
+\begin{DoxyCompactList}\small\item\em Test przerwania odbioru. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{_u_t___can___t_p_8c_a3bfbb1f55311513ebea2c4e1e23f6110}{Test\+\_\+\+Of\+\_\+\+Can\+Tp\+\_\+\+Change\+Parameter}} (void)
+\begin{DoxyCompactList}\small\item\em Test zmiany wartosci parametru. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{_u_t___can___t_p_8c_ac7441704069e63c36cfb2a11bd64074f}{Test\+\_\+\+Of\+\_\+\+Can\+Tp\+\_\+\+Read\+Parameter}} (void)
+\begin{DoxyCompactList}\small\item\em Test odczytu wartosci parametru. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{_u_t___can___t_p_8c_ad189152a19e9a28b9100e812a7f0d143}{Test\+\_\+\+Of\+\_\+\+Can\+Tp\+\_\+\+Main\+Function}} ()
+\begin{DoxyCompactList}\small\item\em Test zarządzania modułem. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{_u_t___can___t_p_8c_a767dac9a9220c9edb790e506b2d79fb3}{Test\+\_\+\+Of\+\_\+\+Can\+Tp\+\_\+\+Tx\+Confirmation}} (void)
+\begin{DoxyCompactList}\small\item\em Test Potwierdzenia transmisji. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{_u_t___can___t_p_8c_a4b65c90909caaef8f1025973d187d462}{Test\+\_\+\+Of\+\_\+\+Can\+Tp\+\_\+\+Reset\+RX}} ()
+\begin{DoxyCompactList}\small\item\em Test Resetu odbiornika. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{_u_t___can___t_p_8c_abf65589f50edb8a6b82ed25236b54514}{Test\+\_\+\+Of\+\_\+\+Can\+Tp\+\_\+\+Reset\+TX}} (void)
+\begin{DoxyCompactList}\small\item\em Test Resetu nadajnika. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{_u_t___can___t_p_8c_a71e03d1534652bc7059bb21defbe836a}{Test\+\_\+\+Of\+\_\+\+Can\+Tp\+\_\+\+Calc\+Blocks\+Size}} (void)
+\begin{DoxyCompactList}\small\item\em Test Wyliczania rozmiarów Blocków. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{_u_t___can___t_p_8c_ae5fd398741087ed552fc3f17ccf6be19}{Test\+\_\+\+Of\+\_\+\+Can\+Tp\+\_\+\+Frame\+Check\+Type}} (void)
+\begin{DoxyCompactList}\small\item\em Test sprawdzania typu ramki. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{_u_t___can___t_p_8c_abb1f5cb165f4032cbe0519dca12e4cf2}\label{_u_t___can___t_p_8c_abb1f5cb165f4032cbe0519dca12e4cf2} 
+{\bfseries DEFINE\+\_\+\+FFF\+\_\+\+GLOBALS}
+\item 
+\Hypertarget{_u_t___can___t_p_8c_a3a51abb152472085e05ee58d41ece059}\label{_u_t___can___t_p_8c_a3a51abb152472085e05ee58d41ece059} 
+uint8 {\bfseries Pdu\+R\+\_\+\+Can\+Tp\+Copy\+Tx\+Data\+\_\+sdu\+\_\+data} \mbox{[}20\mbox{]}\mbox{[}7\mbox{]}
+\item 
+\Hypertarget{_u_t___can___t_p_8c_a9a85cd01a90eb5a10383e6df79f36853}\label{_u_t___can___t_p_8c_a9a85cd01a90eb5a10383e6df79f36853} 
+Pdu\+Length\+Type \texorpdfstring{$\ast$}{*} {\bfseries Pdu\+R\+\_\+\+Can\+Tp\+Copy\+Tx\+Data\+\_\+available\+Data\+Ptr}
+\item 
+\Hypertarget{_u_t___can___t_p_8c_abc68148dfec77776cc0fe13c6fa9297d}\label{_u_t___can___t_p_8c_abc68148dfec77776cc0fe13c6fa9297d} 
+Pdu\+Length\+Type \texorpdfstring{$\ast$}{*} {\bfseries Pdu\+R\+\_\+\+Can\+Tp\+Copy\+Rx\+Data\+\_\+buff\+Size\+\_\+array}
+\item 
+\Hypertarget{_u_t___can___t_p_8c_aa94199c1b7c4584f6af5939b6b154a5c}\label{_u_t___can___t_p_8c_aa94199c1b7c4584f6af5939b6b154a5c} 
+Pdu\+Length\+Type \texorpdfstring{$\ast$}{*} {\bfseries Pdu\+R\+\_\+\+Can\+Tp\+Start\+Of\+Reception\+\_\+buff\+Size\+\_\+array}
+\item 
+\mbox{\hyperlink{_u_t___can___t_p_8c_a101087362f5cfe57f7a7dfefd434ca3b}{TEST\+\_\+\+LIST}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Testy jednostkowe do Can\+Tp \texorpdfstring{$\ast$}{*}====================================================================================================================. 
+
+==================================================================================================================\texorpdfstring{$\ast$}{*}\textbackslash{} 
+
+\doxysubsection{Function Documentation}
+\Hypertarget{_u_t___can___t_p_8c_a71e03d1534652bc7059bb21defbe836a}\label{_u_t___can___t_p_8c_a71e03d1534652bc7059bb21defbe836a} 
+\index{UT\_Can\_TP.c@{UT\_Can\_TP.c}!Test\_Of\_CanTp\_CalcBlocksSize@{Test\_Of\_CanTp\_CalcBlocksSize}}
+\index{Test\_Of\_CanTp\_CalcBlocksSize@{Test\_Of\_CanTp\_CalcBlocksSize}!UT\_Can\_TP.c@{UT\_Can\_TP.c}}
+\doxysubsubsection{\texorpdfstring{Test\_Of\_CanTp\_CalcBlocksSize()}{Test\_Of\_CanTp\_CalcBlocksSize()}}
+{\footnotesize\ttfamily void Test\+\_\+\+Of\+\_\+\+Can\+Tp\+\_\+\+Calc\+Blocks\+Size (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+
+
+Test Wyliczania rozmiarów Blocków. 
+
+Funkcja testująca obliczanie rozmiaru blocków. \Hypertarget{_u_t___can___t_p_8c_aa680b0bf3e0011d63c7b1ab464047d19}\label{_u_t___can___t_p_8c_aa680b0bf3e0011d63c7b1ab464047d19} 
+\index{UT\_Can\_TP.c@{UT\_Can\_TP.c}!Test\_Of\_CanTp\_CancelReceive@{Test\_Of\_CanTp\_CancelReceive}}
+\index{Test\_Of\_CanTp\_CancelReceive@{Test\_Of\_CanTp\_CancelReceive}!UT\_Can\_TP.c@{UT\_Can\_TP.c}}
+\doxysubsubsection{\texorpdfstring{Test\_Of\_CanTp\_CancelReceive()}{Test\_Of\_CanTp\_CancelReceive()}}
+{\footnotesize\ttfamily void Test\+\_\+\+Of\+\_\+\+Can\+Tp\+\_\+\+Cancel\+Receive (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+
+
+Test przerwania odbioru. 
+
+Funkcja testująca przerwanie odbioru PDU. \Hypertarget{_u_t___can___t_p_8c_a39c936aae176ffc1ae8a5f8433f3bf2c}\label{_u_t___can___t_p_8c_a39c936aae176ffc1ae8a5f8433f3bf2c} 
+\index{UT\_Can\_TP.c@{UT\_Can\_TP.c}!Test\_Of\_CanTp\_CancelTransmit@{Test\_Of\_CanTp\_CancelTransmit}}
+\index{Test\_Of\_CanTp\_CancelTransmit@{Test\_Of\_CanTp\_CancelTransmit}!UT\_Can\_TP.c@{UT\_Can\_TP.c}}
+\doxysubsubsection{\texorpdfstring{Test\_Of\_CanTp\_CancelTransmit()}{Test\_Of\_CanTp\_CancelTransmit()}}
+{\footnotesize\ttfamily void Test\+\_\+\+Of\+\_\+\+Can\+Tp\+\_\+\+Cancel\+Transmit (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+
+
+Test przerwania transmisji. 
+
+Funkcja testująca przerwanie transmisji PDU. \Hypertarget{_u_t___can___t_p_8c_a3bfbb1f55311513ebea2c4e1e23f6110}\label{_u_t___can___t_p_8c_a3bfbb1f55311513ebea2c4e1e23f6110} 
+\index{UT\_Can\_TP.c@{UT\_Can\_TP.c}!Test\_Of\_CanTp\_ChangeParameter@{Test\_Of\_CanTp\_ChangeParameter}}
+\index{Test\_Of\_CanTp\_ChangeParameter@{Test\_Of\_CanTp\_ChangeParameter}!UT\_Can\_TP.c@{UT\_Can\_TP.c}}
+\doxysubsubsection{\texorpdfstring{Test\_Of\_CanTp\_ChangeParameter()}{Test\_Of\_CanTp\_ChangeParameter()}}
+{\footnotesize\ttfamily void Test\+\_\+\+Of\+\_\+\+Can\+Tp\+\_\+\+Change\+Parameter (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+
+
+Test zmiany wartosci parametru. 
+
+Funkcja testująca zmiane wartosci parametru. \Hypertarget{_u_t___can___t_p_8c_ae5fd398741087ed552fc3f17ccf6be19}\label{_u_t___can___t_p_8c_ae5fd398741087ed552fc3f17ccf6be19} 
+\index{UT\_Can\_TP.c@{UT\_Can\_TP.c}!Test\_Of\_CanTp\_FrameCheckType@{Test\_Of\_CanTp\_FrameCheckType}}
+\index{Test\_Of\_CanTp\_FrameCheckType@{Test\_Of\_CanTp\_FrameCheckType}!UT\_Can\_TP.c@{UT\_Can\_TP.c}}
+\doxysubsubsection{\texorpdfstring{Test\_Of\_CanTp\_FrameCheckType()}{Test\_Of\_CanTp\_FrameCheckType()}}
+{\footnotesize\ttfamily void Test\+\_\+\+Of\+\_\+\+Can\+Tp\+\_\+\+Frame\+Check\+Type (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+
+
+Test sprawdzania typu ramki. 
+
+Funkcja testująca sprawdzanie typu ramki \Hypertarget{_u_t___can___t_p_8c_a3d1a4af7da20131c97b084320760e158}\label{_u_t___can___t_p_8c_a3d1a4af7da20131c97b084320760e158} 
+\index{UT\_Can\_TP.c@{UT\_Can\_TP.c}!Test\_Of\_CanTp\_GetVersionInfo@{Test\_Of\_CanTp\_GetVersionInfo}}
+\index{Test\_Of\_CanTp\_GetVersionInfo@{Test\_Of\_CanTp\_GetVersionInfo}!UT\_Can\_TP.c@{UT\_Can\_TP.c}}
+\doxysubsubsection{\texorpdfstring{Test\_Of\_CanTp\_GetVersionInfo()}{Test\_Of\_CanTp\_GetVersionInfo()}}
+{\footnotesize\ttfamily void Test\+\_\+\+Of\+\_\+\+Can\+Tp\+\_\+\+Get\+Version\+Info (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+
+
+Test wersji. 
+
+Funkcja testująca zapisywana wersję Can\+Tp. \Hypertarget{_u_t___can___t_p_8c_a69314bd1f71d3d9fbc7604c8394baad9}\label{_u_t___can___t_p_8c_a69314bd1f71d3d9fbc7604c8394baad9} 
+\index{UT\_Can\_TP.c@{UT\_Can\_TP.c}!Test\_Of\_CanTp\_Init@{Test\_Of\_CanTp\_Init}}
+\index{Test\_Of\_CanTp\_Init@{Test\_Of\_CanTp\_Init}!UT\_Can\_TP.c@{UT\_Can\_TP.c}}
+\doxysubsubsection{\texorpdfstring{Test\_Of\_CanTp\_Init()}{Test\_Of\_CanTp\_Init()}}
+{\footnotesize\ttfamily void Test\+\_\+\+Of\+\_\+\+Can\+Tp\+\_\+\+Init (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+
+
+Test inicjalizacji. 
+
+==================================================================================================================\texorpdfstring{$\ast$}{*}\textbackslash{} TESTY JEDNOSTKOWE \texorpdfstring{$\ast$}{*}==================================================================================================================== 
+
+Funkcja testująca inicjalizacji Can\+Tp. \Hypertarget{_u_t___can___t_p_8c_ad189152a19e9a28b9100e812a7f0d143}\label{_u_t___can___t_p_8c_ad189152a19e9a28b9100e812a7f0d143} 
+\index{UT\_Can\_TP.c@{UT\_Can\_TP.c}!Test\_Of\_CanTp\_MainFunction@{Test\_Of\_CanTp\_MainFunction}}
+\index{Test\_Of\_CanTp\_MainFunction@{Test\_Of\_CanTp\_MainFunction}!UT\_Can\_TP.c@{UT\_Can\_TP.c}}
+\doxysubsubsection{\texorpdfstring{Test\_Of\_CanTp\_MainFunction()}{Test\_Of\_CanTp\_MainFunction()}}
+{\footnotesize\ttfamily void Test\+\_\+\+Of\+\_\+\+Can\+Tp\+\_\+\+Main\+Function (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Test zarządzania modułem. 
+
+Funkcja testująca zarządzanie modułem Can\+Tp. \Hypertarget{_u_t___can___t_p_8c_ac7441704069e63c36cfb2a11bd64074f}\label{_u_t___can___t_p_8c_ac7441704069e63c36cfb2a11bd64074f} 
+\index{UT\_Can\_TP.c@{UT\_Can\_TP.c}!Test\_Of\_CanTp\_ReadParameter@{Test\_Of\_CanTp\_ReadParameter}}
+\index{Test\_Of\_CanTp\_ReadParameter@{Test\_Of\_CanTp\_ReadParameter}!UT\_Can\_TP.c@{UT\_Can\_TP.c}}
+\doxysubsubsection{\texorpdfstring{Test\_Of\_CanTp\_ReadParameter()}{Test\_Of\_CanTp\_ReadParameter()}}
+{\footnotesize\ttfamily void Test\+\_\+\+Of\+\_\+\+Can\+Tp\+\_\+\+Read\+Parameter (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+
+
+Test odczytu wartosci parametru. 
+
+Funkcja testująca odczyt wartosci parametru. \Hypertarget{_u_t___can___t_p_8c_a4b65c90909caaef8f1025973d187d462}\label{_u_t___can___t_p_8c_a4b65c90909caaef8f1025973d187d462} 
+\index{UT\_Can\_TP.c@{UT\_Can\_TP.c}!Test\_Of\_CanTp\_ResetRX@{Test\_Of\_CanTp\_ResetRX}}
+\index{Test\_Of\_CanTp\_ResetRX@{Test\_Of\_CanTp\_ResetRX}!UT\_Can\_TP.c@{UT\_Can\_TP.c}}
+\doxysubsubsection{\texorpdfstring{Test\_Of\_CanTp\_ResetRX()}{Test\_Of\_CanTp\_ResetRX()}}
+{\footnotesize\ttfamily void Test\+\_\+\+Of\+\_\+\+Can\+Tp\+\_\+\+Reset\+RX (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Test Resetu odbiornika. 
+
+==================================================================================================================\texorpdfstring{$\ast$}{*}\textbackslash{} TESTY FUNKCJI POMOCNICZYCH \texorpdfstring{$\ast$}{*}==================================================================================================================== 
+
+Funkcja testująca reset odbiornika. \Hypertarget{_u_t___can___t_p_8c_abf65589f50edb8a6b82ed25236b54514}\label{_u_t___can___t_p_8c_abf65589f50edb8a6b82ed25236b54514} 
+\index{UT\_Can\_TP.c@{UT\_Can\_TP.c}!Test\_Of\_CanTp\_ResetTX@{Test\_Of\_CanTp\_ResetTX}}
+\index{Test\_Of\_CanTp\_ResetTX@{Test\_Of\_CanTp\_ResetTX}!UT\_Can\_TP.c@{UT\_Can\_TP.c}}
+\doxysubsubsection{\texorpdfstring{Test\_Of\_CanTp\_ResetTX()}{Test\_Of\_CanTp\_ResetTX()}}
+{\footnotesize\ttfamily void Test\+\_\+\+Of\+\_\+\+Can\+Tp\+\_\+\+Reset\+TX (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+
+
+Test Resetu nadajnika. 
+
+Funkcja testująca reset nadajnika. \Hypertarget{_u_t___can___t_p_8c_ab3be32808e216d07fad48d32da686690}\label{_u_t___can___t_p_8c_ab3be32808e216d07fad48d32da686690} 
+\index{UT\_Can\_TP.c@{UT\_Can\_TP.c}!Test\_Of\_CanTp\_Shutdown@{Test\_Of\_CanTp\_Shutdown}}
+\index{Test\_Of\_CanTp\_Shutdown@{Test\_Of\_CanTp\_Shutdown}!UT\_Can\_TP.c@{UT\_Can\_TP.c}}
+\doxysubsubsection{\texorpdfstring{Test\_Of\_CanTp\_Shutdown()}{Test\_Of\_CanTp\_Shutdown()}}
+{\footnotesize\ttfamily void Test\+\_\+\+Of\+\_\+\+Can\+Tp\+\_\+\+Shutdown (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+
+
+Test Wyłączenia modułu. 
+
+Funkcja testująca wyłączania modułu Can\+Tp. \Hypertarget{_u_t___can___t_p_8c_a767dac9a9220c9edb790e506b2d79fb3}\label{_u_t___can___t_p_8c_a767dac9a9220c9edb790e506b2d79fb3} 
+\index{UT\_Can\_TP.c@{UT\_Can\_TP.c}!Test\_Of\_CanTp\_TxConfirmation@{Test\_Of\_CanTp\_TxConfirmation}}
+\index{Test\_Of\_CanTp\_TxConfirmation@{Test\_Of\_CanTp\_TxConfirmation}!UT\_Can\_TP.c@{UT\_Can\_TP.c}}
+\doxysubsubsection{\texorpdfstring{Test\_Of\_CanTp\_TxConfirmation()}{Test\_Of\_CanTp\_TxConfirmation()}}
+{\footnotesize\ttfamily void Test\+\_\+\+Of\+\_\+\+Can\+Tp\+\_\+\+Tx\+Confirmation (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+
+
+Test Potwierdzenia transmisji. 
+
+Funkcja testującapotwierdzenie transmisji PDU. \Hypertarget{_u_t___can___t_p_8c_a4696e1cd1abd0baf53325ea7316b3f0b}\label{_u_t___can___t_p_8c_a4696e1cd1abd0baf53325ea7316b3f0b} 
+\index{UT\_Can\_TP.c@{UT\_Can\_TP.c}!TestOf\_CanTp\_Transmit@{TestOf\_CanTp\_Transmit}}
+\index{TestOf\_CanTp\_Transmit@{TestOf\_CanTp\_Transmit}!UT\_Can\_TP.c@{UT\_Can\_TP.c}}
+\doxysubsubsection{\texorpdfstring{TestOf\_CanTp\_Transmit()}{TestOf\_CanTp\_Transmit()}}
+{\footnotesize\ttfamily void Test\+Of\+\_\+\+Can\+Tp\+\_\+\+Transmit (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+
+
+Test żądania transmisji. 
+
+Funkcja testująca żądanie transmisji PDU. 
+
+\doxysubsection{Variable Documentation}
+\Hypertarget{_u_t___can___t_p_8c_a101087362f5cfe57f7a7dfefd434ca3b}\label{_u_t___can___t_p_8c_a101087362f5cfe57f7a7dfefd434ca3b} 
+\index{UT\_Can\_TP.c@{UT\_Can\_TP.c}!TEST\_LIST@{TEST\_LIST}}
+\index{TEST\_LIST@{TEST\_LIST}!UT\_Can\_TP.c@{UT\_Can\_TP.c}}
+\doxysubsubsection{\texorpdfstring{TEST\_LIST}{TEST\_LIST}}
+{\footnotesize\ttfamily TEST\+\_\+\+LIST}
+
+{\bfseries Initial value\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{=\ \{}
+\DoxyCodeLine{\ \ \ \ \{\ \textcolor{stringliteral}{"{}Test\ of\ CanTp\_MainFunction"{}},\ \mbox{\hyperlink{_u_t___can___t_p_8c_ad189152a19e9a28b9100e812a7f0d143}{Test\_Of\_CanTp\_MainFunction}}\ \},}
+\DoxyCodeLine{\ \ \ \ \{\ \textcolor{stringliteral}{"{}Test\ of\ CanTp\_ReadParameter"{}},\ \mbox{\hyperlink{_u_t___can___t_p_8c_ac7441704069e63c36cfb2a11bd64074f}{Test\_Of\_CanTp\_ReadParameter}}\ \},}
+\DoxyCodeLine{\ \ \ \ \{\ \textcolor{stringliteral}{"{}Test\ of\ CanTp\_ChangeParameter"{}},\ \mbox{\hyperlink{_u_t___can___t_p_8c_a3bfbb1f55311513ebea2c4e1e23f6110}{Test\_Of\_CanTp\_ChangeParameter}}\ \},}
+\DoxyCodeLine{\ \ \ \ \{\ \textcolor{stringliteral}{"{}Test\ of\ CanTp\_FrameCheckType"{}},\ \mbox{\hyperlink{_u_t___can___t_p_8c_ae5fd398741087ed552fc3f17ccf6be19}{Test\_Of\_CanTp\_FrameCheckType}}\ \},}
+\DoxyCodeLine{\ \ \ \ \{\ \textcolor{stringliteral}{"{}Test\ of\ CanTp\_CalcBlocksSize"{}},\ \mbox{\hyperlink{_u_t___can___t_p_8c_a71e03d1534652bc7059bb21defbe836a}{Test\_Of\_CanTp\_CalcBlocksSize}}\ \},}
+\DoxyCodeLine{\ \ \ \ \{\ \textcolor{stringliteral}{"{}Test\ of\ CanTp\_ResetTX"{}},\ \mbox{\hyperlink{_u_t___can___t_p_8c_abf65589f50edb8a6b82ed25236b54514}{Test\_Of\_CanTp\_ResetTX}}\ \},}
+\DoxyCodeLine{\ \ \ \ \{\ \textcolor{stringliteral}{"{}Test\ of\ CanTp\_ResetRX"{}},\ \mbox{\hyperlink{_u_t___can___t_p_8c_a4b65c90909caaef8f1025973d187d462}{Test\_Of\_CanTp\_ResetRX}}\ \},}
+\DoxyCodeLine{\ \ \ \ \{\ \textcolor{stringliteral}{"{}Test\ of\ CanTp\_TxConfirmation"{}},\ \mbox{\hyperlink{_u_t___can___t_p_8c_a767dac9a9220c9edb790e506b2d79fb3}{Test\_Of\_CanTp\_TxConfirmation}}\ \},}
+\DoxyCodeLine{\ \ \ \ \{\ \textcolor{stringliteral}{"{}Test\ of\ CanTp\_CancelReceive"{}},\ \mbox{\hyperlink{_u_t___can___t_p_8c_aa680b0bf3e0011d63c7b1ab464047d19}{Test\_Of\_CanTp\_CancelReceive}}\ \},}
+\DoxyCodeLine{\ \ \ \ \{\ \textcolor{stringliteral}{"{}Test\ of\ CanTp\_CancelTransmit"{}},\ \mbox{\hyperlink{_u_t___can___t_p_8c_a39c936aae176ffc1ae8a5f8433f3bf2c}{Test\_Of\_CanTp\_CancelTransmit}}\ \},}
+\DoxyCodeLine{\ \ \ \ \{\ \textcolor{stringliteral}{"{}Test\ of\ CanTp\_Transmit"{}},\ \mbox{\hyperlink{_u_t___can___t_p_8c_a4696e1cd1abd0baf53325ea7316b3f0b}{TestOf\_CanTp\_Transmit}}\ \},}
+\DoxyCodeLine{\ \ \ \ \{\ \textcolor{stringliteral}{"{}Test\ of\ CanTp\_Init"{}},\ \mbox{\hyperlink{_u_t___can___t_p_8c_a69314bd1f71d3d9fbc7604c8394baad9}{Test\_Of\_CanTp\_Init}}\ \},}
+\DoxyCodeLine{\ \ \ \ \{\ \textcolor{stringliteral}{"{}Test\ of\ CanTp\_Shutdown"{}},\ \mbox{\hyperlink{_u_t___can___t_p_8c_ab3be32808e216d07fad48d32da686690}{Test\_Of\_CanTp\_Shutdown}}\ \},}
+\DoxyCodeLine{\ \ \ \ \ \ \{\ \textcolor{stringliteral}{"{}Test\ of\ CanTp\_GetVersionInfo"{}},\ \mbox{\hyperlink{_u_t___can___t_p_8c_a3d1a4af7da20131c97b084320760e158}{Test\_Of\_CanTp\_GetVersionInfo}}\ \},}
+\DoxyCodeLine{\ \ \ \ \{\ NULL,\ NULL\ \}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\}}
+
+\end{DoxyCode}

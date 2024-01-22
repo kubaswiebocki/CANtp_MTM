@@ -1,0 +1,138 @@
+\doxysection{Can\+Tp.\+h}
+\hypertarget{_can_tp_8h_source}{}\label{_can_tp_8h_source}\mbox{\hyperlink{_can_tp_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#ifndef\ CAN\_TP\_H}}
+\DoxyCodeLine{00002\ \textcolor{preprocessor}{\#define\ CAN\_TP\_H}}
+\DoxyCodeLine{00013\ \textcolor{comment}{/*====================================================================================================================*\(\backslash\)}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ \ \ \ Załączenie\ nagłówków}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\(\backslash\)*====================================================================================================================*/}}
+\DoxyCodeLine{00016\ \textcolor{preprocessor}{\#include\ "{}ComStack\_Types.h"{}}}
+\DoxyCodeLine{00017\ }
+\DoxyCodeLine{00018\ \textcolor{comment}{/*====================================================================================================================*\(\backslash\)}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ \ \ \ Makra\ globalne}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\(\backslash\)*====================================================================================================================*/}}
+\DoxyCodeLine{00021\ \textcolor{preprocessor}{\#define\ NE\_NULL\_PTR(\ ptr\ )\ (ptr\ !=\ NULL)}}
+\DoxyCodeLine{00022\ \textcolor{preprocessor}{\#define\ DEFAULT\_ST\ 0}}
+\DoxyCodeLine{00023\ }
+\DoxyCodeLine{00024\ \textcolor{comment}{/*\ [SWS\_CANTP\_00319]\ */}}
+\DoxyCodeLine{00025\ \textcolor{preprocessor}{\#define\ NULL\_PTR\ ((void\ *)0x00u)}}
+\DoxyCodeLine{00026\ }
+\DoxyCodeLine{00027\ \textcolor{preprocessor}{\#define\ CANTP\_MODULE\_ID\ (0x0Eu)}}
+\DoxyCodeLine{00028\ \textcolor{preprocessor}{\#define\ CANTP\_SW\_MAJOR\_V\ (0x00u)}}
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#define\ CANTP\_SW\_MINOR\_V\ (0x01u)}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#define\ CANTP\_SW\_PATCH\_V\ (0x00u)}}
+\DoxyCodeLine{00031\ }
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#define\ CANTP\_N\_PCI\_TYPE\_SF\ (0x00u)}}
+\DoxyCodeLine{00033\ \textcolor{preprocessor}{\#define\ CANTP\_N\_PCI\_TYPE\_FF\ (0x01u)}}
+\DoxyCodeLine{00034\ \textcolor{preprocessor}{\#define\ CANTP\_N\_PCI\_TYPE\_CF\ (0x02u)}}
+\DoxyCodeLine{00035\ \textcolor{preprocessor}{\#define\ CANTP\_N\_PCI\_TYPE\_FC\ (0x03u)}}
+\DoxyCodeLine{00036\ \textcolor{preprocessor}{\#define\ CANTP\_CAN\_FRAME\_SIZE\ (0x08u)}}
+\DoxyCodeLine{00037\ }
+\DoxyCodeLine{00038\ \textcolor{preprocessor}{\#define\ N\_AR\_TIMEOUT\_VAL\ 100}}
+\DoxyCodeLine{00039\ \textcolor{preprocessor}{\#define\ N\_BR\_TIMEOUT\_VAL\ 100}}
+\DoxyCodeLine{00040\ \textcolor{preprocessor}{\#define\ N\_CR\_TIMEOUT\_VAL\ 100}}
+\DoxyCodeLine{00041\ }
+\DoxyCodeLine{00042\ \textcolor{preprocessor}{\#define\ N\_AS\_TIMEOUT\_VAL\ 100}}
+\DoxyCodeLine{00043\ \textcolor{preprocessor}{\#define\ N\_BS\_TIMEOUT\_VAL\ 100}}
+\DoxyCodeLine{00044\ \textcolor{preprocessor}{\#define\ N\_CS\_TIMEOUT\_VAL\ 100}}
+\DoxyCodeLine{00045\ }
+\DoxyCodeLine{00046\ \textcolor{preprocessor}{\#define\ STMmin\_TIMEOUT\_VAL\ 100}}
+\DoxyCodeLine{00047\ }
+\DoxyCodeLine{00048\ \textcolor{preprocessor}{\#define\ FC\_WAIT\_FRAME\_CTR\_MAX\ 10}}
+\DoxyCodeLine{00049\ \textcolor{comment}{/*====================================================================================================================*\(\backslash\)}}
+\DoxyCodeLine{00050\ \textcolor{comment}{\ \ \ \ Typedefy}}
+\DoxyCodeLine{00051\ \textcolor{comment}{\(\backslash\)*====================================================================================================================*/}}
+\DoxyCodeLine{00052\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{enum}\ \{}
+\DoxyCodeLine{00053\ \ \ \ \ CANTP\_ON,\ }
+\DoxyCodeLine{00054\ \ \ \ \ CANTP\_OFF}
+\DoxyCodeLine{00055\ \}\ CanTpState\_type;}
+\DoxyCodeLine{00056\ }
+\DoxyCodeLine{00057\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{enum}\ \{}
+\DoxyCodeLine{00058\ \ \ \ \ CANTP\_RX\_WAIT,}
+\DoxyCodeLine{00059\ \ \ \ \ CANTP\_RX\_PROCESSING,}
+\DoxyCodeLine{00060\ \ \ \ \ CANTP\_RX\_PROCESSING\_SUSPEND}
+\DoxyCodeLine{00061\ \}\ CanTpStateRX\_type;}
+\DoxyCodeLine{00062\ }
+\DoxyCodeLine{00063\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{enum}\ \{}
+\DoxyCodeLine{00064\ \ \ \ \ CANTP\_TX\_WAIT,\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00065\ \ \ \ \ CANTP\_TX\_PROCESSING,\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00066\ \ \ \ \ CANTP\_TX\_PROCESSING\_SUSPENDED}
+\DoxyCodeLine{00067\ \}\ CanTpStateTX\_type;}
+\DoxyCodeLine{00068\ }
+\DoxyCodeLine{00069\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct}\{}
+\DoxyCodeLine{00070\ \ \ \ \ uint16\ uiMsgLen;\ }
+\DoxyCodeLine{00071\ \ \ \ \ uint16\ uiExpected\_CF\_SN;\ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00072\ \ \ \ \ uint16\ uiTransmittedBytes;\ \ \ \ }
+\DoxyCodeLine{00073\ \ \ \ \ uint8\ \ uiBlocksNxtCts;\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00074\ \ \ \ \ CanTpStateRX\_type\ eCanTp\_StateRX;\ \ \ }
+\DoxyCodeLine{00075\ \ \ \ \ PduIdType\ CanTp\_Current\_RxId;\ \ \ \ \ \ }
+\DoxyCodeLine{00076\ \}\ \mbox{\hyperlink{struct_can_tp___variables_r_x__type}{CanTp\_VariablesRX\_type}};}
+\DoxyCodeLine{00077\ }
+\DoxyCodeLine{00078\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct}\{}
+\DoxyCodeLine{00079\ \ \ \ \ uint16\ uiMsgLen;}
+\DoxyCodeLine{00080\ \ \ \ \ uint16\ uiTransmittedBytes;}
+\DoxyCodeLine{00081\ \ \ \ \ uint16\ uiFrameNrFC;\ \ }
+\DoxyCodeLine{00082\ \ \ \ \ uint8\_t\ uiNxtSN;}
+\DoxyCodeLine{00083\ \ \ \ \ CanTpStateTX\_type\ eCanTp\_StateTX;}
+\DoxyCodeLine{00084\ \ \ \ \ PduIdType\ CanTp\_Current\_TxId;}
+\DoxyCodeLine{00085\ \}\ \mbox{\hyperlink{struct_can_tp___variables_t_x__type}{CanTp\_VariablesTX\_type}};}
+\DoxyCodeLine{00086\ }
+\DoxyCodeLine{00087\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{enum}\ \{}
+\DoxyCodeLine{00088\ \ \ \ \ CAN\_SF\ =\ 0,\ \textcolor{comment}{//\ CANTP\_N\_PCI\_TYPE\_SF}}
+\DoxyCodeLine{00089\ \ \ \ \ CAN\_FF\ =\ 1,\ \textcolor{comment}{//\ CANTP\_N\_PCI\_TYPE\_FF}}
+\DoxyCodeLine{00090\ \ \ \ \ CAN\_CF\ =\ 2,\ \textcolor{comment}{//\ CANTP\_N\_PCI\_TYPE\_CF}}
+\DoxyCodeLine{00091\ \ \ \ \ CAN\_FC\ =\ 3,\ \textcolor{comment}{//\ CANTP\_N\_PCI\_TYPE\_FC}}
+\DoxyCodeLine{00092\ \ \ \ \ DEFAULT\ =\ 4}
+\DoxyCodeLine{00093\ \}\ FrameType;}
+\DoxyCodeLine{00094\ }
+\DoxyCodeLine{00095\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct}\{}
+\DoxyCodeLine{00096\ \ \ \ \ FrameType\ eFrameType;}
+\DoxyCodeLine{00097\ \ \ \ \ uint32\ uiFrameLenght;\ }
+\DoxyCodeLine{00098\ \ \ \ \ uint8\ uiSequenceNumber;}
+\DoxyCodeLine{00099\ \ \ \ \ uint8\ uiBlockSize;\ }
+\DoxyCodeLine{00100\ \ \ \ \ uint8\ uiFlowStatus;\ }
+\DoxyCodeLine{00101\ \ \ \ \ uint8\ uiSeparationTime;}
+\DoxyCodeLine{00102\ \}\ \mbox{\hyperlink{struct_can_p_c_i___type}{CanPCI\_Type}};}
+\DoxyCodeLine{00103\ }
+\DoxyCodeLine{00104\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{enum}\{}
+\DoxyCodeLine{00105\ \ \ \ \ FC\_OVFLW\ =\ 0,}
+\DoxyCodeLine{00106\ \ \ \ \ FC\_WAIT\ =\ 1,}
+\DoxyCodeLine{00107\ \ \ \ \ FC\_CTS\ =\ 2}
+\DoxyCodeLine{00108\ \}\ FlowControlStatus\_type;}
+\DoxyCodeLine{00109\ }
+\DoxyCodeLine{00110\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{enum}\{}
+\DoxyCodeLine{00111\ \ \ \ \ TIMER\_ENABLE,}
+\DoxyCodeLine{00112\ \ \ \ \ TIMER\_DISABLE}
+\DoxyCodeLine{00113\ \}\ TimerState;}
+\DoxyCodeLine{00114\ }
+\DoxyCodeLine{00115\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct}\{}
+\DoxyCodeLine{00116\ \ \ \ \ TimerState\ \ \ \ eState;}
+\DoxyCodeLine{00117\ \ \ \ \ uint32\ \ \ \ \ \ \ \ uiCounter;\ }
+\DoxyCodeLine{00118\ \ \ \ \ \textcolor{keyword}{const}\ uint32\ \ uiTimeout;\ }
+\DoxyCodeLine{00119\ \}\ \mbox{\hyperlink{struct_can_tp___timer__type}{CanTp\_Timer\_type}};}
+\DoxyCodeLine{00120\ }
+\DoxyCodeLine{00121\ \textcolor{comment}{/*====================================================================================================================*\(\backslash\)}}
+\DoxyCodeLine{00122\ \textcolor{comment}{\ \ \ \ Deklaracje\ funkcji\ globalnych}}
+\DoxyCodeLine{00123\ \textcolor{comment}{\(\backslash\)*====================================================================================================================*/}}
+\DoxyCodeLine{00124\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{_can_tp_8h_a3dfe72ec51f271c2ad5c8f9569226920}{CanTp\_Init}}(\textcolor{keywordtype}{void});}
+\DoxyCodeLine{00125\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{_can_tp_8h_ada90d4609fd6248ee2c845368339dd62}{CanTp\_GetVersionInfo}}(\mbox{\hyperlink{struct_std___version_info_type}{Std\_VersionInfoType}}*\ versioninfo);}
+\DoxyCodeLine{00126\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{_can_tp_8h_a2d4971d9e47654df28a65bd1c14a0d00}{CanTp\_Shutdown}}(\textcolor{keywordtype}{void});}
+\DoxyCodeLine{00127\ }
+\DoxyCodeLine{00128\ Std\_ReturnType\ \mbox{\hyperlink{_can_tp_8h_ab98661fa30a5912c26c1d622fa171104}{CanTp\_Transmit}}(PduIdType\ TxPduId,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{struct_pdu_info_type}{PduInfoType}}*\ PduInfoPtr);}
+\DoxyCodeLine{00129\ Std\_ReturnType\ \mbox{\hyperlink{_can_tp_8h_ab9bb0d37d8dcb66315fec58c79aa1fff}{CanTp\_CancelTransmit}}(PduIdType\ TxPduId);}
+\DoxyCodeLine{00130\ Std\_ReturnType\ \mbox{\hyperlink{_can_tp_8h_a4348d7c8d1f4372eac3652e5d22556c7}{CanTp\_CancelReceive}}(PduIdType\ RxPduId);}
+\DoxyCodeLine{00131\ Std\_ReturnType\ \mbox{\hyperlink{_can_tp_8h_a801a48975f33fb07cac861602967b8d0}{CanTp\_ChangeParameter}}(PduIdType\ \textcolor{keywordtype}{id},\ TPParameterType\ parameter,\ uint16\ value);}
+\DoxyCodeLine{00132\ Std\_ReturnType\ \mbox{\hyperlink{_can_tp_8h_a040a55bfce6f27335a218ab99622b037}{CanTp\_ReadParameter}}(PduIdType\ \textcolor{keywordtype}{id},\ TPParameterType\ parameter,\ uint16*\ value);}
+\DoxyCodeLine{00133\ }
+\DoxyCodeLine{00134\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{_can_tp_8h_a28b31e1ad8e52490124ef883a8d69150}{CanTp\_MainFunction}}(\textcolor{keywordtype}{void});\ }
+\DoxyCodeLine{00135\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{_can_tp_8h_a4c81c6399330bff84bdf2e0cd6254de9}{CanTp\_RxIndication}}(PduIdType\ RxPduId,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{struct_pdu_info_type}{PduInfoType}}*\ PduInfoPtr);}
+\DoxyCodeLine{00136\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{_can_tp_8h_a371d9eb76ded3dfac596dfbcc63e758a}{CanTp\_TxConfirmation}}(PduIdType\ TxPduId,\ Std\_ReturnType\ result);}
+\DoxyCodeLine{00137\ }
+\DoxyCodeLine{00138\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{_can_tp_8h_a36e809b3871fd6f5949e3ed395b4dc20}{CanTp\_TimerStart}}(\mbox{\hyperlink{struct_can_tp___timer__type}{CanTp\_Timer\_type}}\ *pTimer);}
+\DoxyCodeLine{00139\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{_can_tp_8h_a9d97bacf210d61dd6e586abe50a62b47}{CanTp\_TimerReset}}(\mbox{\hyperlink{struct_can_tp___timer__type}{CanTp\_Timer\_type}}\ *pTimer);}
+\DoxyCodeLine{00140\ Std\_ReturnType\ \mbox{\hyperlink{_can_tp_8h_a4e05dc50d66ad5809d8a10d562ad17d7}{CanTp\_TimerTick}}(\mbox{\hyperlink{struct_can_tp___timer__type}{CanTp\_Timer\_type}}\ *pTimer);}
+\DoxyCodeLine{00141\ Std\_ReturnType\ \mbox{\hyperlink{_can_tp_8h_ad6087c8d49ce4d7a0ca27ae3ab98763e}{CanTp\_TimerTimeout}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{struct_can_tp___timer__type}{CanTp\_Timer\_type}}\ *pTimer);}
+\DoxyCodeLine{00142\ }
+\DoxyCodeLine{00143\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ CAN\_TP\_H\ */}\textcolor{preprocessor}{}}
+
+\end{DoxyCode}

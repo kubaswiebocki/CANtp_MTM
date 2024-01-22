@@ -1,0 +1,1799 @@
+\doxysection{acutest.\+h}
+\hypertarget{acutest_8h_source}{}\label{acutest_8h_source}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ Acutest\ -\/-\/\ Another\ C/C++\ Unit\ Test\ facility}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ <https://github.com/mity/acutest>}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *\ Copyright\ 2013-\/2020\ Martin\ Mitas}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ Copyright\ 2019\ Garrett\ D'Amore}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *\ Permission\ is\ hereby\ granted,\ free\ of\ charge,\ to\ any\ person\ obtaining\ a}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *\ copy\ of\ this\ software\ and\ associated\ documentation\ files\ (the\ "{}Software"{}),}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ to\ deal\ in\ the\ Software\ without\ restriction,\ including\ without\ limitation}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ *\ the\ rights\ to\ use,\ copy,\ modify,\ merge,\ publish,\ distribute,\ sublicense,}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ and/or\ sell\ copies\ of\ the\ Software,\ and\ to\ permit\ persons\ to\ whom\ the}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *\ Software\ is\ furnished\ to\ do\ so,\ subject\ to\ the\ following\ conditions:}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *\ The\ above\ copyright\ notice\ and\ this\ permission\ notice\ shall\ be\ included\ in}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *\ all\ copies\ or\ substantial\ portions\ of\ the\ Software.}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ THE\ SOFTWARE\ IS\ PROVIDED\ "{}AS\ IS"{},\ WITHOUT\ WARRANTY\ OF\ ANY\ KIND,\ EXPRESS}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *\ OR\ IMPLIED,\ INCLUDING\ BUT\ NOT\ LIMITED\ TO\ THE\ WARRANTIES\ OF\ MERCHANTABILITY,}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ FITNESS\ FOR\ A\ PARTICULAR\ PURPOSE\ AND\ NONINFRINGEMENT.\ IN\ NO\ EVENT\ SHALL\ THE}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *\ AUTHORS\ OR\ COPYRIGHT\ HOLDERS\ BE\ LIABLE\ FOR\ ANY\ CLAIM,\ DAMAGES\ OR\ OTHER}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ LIABILITY,\ WHETHER\ IN\ AN\ ACTION\ OF\ CONTRACT,\ TORT\ OR\ OTHERWISE,\ ARISING}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ FROM,\ OUT\ OF\ OR\ IN\ CONNECTION\ WITH\ THE\ SOFTWARE\ OR\ THE\ USE\ OR\ OTHER\ DEALINGS}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ IN\ THE\ SOFTWARE.}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00026\ }
+\DoxyCodeLine{00027\ \textcolor{preprocessor}{\#ifndef\ ACUTEST\_H}}
+\DoxyCodeLine{00028\ \textcolor{preprocessor}{\#define\ ACUTEST\_H}}
+\DoxyCodeLine{00029\ }
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00031\ \textcolor{comment}{/************************}}
+\DoxyCodeLine{00032\ \textcolor{comment}{\ ***\ Public\ interface\ ***}}
+\DoxyCodeLine{00033\ \textcolor{comment}{\ ************************/}}
+\DoxyCodeLine{00034\ }
+\DoxyCodeLine{00035\ \textcolor{comment}{/*\ By\ default,\ "{}acutest.h"{}\ provides\ the\ main\ program\ entry\ point\ (function}}
+\DoxyCodeLine{00036\ \textcolor{comment}{\ *\ main()).\ However,\ if\ the\ test\ suite\ is\ composed\ of\ multiple\ source\ files}}
+\DoxyCodeLine{00037\ \textcolor{comment}{\ *\ which\ include\ "{}acutest.h"{},\ then\ this\ causes\ a\ problem\ of\ multiple\ main()}}
+\DoxyCodeLine{00038\ \textcolor{comment}{\ *\ definitions.\ To\ avoid\ this\ problem,\ \#define\ macro\ TEST\_NO\_MAIN\ in\ all}}
+\DoxyCodeLine{00039\ \textcolor{comment}{\ *\ compilation\ units\ but\ one.}}
+\DoxyCodeLine{00040\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00041\ }
+\DoxyCodeLine{00042\ \textcolor{comment}{/*\ Macro\ to\ specify\ list\ of\ unit\ tests\ in\ the\ suite.}}
+\DoxyCodeLine{00043\ \textcolor{comment}{\ *\ The\ unit\ test\ implementation\ MUST\ provide\ list\ of\ unit\ tests\ it\ implements}}
+\DoxyCodeLine{00044\ \textcolor{comment}{\ *\ with\ this\ macro:}}
+\DoxyCodeLine{00045\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00046\ \textcolor{comment}{\ *\ \ \ TEST\_LIST\ =\ \{}}
+\DoxyCodeLine{00047\ \textcolor{comment}{\ *\ \ \ \ \ \ \ \{\ "{}test1\_name"{},\ test1\_func\_ptr\ \},}}
+\DoxyCodeLine{00048\ \textcolor{comment}{\ *\ \ \ \ \ \ \ \{\ "{}test2\_name"{},\ test2\_func\_ptr\ \},}}
+\DoxyCodeLine{00049\ \textcolor{comment}{\ *\ \ \ \ \ \ \ ...}}
+\DoxyCodeLine{00050\ \textcolor{comment}{\ *\ \ \ \ \ \ \ \{\ NULL,\ NULL\ \}\ \ \ \ \ //\ zeroed\ record\ marking\ the\ end\ of\ the\ list}}
+\DoxyCodeLine{00051\ \textcolor{comment}{\ *\ \ \ \};}}
+\DoxyCodeLine{00052\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00053\ \textcolor{comment}{\ *\ The\ list\ specifies\ names\ of\ each\ test\ (must\ be\ unique)\ and\ pointer\ to}}
+\DoxyCodeLine{00054\ \textcolor{comment}{\ *\ a\ function\ implementing\ it.\ The\ function\ does\ not\ take\ any\ arguments}}
+\DoxyCodeLine{00055\ \textcolor{comment}{\ *\ and\ has\ no\ return\ values,\ i.e.\ every\ test\ function\ has\ to\ be\ compatible}}
+\DoxyCodeLine{00056\ \textcolor{comment}{\ *\ with\ this\ prototype:}}
+\DoxyCodeLine{00057\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00058\ \textcolor{comment}{\ *\ \ \ void\ test\_func(void);}}
+\DoxyCodeLine{00059\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00060\ \textcolor{comment}{\ *\ Note\ the\ list\ has\ to\ be\ ended\ with\ a\ zeroed\ record.}}
+\DoxyCodeLine{00061\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00062\ \textcolor{preprocessor}{\#define\ TEST\_LIST\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ const\ struct\ test\_\ test\_list\_[]}}
+\DoxyCodeLine{00063\ }
+\DoxyCodeLine{00064\ }
+\DoxyCodeLine{00065\ \textcolor{comment}{/*\ Macros\ for\ testing\ whether\ an\ unit\ test\ succeeds\ or\ fails.\ These\ macros}}
+\DoxyCodeLine{00066\ \textcolor{comment}{\ *\ can\ be\ used\ arbitrarily\ in\ functions\ implementing\ the\ unit\ tests.}}
+\DoxyCodeLine{00067\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00068\ \textcolor{comment}{\ *\ If\ any\ condition\ fails\ throughout\ execution\ of\ a\ test,\ the\ test\ fails.}}
+\DoxyCodeLine{00069\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00070\ \textcolor{comment}{\ *\ TEST\_CHECK\ takes\ only\ one\ argument\ (the\ condition),\ TEST\_CHECK\_\ allows}}
+\DoxyCodeLine{00071\ \textcolor{comment}{\ *\ also\ to\ specify\ an\ error\ message\ to\ print\ out\ if\ the\ condition\ fails.}}
+\DoxyCodeLine{00072\ \textcolor{comment}{\ *\ (It\ expects\ printf-\/like\ format\ string\ and\ its\ parameters).\ The\ macros}}
+\DoxyCodeLine{00073\ \textcolor{comment}{\ *\ return\ non-\/zero\ (condition\ passes)\ or\ 0\ (condition\ fails).}}
+\DoxyCodeLine{00074\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00075\ \textcolor{comment}{\ *\ That\ can\ be\ useful\ when\ more\ conditions\ should\ be\ checked\ only\ if\ some}}
+\DoxyCodeLine{00076\ \textcolor{comment}{\ *\ preceding\ condition\ passes,\ as\ illustrated\ in\ this\ code\ snippet:}}
+\DoxyCodeLine{00077\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00078\ \textcolor{comment}{\ *\ \ \ SomeStruct*\ ptr\ =\ allocate\_some\_struct();}}
+\DoxyCodeLine{00079\ \textcolor{comment}{\ *\ \ \ if(TEST\_CHECK(ptr\ !=\ NULL))\ \{}}
+\DoxyCodeLine{00080\ \textcolor{comment}{\ *\ \ \ \ \ \ \ TEST\_CHECK(ptr-\/>member1\ <\ 100);}}
+\DoxyCodeLine{00081\ \textcolor{comment}{\ *\ \ \ \ \ \ \ TEST\_CHECK(ptr-\/>member2\ >\ 200);}}
+\DoxyCodeLine{00082\ \textcolor{comment}{\ *\ \ \ \}}}
+\DoxyCodeLine{00083\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00084\ \textcolor{preprocessor}{\#define\ TEST\_CHECK\_(cond,...)\ \ \ test\_check\_((cond),\ \_\_FILE\_\_,\ \_\_LINE\_\_,\ \_\_VA\_ARGS\_\_)}}
+\DoxyCodeLine{00085\ \textcolor{preprocessor}{\#define\ TEST\_CHECK(cond)\ \ \ \ \ \ \ \ test\_check\_((cond),\ \_\_FILE\_\_,\ \_\_LINE\_\_,\ "{}\%s"{},\ \#cond)}}
+\DoxyCodeLine{00086\ }
+\DoxyCodeLine{00087\ }
+\DoxyCodeLine{00088\ \textcolor{comment}{/*\ These\ macros\ are\ the\ same\ as\ TEST\_CHECK\_\ and\ TEST\_CHECK\ except\ that\ if\ the}}
+\DoxyCodeLine{00089\ \textcolor{comment}{\ *\ condition\ fails,\ the\ currently\ executed\ unit\ test\ is\ immediately\ aborted.}}
+\DoxyCodeLine{00090\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00091\ \textcolor{comment}{\ *\ That\ is\ done\ either\ by\ calling\ abort()\ if\ the\ unit\ test\ is\ executed\ as\ a}}
+\DoxyCodeLine{00092\ \textcolor{comment}{\ *\ child\ process;\ or\ via\ longjmp()\ if\ the\ unit\ test\ is\ executed\ within\ the}}
+\DoxyCodeLine{00093\ \textcolor{comment}{\ *\ main\ Acutest\ process.}}
+\DoxyCodeLine{00094\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00095\ \textcolor{comment}{\ *\ As\ a\ side\ effect\ of\ such\ abortion,\ your\ unit\ tests\ may\ cause\ memory\ leaks,}}
+\DoxyCodeLine{00096\ \textcolor{comment}{\ *\ unflushed\ file\ descriptors,\ and\ other\ phenomena\ caused\ by\ the\ abortion.}}
+\DoxyCodeLine{00097\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00098\ \textcolor{comment}{\ *\ Therefore\ you\ should\ not\ use\ these\ as\ a\ general\ replacement\ for\ TEST\_CHECK.}}
+\DoxyCodeLine{00099\ \textcolor{comment}{\ *\ Use\ it\ with\ some\ caution,\ especially\ if\ your\ test\ causes\ some\ other\ side}}
+\DoxyCodeLine{00100\ \textcolor{comment}{\ *\ effects\ to\ the\ outside\ world\ (e.g.\ communicating\ with\ some\ server,\ inserting}}
+\DoxyCodeLine{00101\ \textcolor{comment}{\ *\ into\ a\ database\ etc.).}}
+\DoxyCodeLine{00102\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00103\ \textcolor{preprocessor}{\#define\ TEST\_ASSERT\_(cond,...)\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00104\ \textcolor{preprocessor}{\ \ \ \ do\ \{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00105\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ if(!test\_check\_((cond),\ \_\_FILE\_\_,\ \_\_LINE\_\_,\ \_\_VA\_ARGS\_\_))\ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00106\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ test\_abort\_();\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00107\ \textcolor{preprocessor}{\ \ \ \ \}\ while(0)}}
+\DoxyCodeLine{00108\ \textcolor{preprocessor}{\#define\ TEST\_ASSERT(cond)\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00109\ \textcolor{preprocessor}{\ \ \ \ do\ \{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00110\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ if(!test\_check\_((cond),\ \_\_FILE\_\_,\ \_\_LINE\_\_,\ "{}\%s"{},\ \#cond))\ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00111\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ test\_abort\_();\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00112\ \textcolor{preprocessor}{\ \ \ \ \}\ while(0)}}
+\DoxyCodeLine{00113\ }
+\DoxyCodeLine{00114\ }
+\DoxyCodeLine{00115\ \textcolor{preprocessor}{\#ifdef\ \_\_cplusplus}}
+\DoxyCodeLine{00116\ \textcolor{comment}{/*\ Macros\ to\ verify\ that\ the\ code\ (the\ 1st\ argument)\ throws\ exception\ of\ given}}
+\DoxyCodeLine{00117\ \textcolor{comment}{\ *\ type\ (the\ 2nd\ argument).\ (Note\ these\ macros\ are\ only\ available\ in\ C++.)}}
+\DoxyCodeLine{00118\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00119\ \textcolor{comment}{\ *\ TEST\_EXCEPTION\_\ is\ like\ TEST\_EXCEPTION\ but\ accepts\ custom\ printf-\/like}}
+\DoxyCodeLine{00120\ \textcolor{comment}{\ *\ message.}}
+\DoxyCodeLine{00121\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00122\ \textcolor{comment}{\ *\ For\ example:}}
+\DoxyCodeLine{00123\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00124\ \textcolor{comment}{\ *\ \ \ TEST\_EXCEPTION(function\_that\_throw(),\ ExpectedExceptionType);}}
+\DoxyCodeLine{00125\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00126\ \textcolor{comment}{\ *\ If\ the\ function\_that\_throw()\ throws\ ExpectedExceptionType,\ the\ check\ passes.}}
+\DoxyCodeLine{00127\ \textcolor{comment}{\ *\ If\ the\ function\ throws\ anything\ incompatible\ with\ ExpectedExceptionType}}
+\DoxyCodeLine{00128\ \textcolor{comment}{\ *\ (or\ if\ it\ does\ not\ thrown\ an\ exception\ at\ all),\ the\ check\ fails.}}
+\DoxyCodeLine{00129\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00130\ \textcolor{preprocessor}{\#define\ TEST\_EXCEPTION(code,\ exctype)\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00131\ \textcolor{preprocessor}{\ \ \ \ do\ \{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00132\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ bool\ exc\_ok\_\ =\ false;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00133\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ const\ char\ *msg\_\ =\ NULL;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00134\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ try\ \{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00135\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ code;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00136\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ msg\_\ =\ "{}No\ exception\ thrown."{};\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00137\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \}\ catch(exctype\ const\&)\ \{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00138\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ exc\_ok\_=\ true;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00139\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \}\ catch(...)\ \{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00140\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ msg\_\ =\ "{}Unexpected\ exception\ thrown."{};\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00141\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00142\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ test\_check\_(exc\_ok\_,\ \_\_FILE\_\_,\ \_\_LINE\_\_,\ \#code\ "{}\ throws\ "{}\ \#exctype);\ \ \ \(\backslash\)}}
+\DoxyCodeLine{00143\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ if(msg\_\ !=\ NULL)\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00144\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ test\_message\_("{}\%s"{},\ msg\_);\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00145\ \textcolor{preprocessor}{\ \ \ \ \}\ while(0)}}
+\DoxyCodeLine{00146\ \textcolor{preprocessor}{\#define\ TEST\_EXCEPTION\_(code,\ exctype,\ ...)\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00147\ \textcolor{preprocessor}{\ \ \ \ do\ \{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00148\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ bool\ exc\_ok\_\ =\ false;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00149\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ const\ char\ *msg\_\ =\ NULL;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00150\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ try\ \{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00151\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ code;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00152\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ msg\_\ =\ "{}No\ exception\ thrown."{};\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00153\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \}\ catch(exctype\ const\&)\ \{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00154\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ exc\_ok\_=\ true;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00155\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \}\ catch(...)\ \{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00156\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ msg\_\ =\ "{}Unexpected\ exception\ thrown."{};\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00157\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00158\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ test\_check\_(exc\_ok\_,\ \_\_FILE\_\_,\ \_\_LINE\_\_,\ \_\_VA\_ARGS\_\_);\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00159\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ if(msg\_\ !=\ NULL)\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00160\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ test\_message\_("{}\%s"{},\ msg\_);\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00161\ \textcolor{preprocessor}{\ \ \ \ \}\ while(0)}}
+\DoxyCodeLine{00162\ \textcolor{preprocessor}{\#endif\ \ }\textcolor{comment}{/*\ \#ifdef\ \_\_cplusplus\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00163\ }
+\DoxyCodeLine{00164\ }
+\DoxyCodeLine{00165\ \textcolor{comment}{/*\ Sometimes\ it\ is\ useful\ to\ split\ execution\ of\ more\ complex\ unit\ tests\ to\ some}}
+\DoxyCodeLine{00166\ \textcolor{comment}{\ *\ smaller\ parts\ and\ associate\ those\ parts\ with\ some\ names.}}
+\DoxyCodeLine{00167\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00168\ \textcolor{comment}{\ *\ This\ is\ especially\ handy\ if\ the\ given\ unit\ test\ is\ implemented\ as\ a\ loop}}
+\DoxyCodeLine{00169\ \textcolor{comment}{\ *\ over\ some\ vector\ of\ multiple\ testing\ inputs.\ Using\ these\ macros\ allow\ to\ use}}
+\DoxyCodeLine{00170\ \textcolor{comment}{\ *\ sort\ of\ subtitle\ for\ each\ iteration\ of\ the\ loop\ (e.g.\ outputting\ the\ input}}
+\DoxyCodeLine{00171\ \textcolor{comment}{\ *\ itself\ or\ a\ name\ associated\ to\ it),\ so\ that\ if\ any\ TEST\_CHECK\ condition}}
+\DoxyCodeLine{00172\ \textcolor{comment}{\ *\ fails\ in\ the\ loop,\ it\ can\ be\ easily\ seen\ which\ iteration\ triggers\ the}}
+\DoxyCodeLine{00173\ \textcolor{comment}{\ *\ failure,\ without\ the\ need\ to\ manually\ output\ the\ iteration-\/specific\ data\ in}}
+\DoxyCodeLine{00174\ \textcolor{comment}{\ *\ every\ single\ TEST\_CHECK\ inside\ the\ loop\ body.}}
+\DoxyCodeLine{00175\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00176\ \textcolor{comment}{\ *\ TEST\_CASE\ allows\ to\ specify\ only\ single\ string\ as\ the\ name\ of\ the\ case,}}
+\DoxyCodeLine{00177\ \textcolor{comment}{\ *\ TEST\_CASE\_\ provides\ all\ the\ power\ of\ printf-\/like\ string\ formatting.}}
+\DoxyCodeLine{00178\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00179\ \textcolor{comment}{\ *\ Note\ that\ the\ test\ cases\ cannot\ be\ nested.\ Starting\ a\ new\ test\ case\ ends}}
+\DoxyCodeLine{00180\ \textcolor{comment}{\ *\ implicitly\ the\ previous\ one.\ To\ end\ the\ test\ case\ explicitly\ (e.g.\ to\ end}}
+\DoxyCodeLine{00181\ \textcolor{comment}{\ *\ the\ last\ test\ case\ after\ exiting\ the\ loop),\ you\ may\ use\ TEST\_CASE(NULL).}}
+\DoxyCodeLine{00182\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00183\ \textcolor{preprocessor}{\#define\ TEST\_CASE\_(...)\ \ \ \ \ \ \ \ \ test\_case\_(\_\_VA\_ARGS\_\_)}}
+\DoxyCodeLine{00184\ \textcolor{preprocessor}{\#define\ TEST\_CASE(name)\ \ \ \ \ \ \ \ \ test\_case\_("{}\%s"{},\ name)}}
+\DoxyCodeLine{00185\ }
+\DoxyCodeLine{00186\ }
+\DoxyCodeLine{00187\ \textcolor{comment}{/*\ Maximal\ output\ per\ TEST\_CASE\ call.\ Longer\ messages\ are\ cut.}}
+\DoxyCodeLine{00188\ \textcolor{comment}{\ *\ You\ may\ define\ another\ limit\ prior\ including\ "{}acutest.h"{}}}
+\DoxyCodeLine{00189\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00190\ \textcolor{preprocessor}{\#ifndef\ TEST\_CASE\_MAXSIZE}}
+\DoxyCodeLine{00191\ \textcolor{preprocessor}{\ \ \ \ \#define\ TEST\_CASE\_MAXSIZE\ \ \ \ 64}}
+\DoxyCodeLine{00192\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00193\ }
+\DoxyCodeLine{00194\ }
+\DoxyCodeLine{00195\ \textcolor{comment}{/*\ printf-\/like\ macro\ for\ outputting\ an\ extra\ information\ about\ a\ failure.}}
+\DoxyCodeLine{00196\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00197\ \textcolor{comment}{\ *\ Intended\ use\ is\ to\ output\ some\ computed\ output\ versus\ the\ expected\ value,}}
+\DoxyCodeLine{00198\ \textcolor{comment}{\ *\ e.g.\ like\ this:}}
+\DoxyCodeLine{00199\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00200\ \textcolor{comment}{\ *\ \ \ if(!TEST\_CHECK(produced\ ==\ expected))\ \{}}
+\DoxyCodeLine{00201\ \textcolor{comment}{\ *\ \ \ \ \ \ \ TEST\_MSG("{}Expected:\ \%d"{},\ expected);}}
+\DoxyCodeLine{00202\ \textcolor{comment}{\ *\ \ \ \ \ \ \ TEST\_MSG("{}Produced:\ \%d"{},\ produced);}}
+\DoxyCodeLine{00203\ \textcolor{comment}{\ *\ \ \ \}}}
+\DoxyCodeLine{00204\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00205\ \textcolor{comment}{\ *\ Note\ the\ message\ is\ only\ written\ down\ if\ the\ most\ recent\ use\ of\ any\ checking}}
+\DoxyCodeLine{00206\ \textcolor{comment}{\ *\ macro\ (like\ e.g.\ TEST\_CHECK\ or\ TEST\_EXCEPTION)\ in\ the\ current\ test\ failed.}}
+\DoxyCodeLine{00207\ \textcolor{comment}{\ *\ This\ means\ the\ above\ is\ equivalent\ to\ just\ this:}}
+\DoxyCodeLine{00208\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00209\ \textcolor{comment}{\ *\ \ \ TEST\_CHECK(produced\ ==\ expected);}}
+\DoxyCodeLine{00210\ \textcolor{comment}{\ *\ \ \ TEST\_MSG("{}Expected:\ \%d"{},\ expected);}}
+\DoxyCodeLine{00211\ \textcolor{comment}{\ *\ \ \ TEST\_MSG("{}Produced:\ \%d"{},\ produced);}}
+\DoxyCodeLine{00212\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00213\ \textcolor{comment}{\ *\ The\ macro\ can\ deal\ with\ multi-\/line\ output\ fairly\ well.\ It\ also\ automatically}}
+\DoxyCodeLine{00214\ \textcolor{comment}{\ *\ adds\ a\ final\ new-\/line\ if\ there\ is\ none\ present.}}
+\DoxyCodeLine{00215\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00216\ \textcolor{preprocessor}{\#define\ TEST\_MSG(...)\ \ \ \ \ \ \ \ \ \ \ test\_message\_(\_\_VA\_ARGS\_\_)}}
+\DoxyCodeLine{00217\ }
+\DoxyCodeLine{00218\ }
+\DoxyCodeLine{00219\ \textcolor{comment}{/*\ Maximal\ output\ per\ TEST\_MSG\ call.\ Longer\ messages\ are\ cut.}}
+\DoxyCodeLine{00220\ \textcolor{comment}{\ *\ You\ may\ define\ another\ limit\ prior\ including\ "{}acutest.h"{}}}
+\DoxyCodeLine{00221\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00222\ \textcolor{preprocessor}{\#ifndef\ TEST\_MSG\_MAXSIZE}}
+\DoxyCodeLine{00223\ \textcolor{preprocessor}{\ \ \ \ \#define\ TEST\_MSG\_MAXSIZE\ \ \ \ 1024}}
+\DoxyCodeLine{00224\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00225\ }
+\DoxyCodeLine{00226\ }
+\DoxyCodeLine{00227\ \textcolor{comment}{/*\ Macro\ for\ dumping\ a\ block\ of\ memory.}}
+\DoxyCodeLine{00228\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00229\ \textcolor{comment}{\ *\ Its\ intended\ use\ is\ very\ similar\ to\ what\ TEST\_MSG\ is\ for,\ but\ instead\ of}}
+\DoxyCodeLine{00230\ \textcolor{comment}{\ *\ generating\ any\ printf-\/like\ message,\ this\ is\ for\ dumping\ raw\ block\ of\ a}}
+\DoxyCodeLine{00231\ \textcolor{comment}{\ *\ memory\ in\ a\ hexadecimal\ form:}}
+\DoxyCodeLine{00232\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00233\ \textcolor{comment}{\ *\ \ \ TEST\_CHECK(size\_produced\ ==\ size\_expected\ \&\&}}
+\DoxyCodeLine{00234\ \textcolor{comment}{\ *\ \ \ \ \ \ \ \ \ \ \ \ \ \ memcmp(addr\_produced,\ addr\_expected,\ size\_produced)\ ==\ 0);}}
+\DoxyCodeLine{00235\ \textcolor{comment}{\ *\ \ \ TEST\_DUMP("{}Expected:"{},\ addr\_expected,\ size\_expected);}}
+\DoxyCodeLine{00236\ \textcolor{comment}{\ *\ \ \ TEST\_DUMP("{}Produced:"{},\ addr\_produced,\ size\_produced);}}
+\DoxyCodeLine{00237\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00238\ \textcolor{preprocessor}{\#define\ TEST\_DUMP(title,\ addr,\ size)\ \ \ \ test\_dump\_(title,\ addr,\ size)}}
+\DoxyCodeLine{00239\ }
+\DoxyCodeLine{00240\ \textcolor{comment}{/*\ Maximal\ output\ per\ TEST\_DUMP\ call\ (in\ bytes\ to\ dump).\ Longer\ blocks\ are\ cut.}}
+\DoxyCodeLine{00241\ \textcolor{comment}{\ *\ You\ may\ define\ another\ limit\ prior\ including\ "{}acutest.h"{}}}
+\DoxyCodeLine{00242\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00243\ \textcolor{preprocessor}{\#ifndef\ TEST\_DUMP\_MAXSIZE}}
+\DoxyCodeLine{00244\ \textcolor{preprocessor}{\ \ \ \ \#define\ TEST\_DUMP\_MAXSIZE\ \ \ 1024}}
+\DoxyCodeLine{00245\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00246\ }
+\DoxyCodeLine{00247\ }
+\DoxyCodeLine{00248\ \textcolor{comment}{/*\ Common\ test\ initialiation/clean-\/up}}
+\DoxyCodeLine{00249\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00250\ \textcolor{comment}{\ *\ In\ some\ test\ suites,\ it\ may\ be\ needed\ to\ perform\ some\ sort\ of\ the\ same}}
+\DoxyCodeLine{00251\ \textcolor{comment}{\ *\ initialization\ and/or\ clean-\/up\ in\ all\ the\ tests.}}
+\DoxyCodeLine{00252\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00253\ \textcolor{comment}{\ *\ Such\ test\ suites\ may\ use\ macros\ TEST\_INIT\ and/or\ TEST\_FINI\ prior\ including}}
+\DoxyCodeLine{00254\ \textcolor{comment}{\ *\ this\ header.\ The\ expansion\ of\ the\ macro\ is\ then\ used\ as\ a\ body\ of\ helper}}
+\DoxyCodeLine{00255\ \textcolor{comment}{\ *\ function\ called\ just\ before\ executing\ every\ single\ (TEST\_INIT)\ or\ just\ after}}
+\DoxyCodeLine{00256\ \textcolor{comment}{\ *\ it\ ends\ (TEST\_FINI).}}
+\DoxyCodeLine{00257\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00258\ \textcolor{comment}{\ *\ Examples\ of\ various\ ways\ how\ to\ use\ the\ macro\ TEST\_INIT:}}
+\DoxyCodeLine{00259\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00260\ \textcolor{comment}{\ *\ \ \ \#define\ TEST\_INIT\ \ \ \ \ \ my\_init\_func();}}
+\DoxyCodeLine{00261\ \textcolor{comment}{\ *\ \ \ \#define\ TEST\_INIT\ \ \ \ \ \ my\_init\_func()\ \ \ \ \ \ //\ Works\ even\ without\ the\ semicolon}}
+\DoxyCodeLine{00262\ \textcolor{comment}{\ *\ \ \ \#define\ TEST\_INIT\ \ \ \ \ \ setlocale(LC\_ALL,\ NULL);}}
+\DoxyCodeLine{00263\ \textcolor{comment}{\ *\ \ \ \#define\ TEST\_INIT\ \ \ \ \ \ \{\ setlocale(LC\_ALL,\ NULL);\ my\_init\_func();\ \}}}
+\DoxyCodeLine{00264\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00265\ \textcolor{comment}{\ *\ TEST\_FINI\ is\ to\ be\ used\ in\ the\ same\ way.}}
+\DoxyCodeLine{00266\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00267\ }
+\DoxyCodeLine{00268\ }
+\DoxyCodeLine{00269\ \textcolor{comment}{/**********************}}
+\DoxyCodeLine{00270\ \textcolor{comment}{\ ***\ Implementation\ ***}}
+\DoxyCodeLine{00271\ \textcolor{comment}{\ **********************/}}
+\DoxyCodeLine{00272\ }
+\DoxyCodeLine{00273\ \textcolor{comment}{/*\ The\ unit\ test\ files\ should\ not\ rely\ on\ anything\ below.\ */}}
+\DoxyCodeLine{00274\ }
+\DoxyCodeLine{00275\ \textcolor{preprocessor}{\#include\ <ctype.h>}}
+\DoxyCodeLine{00276\ \textcolor{preprocessor}{\#include\ <stdarg.h>}}
+\DoxyCodeLine{00277\ \textcolor{preprocessor}{\#include\ <stdio.h>}}
+\DoxyCodeLine{00278\ \textcolor{preprocessor}{\#include\ <stdlib.h>}}
+\DoxyCodeLine{00279\ \textcolor{preprocessor}{\#include\ <string.h>}}
+\DoxyCodeLine{00280\ \textcolor{preprocessor}{\#include\ <setjmp.h>}}
+\DoxyCodeLine{00281\ }
+\DoxyCodeLine{00282\ \textcolor{preprocessor}{\#if\ defined(unix)\ ||\ defined(\_\_unix\_\_)\ ||\ defined(\_\_unix)\ ||\ defined(\_\_APPLE\_\_)}}
+\DoxyCodeLine{00283\ \textcolor{preprocessor}{\ \ \ \ \#define\ ACUTEST\_UNIX\_\ \ \ \ \ \ \ 1}}
+\DoxyCodeLine{00284\ \textcolor{preprocessor}{\ \ \ \ \#include\ <errno.h>}}
+\DoxyCodeLine{00285\ \textcolor{preprocessor}{\ \ \ \ \#include\ <libgen.h>}}
+\DoxyCodeLine{00286\ \textcolor{preprocessor}{\ \ \ \ \#include\ <unistd.h>}}
+\DoxyCodeLine{00287\ \textcolor{preprocessor}{\ \ \ \ \#include\ <sys/types.h>}}
+\DoxyCodeLine{00288\ \textcolor{preprocessor}{\ \ \ \ \#include\ <sys/wait.h>}}
+\DoxyCodeLine{00289\ \textcolor{preprocessor}{\ \ \ \ \#include\ <signal.h>}}
+\DoxyCodeLine{00290\ \textcolor{preprocessor}{\ \ \ \ \#include\ <time.h>}}
+\DoxyCodeLine{00291\ }
+\DoxyCodeLine{00292\ \textcolor{preprocessor}{\ \ \ \ \#if\ defined\ CLOCK\_PROCESS\_CPUTIME\_ID\ \ \&\&\ \ defined\ CLOCK\_MONOTONIC}}
+\DoxyCodeLine{00293\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \#define\ ACUTEST\_HAS\_POSIX\_TIMER\_\ \ \ \ 1}}
+\DoxyCodeLine{00294\ \textcolor{preprocessor}{\ \ \ \ \#endif}}
+\DoxyCodeLine{00295\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00296\ }
+\DoxyCodeLine{00297\ \textcolor{preprocessor}{\#if\ defined(\_gnu\_linux\_)}}
+\DoxyCodeLine{00298\ \textcolor{preprocessor}{\ \ \ \ \#define\ ACUTEST\_LINUX\_\ \ \ \ \ \ 1}}
+\DoxyCodeLine{00299\ \textcolor{preprocessor}{\ \ \ \ \#include\ <fcntl.h>}}
+\DoxyCodeLine{00300\ \textcolor{preprocessor}{\ \ \ \ \#include\ <sys/stat.h>}}
+\DoxyCodeLine{00301\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00302\ }
+\DoxyCodeLine{00303\ \textcolor{preprocessor}{\#if\ defined(\_WIN32)\ ||\ defined(\_\_WIN32\_\_)\ ||\ defined(\_\_WINDOWS\_\_)}}
+\DoxyCodeLine{00304\ \textcolor{preprocessor}{\ \ \ \ \#define\ ACUTEST\_WIN\_\ \ \ \ \ \ \ \ 1}}
+\DoxyCodeLine{00305\ \textcolor{preprocessor}{\ \ \ \ \#include\ <windows.h>}}
+\DoxyCodeLine{00306\ \textcolor{preprocessor}{\ \ \ \ \#include\ <io.h>}}
+\DoxyCodeLine{00307\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00308\ }
+\DoxyCodeLine{00309\ \textcolor{preprocessor}{\#ifdef\ \_\_cplusplus}}
+\DoxyCodeLine{00310\ \textcolor{preprocessor}{\ \ \ \ \#include\ <exception>}}
+\DoxyCodeLine{00311\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00312\ }
+\DoxyCodeLine{00313\ \textcolor{comment}{/*\ Load\ valgrind.h,\ if\ available.\ This\ allows\ to\ detect\ valgrind's\ presence\ via\ RUNNING\_ON\_VALGRIND.\ */}}
+\DoxyCodeLine{00314\ \textcolor{preprocessor}{\#ifdef\ \_\_has\_include}}
+\DoxyCodeLine{00315\ \textcolor{preprocessor}{\ \ \ \ \#if\ \_\_has\_include(<valgrind.h>)}}
+\DoxyCodeLine{00316\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \#include\ <valgrind.h>}}
+\DoxyCodeLine{00317\ \textcolor{preprocessor}{\ \ \ \ \#endif}}
+\DoxyCodeLine{00318\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00319\ }
+\DoxyCodeLine{00320\ \textcolor{comment}{/*\ Enable\ the\ use\ of\ the\ non-\/standard\ keyword\ \_\_attribute\_\_\ to\ silence\ warnings\ under\ some\ compilers\ */}}
+\DoxyCodeLine{00321\ \textcolor{preprocessor}{\#if\ defined(\_\_GNUC\_\_)\ ||\ defined(\_\_clang\_\_)}}
+\DoxyCodeLine{00322\ \textcolor{preprocessor}{\ \ \ \ \#define\ TEST\_ATTRIBUTE\_(attr)\ \ \ \_\_attribute\_\_((attr))}}
+\DoxyCodeLine{00323\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00324\ \textcolor{preprocessor}{\ \ \ \ \#define\ TEST\_ATTRIBUTE\_(attr)}}
+\DoxyCodeLine{00325\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00326\ }
+\DoxyCodeLine{00327\ \textcolor{comment}{/*\ Note\ our\ global\ private\ identifiers\ end\ with\ '\_'\ to\ mitigate\ risk\ of\ clash}}
+\DoxyCodeLine{00328\ \textcolor{comment}{\ *\ with\ the\ unit\ tests\ implementation.\ */}}
+\DoxyCodeLine{00329\ }
+\DoxyCodeLine{00330\ \textcolor{preprocessor}{\#ifdef\ \_\_cplusplus}}
+\DoxyCodeLine{00331\ \ \ \ \ \textcolor{keyword}{extern}\ \textcolor{stringliteral}{"{}C"{}}\ \{}
+\DoxyCodeLine{00332\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00333\ }
+\DoxyCodeLine{00334\ \textcolor{preprocessor}{\#ifdef\ \_MSC\_VER}}
+\DoxyCodeLine{00335\ \ \ \ \ \textcolor{comment}{/*\ In\ the\ multi-\/platform\ code\ like\ ours,\ we\ cannot\ use\ the\ non-\/standard}}
+\DoxyCodeLine{00336\ \textcolor{comment}{\ \ \ \ \ *\ "{}safe"{}\ functions\ from\ Microsoft\ C\ lib\ like\ e.g.\ sprintf\_s()\ instead\ of}}
+\DoxyCodeLine{00337\ \textcolor{comment}{\ \ \ \ \ *\ standard\ sprintf().\ Hence,\ lets\ disable\ the\ warning\ C4996.\ */}}
+\DoxyCodeLine{00338\ \textcolor{preprocessor}{\ \ \ \ \#pragma\ warning(push)}}
+\DoxyCodeLine{00339\ \textcolor{preprocessor}{\ \ \ \ \#pragma\ warning(disable:\ 4996)}}
+\DoxyCodeLine{00340\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00341\ }
+\DoxyCodeLine{00342\ }
+\DoxyCodeLine{00343\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structtest__}{test\_}}\ \{}
+\DoxyCodeLine{00344\ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ name;}
+\DoxyCodeLine{00345\ \ \ \ \ void\ (*func)(void);}
+\DoxyCodeLine{00346\ \};}
+\DoxyCodeLine{00347\ }
+\DoxyCodeLine{00348\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structtest__detail__}{test\_detail\_}}\ \{}
+\DoxyCodeLine{00349\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{char}\ flags;}
+\DoxyCodeLine{00350\ \ \ \ \ \textcolor{keywordtype}{double}\ duration;}
+\DoxyCodeLine{00351\ \};}
+\DoxyCodeLine{00352\ }
+\DoxyCodeLine{00353\ \textcolor{keyword}{enum}\ \{}
+\DoxyCodeLine{00354\ \ \ \ \ TEST\_FLAG\_RUN\_\ =\ 1\ <<\ 0,}
+\DoxyCodeLine{00355\ \ \ \ \ TEST\_FLAG\_SUCCESS\_\ =\ 1\ <<\ 1,}
+\DoxyCodeLine{00356\ \ \ \ \ TEST\_FLAG\_FAILURE\_\ =\ 1\ <<\ 2,}
+\DoxyCodeLine{00357\ \};}
+\DoxyCodeLine{00358\ }
+\DoxyCodeLine{00359\ \textcolor{keyword}{extern}\ \textcolor{keyword}{const}\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structtest__}{test\_}}\ test\_list\_[];}
+\DoxyCodeLine{00360\ }
+\DoxyCodeLine{00361\ \textcolor{keywordtype}{int}\ test\_check\_(\textcolor{keywordtype}{int}\ cond,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ file,\ \textcolor{keywordtype}{int}\ line,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ fmt,\ ...);}
+\DoxyCodeLine{00362\ \textcolor{keywordtype}{void}\ test\_case\_(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ fmt,\ ...);}
+\DoxyCodeLine{00363\ \textcolor{keywordtype}{void}\ test\_message\_(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ fmt,\ ...);}
+\DoxyCodeLine{00364\ \textcolor{keywordtype}{void}\ test\_dump\_(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ title,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{void}*\ addr,\ \textcolor{keywordtype}{size\_t}\ size);}
+\DoxyCodeLine{00365\ \textcolor{keywordtype}{void}\ test\_abort\_(\textcolor{keywordtype}{void})\ TEST\_ATTRIBUTE\_(noreturn);}
+\DoxyCodeLine{00366\ }
+\DoxyCodeLine{00367\ }
+\DoxyCodeLine{00368\ \textcolor{preprocessor}{\#ifndef\ TEST\_NO\_MAIN}}
+\DoxyCodeLine{00369\ }
+\DoxyCodeLine{00370\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{char}*\ test\_argv0\_\ =\ NULL;}
+\DoxyCodeLine{00371\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{size\_t}\ test\_list\_size\_\ =\ 0;}
+\DoxyCodeLine{00372\ \textcolor{keyword}{static}\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structtest__detail__}{test\_detail\_}}\ *test\_details\_\ =\ NULL;}
+\DoxyCodeLine{00373\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{size\_t}\ test\_count\_\ =\ 0;}
+\DoxyCodeLine{00374\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{int}\ test\_no\_exec\_\ =\ -\/1;}
+\DoxyCodeLine{00375\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{int}\ test\_no\_summary\_\ =\ 0;}
+\DoxyCodeLine{00376\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{int}\ test\_tap\_\ =\ 0;}
+\DoxyCodeLine{00377\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{int}\ test\_skip\_mode\_\ =\ 0;}
+\DoxyCodeLine{00378\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{int}\ test\_worker\_\ =\ 0;}
+\DoxyCodeLine{00379\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{int}\ test\_worker\_index\_\ =\ 0;}
+\DoxyCodeLine{00380\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{int}\ test\_cond\_failed\_\ =\ 0;}
+\DoxyCodeLine{00381\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{int}\ test\_was\_aborted\_\ =\ 0;}
+\DoxyCodeLine{00382\ \textcolor{keyword}{static}\ FILE\ *test\_xml\_output\_\ =\ NULL;}
+\DoxyCodeLine{00383\ }
+\DoxyCodeLine{00384\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{int}\ test\_stat\_failed\_units\_\ =\ 0;}
+\DoxyCodeLine{00385\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{int}\ test\_stat\_run\_units\_\ =\ 0;}
+\DoxyCodeLine{00386\ }
+\DoxyCodeLine{00387\ \textcolor{keyword}{static}\ \textcolor{keyword}{const}\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structtest__}{test\_}}*\ test\_current\_unit\_\ =\ NULL;}
+\DoxyCodeLine{00388\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{int}\ test\_current\_index\_\ =\ 0;}
+\DoxyCodeLine{00389\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{char}\ test\_case\_name\_[TEST\_CASE\_MAXSIZE]\ =\ \textcolor{stringliteral}{"{}"{}};}
+\DoxyCodeLine{00390\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{int}\ test\_current\_already\_logged\_\ =\ 0;}
+\DoxyCodeLine{00391\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{int}\ test\_case\_current\_already\_logged\_\ =\ 0;}
+\DoxyCodeLine{00392\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{int}\ test\_verbose\_level\_\ =\ 2;}
+\DoxyCodeLine{00393\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{int}\ test\_current\_failures\_\ =\ 0;}
+\DoxyCodeLine{00394\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{int}\ test\_colorize\_\ =\ 0;}
+\DoxyCodeLine{00395\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{int}\ test\_timer\_\ =\ 0;}
+\DoxyCodeLine{00396\ }
+\DoxyCodeLine{00397\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{int}\ test\_abort\_has\_jmp\_buf\_\ =\ 0;}
+\DoxyCodeLine{00398\ \textcolor{keyword}{static}\ jmp\_buf\ test\_abort\_jmp\_buf\_;}
+\DoxyCodeLine{00399\ }
+\DoxyCodeLine{00400\ }
+\DoxyCodeLine{00401\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00402\ test\_cleanup\_(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00403\ \{}
+\DoxyCodeLine{00404\ \ \ \ \ free((\textcolor{keywordtype}{void}*)\ test\_details\_);}
+\DoxyCodeLine{00405\ \}}
+\DoxyCodeLine{00406\ }
+\DoxyCodeLine{00407\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00408\ test\_exit\_(\textcolor{keywordtype}{int}\ exit\_code)}
+\DoxyCodeLine{00409\ \{}
+\DoxyCodeLine{00410\ \ \ \ \ test\_cleanup\_();}
+\DoxyCodeLine{00411\ \ \ \ \ exit(exit\_code);}
+\DoxyCodeLine{00412\ \}}
+\DoxyCodeLine{00413\ }
+\DoxyCodeLine{00414\ \textcolor{preprocessor}{\#if\ defined\ ACUTEST\_WIN\_}}
+\DoxyCodeLine{00415\ \ \ \ \ \textcolor{keyword}{typedef}\ LARGE\_INTEGER\ test\_timer\_type\_;}
+\DoxyCodeLine{00416\ \ \ \ \ \textcolor{keyword}{static}\ LARGE\_INTEGER\ test\_timer\_freq\_;}
+\DoxyCodeLine{00417\ \ \ \ \ \textcolor{keyword}{static}\ test\_timer\_type\_\ test\_timer\_start\_;}
+\DoxyCodeLine{00418\ \ \ \ \ \textcolor{keyword}{static}\ test\_timer\_type\_\ test\_timer\_end\_;}
+\DoxyCodeLine{00419\ }
+\DoxyCodeLine{00420\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00421\ \ \ \ \ test\_timer\_init\_(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00422\ \ \ \ \ \{}
+\DoxyCodeLine{00423\ \ \ \ \ \ \ \ \ QueryPerformanceFrequency(\&test\_timer\_freq\_);}
+\DoxyCodeLine{00424\ \ \ \ \ \}}
+\DoxyCodeLine{00425\ }
+\DoxyCodeLine{00426\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00427\ \ \ \ \ test\_timer\_get\_time\_(LARGE\_INTEGER*\ ts)}
+\DoxyCodeLine{00428\ \ \ \ \ \{}
+\DoxyCodeLine{00429\ \ \ \ \ \ \ \ \ QueryPerformanceCounter(ts);}
+\DoxyCodeLine{00430\ \ \ \ \ \}}
+\DoxyCodeLine{00431\ }
+\DoxyCodeLine{00432\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{double}}
+\DoxyCodeLine{00433\ \ \ \ \ test\_timer\_diff\_(LARGE\_INTEGER\ start,\ LARGE\_INTEGER\ end)}
+\DoxyCodeLine{00434\ \ \ \ \ \{}
+\DoxyCodeLine{00435\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ duration\ =\ (double)(end.QuadPart\ -\/\ start.QuadPart);}
+\DoxyCodeLine{00436\ \ \ \ \ \ \ \ \ duration\ /=\ (double)test\_timer\_freq\_.QuadPart;}
+\DoxyCodeLine{00437\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ duration;}
+\DoxyCodeLine{00438\ \ \ \ \ \}}
+\DoxyCodeLine{00439\ }
+\DoxyCodeLine{00440\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00441\ \ \ \ \ test\_timer\_print\_diff\_(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00442\ \ \ \ \ \{}
+\DoxyCodeLine{00443\ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\%.6lf\ secs"{}},\ test\_timer\_diff\_(test\_timer\_start\_,\ test\_timer\_end\_));}
+\DoxyCodeLine{00444\ \ \ \ \ \}}
+\DoxyCodeLine{00445\ \textcolor{preprocessor}{\#elif\ defined\ ACUTEST\_HAS\_POSIX\_TIMER\_}}
+\DoxyCodeLine{00446\ \ \ \ \ \textcolor{keyword}{static}\ clockid\_t\ test\_timer\_id\_;}
+\DoxyCodeLine{00447\ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }timespec\ test\_timer\_type\_;}
+\DoxyCodeLine{00448\ \ \ \ \ \textcolor{keyword}{static}\ test\_timer\_type\_\ test\_timer\_start\_;}
+\DoxyCodeLine{00449\ \ \ \ \ \textcolor{keyword}{static}\ test\_timer\_type\_\ test\_timer\_end\_;}
+\DoxyCodeLine{00450\ }
+\DoxyCodeLine{00451\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00452\ \ \ \ \ test\_timer\_init\_(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00453\ \ \ \ \ \{}
+\DoxyCodeLine{00454\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(test\_timer\_\ ==\ 1)}
+\DoxyCodeLine{00455\ \ \ \ \ \ \ \ \ \ \ \ \ test\_timer\_id\_\ =\ CLOCK\_MONOTONIC;}
+\DoxyCodeLine{00456\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}(test\_timer\_\ ==\ 2)}
+\DoxyCodeLine{00457\ \ \ \ \ \ \ \ \ \ \ \ \ test\_timer\_id\_\ =\ CLOCK\_PROCESS\_CPUTIME\_ID;}
+\DoxyCodeLine{00458\ \ \ \ \ \}}
+\DoxyCodeLine{00459\ }
+\DoxyCodeLine{00460\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00461\ \ \ \ \ test\_timer\_get\_time\_(\textcolor{keyword}{struct}\ timespec*\ ts)}
+\DoxyCodeLine{00462\ \ \ \ \ \{}
+\DoxyCodeLine{00463\ \ \ \ \ \ \ \ \ clock\_gettime(test\_timer\_id\_,\ ts);}
+\DoxyCodeLine{00464\ \ \ \ \ \}}
+\DoxyCodeLine{00465\ }
+\DoxyCodeLine{00466\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{double}}
+\DoxyCodeLine{00467\ \ \ \ \ test\_timer\_diff\_(\textcolor{keyword}{struct}\ timespec\ start,\ \textcolor{keyword}{struct}\ timespec\ end)}
+\DoxyCodeLine{00468\ \ \ \ \ \{}
+\DoxyCodeLine{00469\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ endns;}
+\DoxyCodeLine{00470\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ startns;}
+\DoxyCodeLine{00471\ }
+\DoxyCodeLine{00472\ \ \ \ \ \ \ \ \ endns\ =\ end.tv\_sec;}
+\DoxyCodeLine{00473\ \ \ \ \ \ \ \ \ endns\ *=\ 1e9;}
+\DoxyCodeLine{00474\ \ \ \ \ \ \ \ \ endns\ +=\ end.tv\_nsec;}
+\DoxyCodeLine{00475\ }
+\DoxyCodeLine{00476\ \ \ \ \ \ \ \ \ startns\ =\ start.tv\_sec;}
+\DoxyCodeLine{00477\ \ \ \ \ \ \ \ \ startns\ *=\ 1e9;}
+\DoxyCodeLine{00478\ \ \ \ \ \ \ \ \ startns\ +=\ start.tv\_nsec;}
+\DoxyCodeLine{00479\ }
+\DoxyCodeLine{00480\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ ((endns\ -\/\ startns)/\ 1e9);}
+\DoxyCodeLine{00481\ \ \ \ \ \}}
+\DoxyCodeLine{00482\ }
+\DoxyCodeLine{00483\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00484\ \ \ \ \ test\_timer\_print\_diff\_(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00485\ \ \ \ \ \{}
+\DoxyCodeLine{00486\ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\%.6lf\ secs"{}},}
+\DoxyCodeLine{00487\ \ \ \ \ \ \ \ \ \ \ \ \ test\_timer\_diff\_(test\_timer\_start\_,\ test\_timer\_end\_));}
+\DoxyCodeLine{00488\ \ \ \ \ \}}
+\DoxyCodeLine{00489\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00490\ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keywordtype}{int}\ test\_timer\_type\_;}
+\DoxyCodeLine{00491\ \ \ \ \ \textcolor{keyword}{static}\ test\_timer\_type\_\ test\_timer\_start\_;}
+\DoxyCodeLine{00492\ \ \ \ \ \textcolor{keyword}{static}\ test\_timer\_type\_\ test\_timer\_end\_;}
+\DoxyCodeLine{00493\ }
+\DoxyCodeLine{00494\ \ \ \ \ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00495\ \ \ \ \ test\_timer\_init\_(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00496\ \ \ \ \ \{\}}
+\DoxyCodeLine{00497\ }
+\DoxyCodeLine{00498\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00499\ \ \ \ \ test\_timer\_get\_time\_(\textcolor{keywordtype}{int}*\ ts)}
+\DoxyCodeLine{00500\ \ \ \ \ \{}
+\DoxyCodeLine{00501\ \ \ \ \ \ \ \ \ (void)\ ts;}
+\DoxyCodeLine{00502\ \ \ \ \ \}}
+\DoxyCodeLine{00503\ }
+\DoxyCodeLine{00504\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{double}}
+\DoxyCodeLine{00505\ \ \ \ \ test\_timer\_diff\_(\textcolor{keywordtype}{int}\ start,\ \textcolor{keywordtype}{int}\ end)}
+\DoxyCodeLine{00506\ \ \ \ \ \{}
+\DoxyCodeLine{00507\ \ \ \ \ \ \ \ \ (void)\ start;}
+\DoxyCodeLine{00508\ \ \ \ \ \ \ \ \ (void)\ end;}
+\DoxyCodeLine{00509\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ 0.0;}
+\DoxyCodeLine{00510\ \ \ \ \ \}}
+\DoxyCodeLine{00511\ }
+\DoxyCodeLine{00512\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00513\ \ \ \ \ test\_timer\_print\_diff\_(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00514\ \ \ \ \ \{\}}
+\DoxyCodeLine{00515\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00516\ }
+\DoxyCodeLine{00517\ \textcolor{preprocessor}{\#define\ TEST\_COLOR\_DEFAULT\_\ \ \ \ \ \ \ \ \ \ \ \ \ 0}}
+\DoxyCodeLine{00518\ \textcolor{preprocessor}{\#define\ TEST\_COLOR\_GREEN\_\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 1}}
+\DoxyCodeLine{00519\ \textcolor{preprocessor}{\#define\ TEST\_COLOR\_RED\_\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 2}}
+\DoxyCodeLine{00520\ \textcolor{preprocessor}{\#define\ TEST\_COLOR\_DEFAULT\_INTENSIVE\_\ \ \ 3}}
+\DoxyCodeLine{00521\ \textcolor{preprocessor}{\#define\ TEST\_COLOR\_GREEN\_INTENSIVE\_\ \ \ \ \ 4}}
+\DoxyCodeLine{00522\ \textcolor{preprocessor}{\#define\ TEST\_COLOR\_RED\_INTENSIVE\_\ \ \ \ \ \ \ 5}}
+\DoxyCodeLine{00523\ }
+\DoxyCodeLine{00524\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{int}\ TEST\_ATTRIBUTE\_(format\ (printf,\ 2,\ 3))}
+\DoxyCodeLine{00525\ test\_print\_in\_color\_(\textcolor{keywordtype}{int}\ color,\ const\ \textcolor{keywordtype}{char}*\ fmt,\ ...)}
+\DoxyCodeLine{00526\ \{}
+\DoxyCodeLine{00527\ \ \ \ \ va\_list\ args;}
+\DoxyCodeLine{00528\ \ \ \ \ \textcolor{keywordtype}{char}\ buffer[256];}
+\DoxyCodeLine{00529\ \ \ \ \ \textcolor{keywordtype}{int}\ n;}
+\DoxyCodeLine{00530\ }
+\DoxyCodeLine{00531\ \ \ \ \ va\_start(args,\ fmt);}
+\DoxyCodeLine{00532\ \ \ \ \ vsnprintf(buffer,\ \textcolor{keyword}{sizeof}(buffer),\ fmt,\ args);}
+\DoxyCodeLine{00533\ \ \ \ \ va\_end(args);}
+\DoxyCodeLine{00534\ \ \ \ \ buffer[\textcolor{keyword}{sizeof}(buffer)-\/1]\ =\ \textcolor{charliteral}{'\(\backslash\)0'};}
+\DoxyCodeLine{00535\ }
+\DoxyCodeLine{00536\ \ \ \ \ \textcolor{keywordflow}{if}(!test\_colorize\_)\ \{}
+\DoxyCodeLine{00537\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ printf(\textcolor{stringliteral}{"{}\%s"{}},\ buffer);}
+\DoxyCodeLine{00538\ \ \ \ \ \}}
+\DoxyCodeLine{00539\ }
+\DoxyCodeLine{00540\ \textcolor{preprocessor}{\#if\ defined\ ACUTEST\_UNIX\_}}
+\DoxyCodeLine{00541\ \ \ \ \ \{}
+\DoxyCodeLine{00542\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ col\_str;}
+\DoxyCodeLine{00543\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{switch}(color)\ \{}
+\DoxyCodeLine{00544\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ TEST\_COLOR\_GREEN\_:\ \ \ \ \ \ \ \ \ \ \ \ \ col\_str\ =\ \textcolor{stringliteral}{"{}\(\backslash\)033[0;32m"{}};\ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00545\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ TEST\_COLOR\_RED\_:\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ col\_str\ =\ \textcolor{stringliteral}{"{}\(\backslash\)033[0;31m"{}};\ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00546\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ TEST\_COLOR\_GREEN\_INTENSIVE\_:\ \ \ col\_str\ =\ \textcolor{stringliteral}{"{}\(\backslash\)033[1;32m"{}};\ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00547\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ TEST\_COLOR\_RED\_INTENSIVE\_:\ \ \ \ \ col\_str\ =\ \textcolor{stringliteral}{"{}\(\backslash\)033[1;31m"{}};\ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00548\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ TEST\_COLOR\_DEFAULT\_INTENSIVE\_:\ col\_str\ =\ \textcolor{stringliteral}{"{}\(\backslash\)033[1m"{}};\ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00549\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{default}:\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ col\_str\ =\ \textcolor{stringliteral}{"{}\(\backslash\)033[0m"{}};\ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00550\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00551\ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\%s"{}},\ col\_str);}
+\DoxyCodeLine{00552\ \ \ \ \ \ \ \ \ n\ =\ printf(\textcolor{stringliteral}{"{}\%s"{}},\ buffer);}
+\DoxyCodeLine{00553\ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\(\backslash\)033[0m"{}});}
+\DoxyCodeLine{00554\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ n;}
+\DoxyCodeLine{00555\ \ \ \ \ \}}
+\DoxyCodeLine{00556\ \textcolor{preprocessor}{\#elif\ defined\ ACUTEST\_WIN\_}}
+\DoxyCodeLine{00557\ \ \ \ \ \{}
+\DoxyCodeLine{00558\ \ \ \ \ \ \ \ \ HANDLE\ h;}
+\DoxyCodeLine{00559\ \ \ \ \ \ \ \ \ CONSOLE\_SCREEN\_BUFFER\_INFO\ info;}
+\DoxyCodeLine{00560\ \ \ \ \ \ \ \ \ WORD\ attr;}
+\DoxyCodeLine{00561\ }
+\DoxyCodeLine{00562\ \ \ \ \ \ \ \ \ h\ =\ GetStdHandle(STD\_OUTPUT\_HANDLE);}
+\DoxyCodeLine{00563\ \ \ \ \ \ \ \ \ GetConsoleScreenBufferInfo(h,\ \&info);}
+\DoxyCodeLine{00564\ }
+\DoxyCodeLine{00565\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{switch}(color)\ \{}
+\DoxyCodeLine{00566\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ TEST\_COLOR\_GREEN\_:\ \ \ \ \ \ \ \ \ \ \ \ \ attr\ =\ FOREGROUND\_GREEN;\ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00567\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ TEST\_COLOR\_RED\_:\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ attr\ =\ FOREGROUND\_RED;\ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00568\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ TEST\_COLOR\_GREEN\_INTENSIVE\_:\ \ \ attr\ =\ FOREGROUND\_GREEN\ |\ FOREGROUND\_INTENSITY;\ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00569\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ TEST\_COLOR\_RED\_INTENSIVE\_:\ \ \ \ \ attr\ =\ FOREGROUND\_RED\ |\ FOREGROUND\_INTENSITY;\ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00570\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ TEST\_COLOR\_DEFAULT\_INTENSIVE\_:\ attr\ =\ FOREGROUND\_BLUE\ |\ FOREGROUND\_GREEN\ |\ FOREGROUND\_RED\ |\ FOREGROUND\_INTENSITY;\ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00571\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{default}:\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ attr\ =\ 0;\ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00572\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00573\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(attr\ !=\ 0)}
+\DoxyCodeLine{00574\ \ \ \ \ \ \ \ \ \ \ \ \ SetConsoleTextAttribute(h,\ attr);}
+\DoxyCodeLine{00575\ \ \ \ \ \ \ \ \ n\ =\ printf(\textcolor{stringliteral}{"{}\%s"{}},\ buffer);}
+\DoxyCodeLine{00576\ \ \ \ \ \ \ \ \ SetConsoleTextAttribute(h,\ info.wAttributes);}
+\DoxyCodeLine{00577\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ n;}
+\DoxyCodeLine{00578\ \ \ \ \ \}}
+\DoxyCodeLine{00579\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00580\ \ \ \ \ n\ =\ printf(\textcolor{stringliteral}{"{}\%s"{}},\ buffer);}
+\DoxyCodeLine{00581\ \ \ \ \ \textcolor{keywordflow}{return}\ n;}
+\DoxyCodeLine{00582\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00583\ \}}
+\DoxyCodeLine{00584\ }
+\DoxyCodeLine{00585\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00586\ test\_begin\_test\_line\_(\textcolor{keyword}{const}\ \textcolor{keyword}{struct}\ \mbox{\hyperlink{structtest__}{test\_}}*\ test)}
+\DoxyCodeLine{00587\ \{}
+\DoxyCodeLine{00588\ \ \ \ \ \textcolor{keywordflow}{if}(!test\_tap\_)\ \{}
+\DoxyCodeLine{00589\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(test\_verbose\_level\_\ >=\ 3)\ \{}
+\DoxyCodeLine{00590\ \ \ \ \ \ \ \ \ \ \ \ \ test\_print\_in\_color\_(TEST\_COLOR\_DEFAULT\_INTENSIVE\_,\ \textcolor{stringliteral}{"{}Test\ \%s:\(\backslash\)n"{}},\ test-\/>name);}
+\DoxyCodeLine{00591\ \ \ \ \ \ \ \ \ \ \ \ \ test\_current\_already\_logged\_++;}
+\DoxyCodeLine{00592\ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}(test\_verbose\_level\_\ >=\ 1)\ \{}
+\DoxyCodeLine{00593\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ n;}
+\DoxyCodeLine{00594\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ spaces[48];}
+\DoxyCodeLine{00595\ }
+\DoxyCodeLine{00596\ \ \ \ \ \ \ \ \ \ \ \ \ n\ =\ test\_print\_in\_color\_(TEST\_COLOR\_DEFAULT\_INTENSIVE\_,\ \textcolor{stringliteral}{"{}Test\ \%s...\ "{}},\ test-\/>name);}
+\DoxyCodeLine{00597\ \ \ \ \ \ \ \ \ \ \ \ \ memset(spaces,\ \textcolor{charliteral}{'\ '},\ \textcolor{keyword}{sizeof}(spaces));}
+\DoxyCodeLine{00598\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(n\ <\ (\textcolor{keywordtype}{int})\ \textcolor{keyword}{sizeof}(spaces))}
+\DoxyCodeLine{00599\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\%.*s"{}},\ (\textcolor{keywordtype}{int})\ \textcolor{keyword}{sizeof}(spaces)\ -\/\ n,\ spaces);}
+\DoxyCodeLine{00600\ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{00601\ \ \ \ \ \ \ \ \ \ \ \ \ test\_current\_already\_logged\_\ =\ 1;}
+\DoxyCodeLine{00602\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00603\ \ \ \ \ \}}
+\DoxyCodeLine{00604\ \}}
+\DoxyCodeLine{00605\ }
+\DoxyCodeLine{00606\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00607\ test\_finish\_test\_line\_(\textcolor{keywordtype}{int}\ result)}
+\DoxyCodeLine{00608\ \{}
+\DoxyCodeLine{00609\ \ \ \ \ \textcolor{keywordflow}{if}(test\_tap\_)\ \{}
+\DoxyCodeLine{00610\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ str\ =\ (result\ ==\ 0)\ ?\ \textcolor{stringliteral}{"{}ok"{}}\ :\ \textcolor{stringliteral}{"{}not\ ok"{}};}
+\DoxyCodeLine{00611\ }
+\DoxyCodeLine{00612\ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\%s\ \%d\ -\/\ \%s\(\backslash\)n"{}},\ str,\ test\_current\_index\_\ +\ 1,\ test\_current\_unit\_-\/>name);}
+\DoxyCodeLine{00613\ }
+\DoxyCodeLine{00614\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(result\ ==\ 0\ \ \&\&\ \ test\_timer\_)\ \{}
+\DoxyCodeLine{00615\ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\#\ Duration:\ "{}});}
+\DoxyCodeLine{00616\ \ \ \ \ \ \ \ \ \ \ \ \ test\_timer\_print\_diff\_();}
+\DoxyCodeLine{00617\ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\(\backslash\)n"{}});}
+\DoxyCodeLine{00618\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00619\ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{00620\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ color\ =\ (result\ ==\ 0)\ ?\ TEST\_COLOR\_GREEN\_INTENSIVE\_\ :\ TEST\_COLOR\_RED\_INTENSIVE\_;}
+\DoxyCodeLine{00621\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ str\ =\ (result\ ==\ 0)\ ?\ \textcolor{stringliteral}{"{}OK"{}}\ :\ \textcolor{stringliteral}{"{}FAILED"{}};}
+\DoxyCodeLine{00622\ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}[\ "{}});}
+\DoxyCodeLine{00623\ \ \ \ \ \ \ \ \ test\_print\_in\_color\_(color,\ \textcolor{stringliteral}{"{}\%s"{}},\ str);}
+\DoxyCodeLine{00624\ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\ ]"{}});}
+\DoxyCodeLine{00625\ }
+\DoxyCodeLine{00626\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(result\ ==\ 0\ \ \&\&\ \ test\_timer\_)\ \{}
+\DoxyCodeLine{00627\ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\ \ "{}});}
+\DoxyCodeLine{00628\ \ \ \ \ \ \ \ \ \ \ \ \ test\_timer\_print\_diff\_();}
+\DoxyCodeLine{00629\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00630\ }
+\DoxyCodeLine{00631\ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\(\backslash\)n"{}});}
+\DoxyCodeLine{00632\ \ \ \ \ \}}
+\DoxyCodeLine{00633\ \}}
+\DoxyCodeLine{00634\ }
+\DoxyCodeLine{00635\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00636\ test\_line\_indent\_(\textcolor{keywordtype}{int}\ level)}
+\DoxyCodeLine{00637\ \{}
+\DoxyCodeLine{00638\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ spaces[]\ =\ \textcolor{stringliteral}{"{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ "{}};}
+\DoxyCodeLine{00639\ \ \ \ \ \textcolor{keywordtype}{int}\ n\ =\ level\ *\ 2;}
+\DoxyCodeLine{00640\ }
+\DoxyCodeLine{00641\ \ \ \ \ \textcolor{keywordflow}{if}(test\_tap\_\ \ \&\&\ \ n\ >\ 0)\ \{}
+\DoxyCodeLine{00642\ \ \ \ \ \ \ \ \ n-\/-\/;}
+\DoxyCodeLine{00643\ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\#"{}});}
+\DoxyCodeLine{00644\ \ \ \ \ \}}
+\DoxyCodeLine{00645\ }
+\DoxyCodeLine{00646\ \ \ \ \ \textcolor{keywordflow}{while}(n\ >\ 16)\ \{}
+\DoxyCodeLine{00647\ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\%s"{}},\ spaces);}
+\DoxyCodeLine{00648\ \ \ \ \ \ \ \ \ n\ -\/=\ 16;}
+\DoxyCodeLine{00649\ \ \ \ \ \}}
+\DoxyCodeLine{00650\ \ \ \ \ printf(\textcolor{stringliteral}{"{}\%.*s"{}},\ n,\ spaces);}
+\DoxyCodeLine{00651\ \}}
+\DoxyCodeLine{00652\ }
+\DoxyCodeLine{00653\ \textcolor{keywordtype}{int}\ TEST\_ATTRIBUTE\_(format\ (printf,\ 4,\ 5))}
+\DoxyCodeLine{00654\ test\_check\_(\textcolor{keywordtype}{int}\ cond,\ const\ \textcolor{keywordtype}{char}*\ file,\ \textcolor{keywordtype}{int}\ line,\ const\ \textcolor{keywordtype}{char}*\ fmt,\ ...)}
+\DoxyCodeLine{00655\ \{}
+\DoxyCodeLine{00656\ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *result\_str;}
+\DoxyCodeLine{00657\ \ \ \ \ \textcolor{keywordtype}{int}\ result\_color;}
+\DoxyCodeLine{00658\ \ \ \ \ \textcolor{keywordtype}{int}\ verbose\_level;}
+\DoxyCodeLine{00659\ }
+\DoxyCodeLine{00660\ \ \ \ \ \textcolor{keywordflow}{if}(cond)\ \{}
+\DoxyCodeLine{00661\ \ \ \ \ \ \ \ \ result\_str\ =\ \textcolor{stringliteral}{"{}ok"{}};}
+\DoxyCodeLine{00662\ \ \ \ \ \ \ \ \ result\_color\ =\ TEST\_COLOR\_GREEN\_;}
+\DoxyCodeLine{00663\ \ \ \ \ \ \ \ \ verbose\_level\ =\ 3;}
+\DoxyCodeLine{00664\ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{00665\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(!test\_current\_already\_logged\_\ \ \&\&\ \ test\_current\_unit\_\ !=\ NULL)}
+\DoxyCodeLine{00666\ \ \ \ \ \ \ \ \ \ \ \ \ test\_finish\_test\_line\_(-\/1);}
+\DoxyCodeLine{00667\ }
+\DoxyCodeLine{00668\ \ \ \ \ \ \ \ \ result\_str\ =\ \textcolor{stringliteral}{"{}failed"{}};}
+\DoxyCodeLine{00669\ \ \ \ \ \ \ \ \ result\_color\ =\ TEST\_COLOR\_RED\_;}
+\DoxyCodeLine{00670\ \ \ \ \ \ \ \ \ verbose\_level\ =\ 2;}
+\DoxyCodeLine{00671\ \ \ \ \ \ \ \ \ test\_current\_failures\_++;}
+\DoxyCodeLine{00672\ \ \ \ \ \ \ \ \ test\_current\_already\_logged\_++;}
+\DoxyCodeLine{00673\ \ \ \ \ \}}
+\DoxyCodeLine{00674\ }
+\DoxyCodeLine{00675\ \ \ \ \ \textcolor{keywordflow}{if}(test\_verbose\_level\_\ >=\ verbose\_level)\ \{}
+\DoxyCodeLine{00676\ \ \ \ \ \ \ \ \ va\_list\ args;}
+\DoxyCodeLine{00677\ }
+\DoxyCodeLine{00678\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(!test\_case\_current\_already\_logged\_\ \ \&\&\ \ test\_case\_name\_[0])\ \{}
+\DoxyCodeLine{00679\ \ \ \ \ \ \ \ \ \ \ \ \ test\_line\_indent\_(1);}
+\DoxyCodeLine{00680\ \ \ \ \ \ \ \ \ \ \ \ \ test\_print\_in\_color\_(TEST\_COLOR\_DEFAULT\_INTENSIVE\_,\ \textcolor{stringliteral}{"{}Case\ \%s:\(\backslash\)n"{}},\ test\_case\_name\_);}
+\DoxyCodeLine{00681\ \ \ \ \ \ \ \ \ \ \ \ \ test\_current\_already\_logged\_++;}
+\DoxyCodeLine{00682\ \ \ \ \ \ \ \ \ \ \ \ \ test\_case\_current\_already\_logged\_++;}
+\DoxyCodeLine{00683\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00684\ }
+\DoxyCodeLine{00685\ \ \ \ \ \ \ \ \ test\_line\_indent\_(test\_case\_name\_[0]\ ?\ 2\ :\ 1);}
+\DoxyCodeLine{00686\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(file\ !=\ NULL)\ \{}
+\DoxyCodeLine{00687\ \textcolor{preprocessor}{\#ifdef\ ACUTEST\_WIN\_}}
+\DoxyCodeLine{00688\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ lastsep1\ =\ strrchr(file,\ \textcolor{charliteral}{'\(\backslash\)\(\backslash\)'});}
+\DoxyCodeLine{00689\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ lastsep2\ =\ strrchr(file,\ \textcolor{charliteral}{'/'});}
+\DoxyCodeLine{00690\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(lastsep1\ ==\ NULL)}
+\DoxyCodeLine{00691\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ lastsep1\ =\ file-\/1;}
+\DoxyCodeLine{00692\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(lastsep2\ ==\ NULL)}
+\DoxyCodeLine{00693\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ lastsep2\ =\ file-\/1;}
+\DoxyCodeLine{00694\ \ \ \ \ \ \ \ \ \ \ \ \ file\ =\ (lastsep1\ >\ lastsep2\ ?\ lastsep1\ :\ lastsep2)\ +\ 1;}
+\DoxyCodeLine{00695\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00696\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ lastsep\ =\ strrchr(file,\ \textcolor{charliteral}{'/'});}
+\DoxyCodeLine{00697\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(lastsep\ !=\ NULL)}
+\DoxyCodeLine{00698\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ file\ =\ lastsep+1;}
+\DoxyCodeLine{00699\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00700\ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\%s:\%d:\ Check\ "{}},\ file,\ line);}
+\DoxyCodeLine{00701\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00702\ }
+\DoxyCodeLine{00703\ \ \ \ \ \ \ \ \ va\_start(args,\ fmt);}
+\DoxyCodeLine{00704\ \ \ \ \ \ \ \ \ vprintf(fmt,\ args);}
+\DoxyCodeLine{00705\ \ \ \ \ \ \ \ \ va\_end(args);}
+\DoxyCodeLine{00706\ }
+\DoxyCodeLine{00707\ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}...\ "{}});}
+\DoxyCodeLine{00708\ \ \ \ \ \ \ \ \ test\_print\_in\_color\_(result\_color,\ \textcolor{stringliteral}{"{}\%s"{}},\ result\_str);}
+\DoxyCodeLine{00709\ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\(\backslash\)n"{}});}
+\DoxyCodeLine{00710\ \ \ \ \ \ \ \ \ test\_current\_already\_logged\_++;}
+\DoxyCodeLine{00711\ \ \ \ \ \}}
+\DoxyCodeLine{00712\ }
+\DoxyCodeLine{00713\ \ \ \ \ test\_cond\_failed\_\ =\ (cond\ ==\ 0);}
+\DoxyCodeLine{00714\ \ \ \ \ \textcolor{keywordflow}{return}\ !test\_cond\_failed\_;}
+\DoxyCodeLine{00715\ \}}
+\DoxyCodeLine{00716\ }
+\DoxyCodeLine{00717\ \textcolor{keywordtype}{void}\ TEST\_ATTRIBUTE\_(format\ (printf,\ 1,\ 2))}
+\DoxyCodeLine{00718\ test\_case\_(const\ \textcolor{keywordtype}{char}*\ fmt,\ ...)}
+\DoxyCodeLine{00719\ \{}
+\DoxyCodeLine{00720\ \ \ \ \ va\_list\ args;}
+\DoxyCodeLine{00721\ }
+\DoxyCodeLine{00722\ \ \ \ \ \textcolor{keywordflow}{if}(test\_verbose\_level\_\ <\ 2)}
+\DoxyCodeLine{00723\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{00724\ }
+\DoxyCodeLine{00725\ \ \ \ \ \textcolor{keywordflow}{if}(test\_case\_name\_[0])\ \{}
+\DoxyCodeLine{00726\ \ \ \ \ \ \ \ \ test\_case\_current\_already\_logged\_\ =\ 0;}
+\DoxyCodeLine{00727\ \ \ \ \ \ \ \ \ test\_case\_name\_[0]\ =\ \textcolor{charliteral}{'\(\backslash\)0'};}
+\DoxyCodeLine{00728\ \ \ \ \ \}}
+\DoxyCodeLine{00729\ }
+\DoxyCodeLine{00730\ \ \ \ \ \textcolor{keywordflow}{if}(fmt\ ==\ NULL)}
+\DoxyCodeLine{00731\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{00732\ }
+\DoxyCodeLine{00733\ \ \ \ \ va\_start(args,\ fmt);}
+\DoxyCodeLine{00734\ \ \ \ \ vsnprintf(test\_case\_name\_,\ \textcolor{keyword}{sizeof}(test\_case\_name\_)\ -\/\ 1,\ fmt,\ args);}
+\DoxyCodeLine{00735\ \ \ \ \ va\_end(args);}
+\DoxyCodeLine{00736\ \ \ \ \ test\_case\_name\_[\textcolor{keyword}{sizeof}(test\_case\_name\_)\ -\/\ 1]\ =\ \textcolor{charliteral}{'\(\backslash\)0'};}
+\DoxyCodeLine{00737\ }
+\DoxyCodeLine{00738\ \ \ \ \ \textcolor{keywordflow}{if}(test\_verbose\_level\_\ >=\ 3)\ \{}
+\DoxyCodeLine{00739\ \ \ \ \ \ \ \ \ test\_line\_indent\_(1);}
+\DoxyCodeLine{00740\ \ \ \ \ \ \ \ \ test\_print\_in\_color\_(TEST\_COLOR\_DEFAULT\_INTENSIVE\_,\ \textcolor{stringliteral}{"{}Case\ \%s:\(\backslash\)n"{}},\ test\_case\_name\_);}
+\DoxyCodeLine{00741\ \ \ \ \ \ \ \ \ test\_current\_already\_logged\_++;}
+\DoxyCodeLine{00742\ \ \ \ \ \ \ \ \ test\_case\_current\_already\_logged\_++;}
+\DoxyCodeLine{00743\ \ \ \ \ \}}
+\DoxyCodeLine{00744\ \}}
+\DoxyCodeLine{00745\ }
+\DoxyCodeLine{00746\ \textcolor{keywordtype}{void}\ TEST\_ATTRIBUTE\_(format\ (printf,\ 1,\ 2))}
+\DoxyCodeLine{00747\ test\_message\_(const\ \textcolor{keywordtype}{char}*\ fmt,\ ...)}
+\DoxyCodeLine{00748\ \{}
+\DoxyCodeLine{00749\ \ \ \ \ \textcolor{keywordtype}{char}\ buffer[TEST\_MSG\_MAXSIZE];}
+\DoxyCodeLine{00750\ \ \ \ \ \textcolor{keywordtype}{char}*\ line\_beg;}
+\DoxyCodeLine{00751\ \ \ \ \ \textcolor{keywordtype}{char}*\ line\_end;}
+\DoxyCodeLine{00752\ \ \ \ \ va\_list\ args;}
+\DoxyCodeLine{00753\ }
+\DoxyCodeLine{00754\ \ \ \ \ \textcolor{keywordflow}{if}(test\_verbose\_level\_\ <\ 2)}
+\DoxyCodeLine{00755\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{00756\ }
+\DoxyCodeLine{00757\ \ \ \ \ \textcolor{comment}{/*\ We\ allow\ extra\ message\ only\ when\ something\ is\ already\ wrong\ in\ the}}
+\DoxyCodeLine{00758\ \textcolor{comment}{\ \ \ \ \ *\ current\ test.\ */}}
+\DoxyCodeLine{00759\ \ \ \ \ \textcolor{keywordflow}{if}(test\_current\_unit\_\ ==\ NULL\ \ ||\ \ !test\_cond\_failed\_)}
+\DoxyCodeLine{00760\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{00761\ }
+\DoxyCodeLine{00762\ \ \ \ \ va\_start(args,\ fmt);}
+\DoxyCodeLine{00763\ \ \ \ \ vsnprintf(buffer,\ TEST\_MSG\_MAXSIZE,\ fmt,\ args);}
+\DoxyCodeLine{00764\ \ \ \ \ va\_end(args);}
+\DoxyCodeLine{00765\ \ \ \ \ buffer[TEST\_MSG\_MAXSIZE-\/1]\ =\ \textcolor{charliteral}{'\(\backslash\)0'};}
+\DoxyCodeLine{00766\ }
+\DoxyCodeLine{00767\ \ \ \ \ line\_beg\ =\ buffer;}
+\DoxyCodeLine{00768\ \ \ \ \ \textcolor{keywordflow}{while}(1)\ \{}
+\DoxyCodeLine{00769\ \ \ \ \ \ \ \ \ line\_end\ =\ strchr(line\_beg,\ \textcolor{charliteral}{'\(\backslash\)n'});}
+\DoxyCodeLine{00770\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(line\_end\ ==\ NULL)}
+\DoxyCodeLine{00771\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00772\ \ \ \ \ \ \ \ \ test\_line\_indent\_(test\_case\_name\_[0]\ ?\ 3\ :\ 2);}
+\DoxyCodeLine{00773\ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\%.*s\(\backslash\)n"{}},\ (\textcolor{keywordtype}{int})(line\_end\ -\/\ line\_beg),\ line\_beg);}
+\DoxyCodeLine{00774\ \ \ \ \ \ \ \ \ line\_beg\ =\ line\_end\ +\ 1;}
+\DoxyCodeLine{00775\ \ \ \ \ \}}
+\DoxyCodeLine{00776\ \ \ \ \ \textcolor{keywordflow}{if}(line\_beg[0]\ !=\ \textcolor{charliteral}{'\(\backslash\)0'})\ \{}
+\DoxyCodeLine{00777\ \ \ \ \ \ \ \ \ test\_line\_indent\_(test\_case\_name\_[0]\ ?\ 3\ :\ 2);}
+\DoxyCodeLine{00778\ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\%s\(\backslash\)n"{}},\ line\_beg);}
+\DoxyCodeLine{00779\ \ \ \ \ \}}
+\DoxyCodeLine{00780\ \}}
+\DoxyCodeLine{00781\ }
+\DoxyCodeLine{00782\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00783\ test\_dump\_(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ title,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{void}*\ addr,\ \textcolor{keywordtype}{size\_t}\ size)}
+\DoxyCodeLine{00784\ \{}
+\DoxyCodeLine{00785\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{size\_t}\ BYTES\_PER\_LINE\ =\ 16;}
+\DoxyCodeLine{00786\ \ \ \ \ \textcolor{keywordtype}{size\_t}\ line\_beg;}
+\DoxyCodeLine{00787\ \ \ \ \ \textcolor{keywordtype}{size\_t}\ truncate\ =\ 0;}
+\DoxyCodeLine{00788\ }
+\DoxyCodeLine{00789\ \ \ \ \ \textcolor{keywordflow}{if}(test\_verbose\_level\_\ <\ 2)}
+\DoxyCodeLine{00790\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{00791\ }
+\DoxyCodeLine{00792\ \ \ \ \ \textcolor{comment}{/*\ We\ allow\ extra\ message\ only\ when\ something\ is\ already\ wrong\ in\ the}}
+\DoxyCodeLine{00793\ \textcolor{comment}{\ \ \ \ \ *\ current\ test.\ */}}
+\DoxyCodeLine{00794\ \ \ \ \ \textcolor{keywordflow}{if}(test\_current\_unit\_\ ==\ NULL\ \ ||\ \ !test\_cond\_failed\_)}
+\DoxyCodeLine{00795\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{00796\ }
+\DoxyCodeLine{00797\ \ \ \ \ \textcolor{keywordflow}{if}(size\ >\ TEST\_DUMP\_MAXSIZE)\ \{}
+\DoxyCodeLine{00798\ \ \ \ \ \ \ \ \ truncate\ =\ size\ -\/\ TEST\_DUMP\_MAXSIZE;}
+\DoxyCodeLine{00799\ \ \ \ \ \ \ \ \ size\ =\ TEST\_DUMP\_MAXSIZE;}
+\DoxyCodeLine{00800\ \ \ \ \ \}}
+\DoxyCodeLine{00801\ }
+\DoxyCodeLine{00802\ \ \ \ \ test\_line\_indent\_(test\_case\_name\_[0]\ ?\ 3\ :\ 2);}
+\DoxyCodeLine{00803\ \ \ \ \ printf((title[strlen(title)-\/1]\ ==\ \textcolor{charliteral}{':'})\ ?\ \textcolor{stringliteral}{"{}\%s\(\backslash\)n"{}}\ :\ \textcolor{stringliteral}{"{}\%s:\(\backslash\)n"{}},\ title);}
+\DoxyCodeLine{00804\ }
+\DoxyCodeLine{00805\ \ \ \ \ \textcolor{keywordflow}{for}(line\_beg\ =\ 0;\ line\_beg\ <\ size;\ line\_beg\ +=\ BYTES\_PER\_LINE)\ \{}
+\DoxyCodeLine{00806\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{size\_t}\ line\_end\ =\ line\_beg\ +\ BYTES\_PER\_LINE;}
+\DoxyCodeLine{00807\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{size\_t}\ off;}
+\DoxyCodeLine{00808\ }
+\DoxyCodeLine{00809\ \ \ \ \ \ \ \ \ test\_line\_indent\_(test\_case\_name\_[0]\ ?\ 4\ :\ 3);}
+\DoxyCodeLine{00810\ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\%08lx:\ "{}},\ (\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{long})line\_beg);}
+\DoxyCodeLine{00811\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(off\ =\ line\_beg;\ off\ <\ line\_end;\ off++)\ \{}
+\DoxyCodeLine{00812\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(off\ <\ size)}
+\DoxyCodeLine{00813\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\ \%02x"{}},\ ((\textcolor{keyword}{const}\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{char}*)addr)[off]);}
+\DoxyCodeLine{00814\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00815\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\ \ \ "{}});}
+\DoxyCodeLine{00816\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00817\ }
+\DoxyCodeLine{00818\ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\ \ "{}});}
+\DoxyCodeLine{00819\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(off\ =\ line\_beg;\ off\ <\ line\_end;\ off++)\ \{}
+\DoxyCodeLine{00820\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{char}\ \textcolor{keywordtype}{byte}\ =\ ((\textcolor{keyword}{const}\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{char}*)addr)[off];}
+\DoxyCodeLine{00821\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(off\ <\ size)}
+\DoxyCodeLine{00822\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\%c"{}},\ (iscntrl(\textcolor{keywordtype}{byte})\ ?\ \textcolor{charliteral}{'.'}\ :\ byte));}
+\DoxyCodeLine{00823\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00824\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00825\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00826\ }
+\DoxyCodeLine{00827\ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\(\backslash\)n"{}});}
+\DoxyCodeLine{00828\ \ \ \ \ \}}
+\DoxyCodeLine{00829\ }
+\DoxyCodeLine{00830\ \ \ \ \ \textcolor{keywordflow}{if}(truncate\ >\ 0)\ \{}
+\DoxyCodeLine{00831\ \ \ \ \ \ \ \ \ test\_line\_indent\_(test\_case\_name\_[0]\ ?\ 4\ :\ 3);}
+\DoxyCodeLine{00832\ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\ \ \ \ \ \ \ \ \ \ \ ...\ (and\ more\ \%u\ bytes)\(\backslash\)n"{}},\ (\textcolor{keywordtype}{unsigned})\ truncate);}
+\DoxyCodeLine{00833\ \ \ \ \ \}}
+\DoxyCodeLine{00834\ \}}
+\DoxyCodeLine{00835\ }
+\DoxyCodeLine{00836\ \textcolor{comment}{/*\ This\ is\ called\ just\ before\ each\ test\ */}}
+\DoxyCodeLine{00837\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00838\ test\_init\_(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *test\_name)}
+\DoxyCodeLine{00839\ \{}
+\DoxyCodeLine{00840\ \textcolor{preprocessor}{\#ifdef\ TEST\_INIT}}
+\DoxyCodeLine{00841\ \ \ \ \ TEST\_INIT}
+\DoxyCodeLine{00842\ \ \ \ \ ;\ \textcolor{comment}{/*\ Allow\ for\ a\ single\ unterminated\ function\ call\ */}}
+\DoxyCodeLine{00843\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00844\ }
+\DoxyCodeLine{00845\ \ \ \ \ \textcolor{comment}{/*\ Suppress\ any\ warnings\ about\ unused\ variable.\ */}}
+\DoxyCodeLine{00846\ \ \ \ \ (void)\ test\_name;}
+\DoxyCodeLine{00847\ \}}
+\DoxyCodeLine{00848\ }
+\DoxyCodeLine{00849\ \textcolor{comment}{/*\ This\ is\ called\ after\ each\ test\ */}}
+\DoxyCodeLine{00850\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00851\ test\_fini\_(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *test\_name)}
+\DoxyCodeLine{00852\ \{}
+\DoxyCodeLine{00853\ \textcolor{preprocessor}{\#ifdef\ TEST\_FINI}}
+\DoxyCodeLine{00854\ \ \ \ \ TEST\_FINI}
+\DoxyCodeLine{00855\ \ \ \ \ ;\ \textcolor{comment}{/*\ Allow\ for\ a\ single\ unterminated\ function\ call\ */}}
+\DoxyCodeLine{00856\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00857\ }
+\DoxyCodeLine{00858\ \ \ \ \ \textcolor{comment}{/*\ Suppress\ any\ warnings\ about\ unused\ variable.\ */}}
+\DoxyCodeLine{00859\ \ \ \ \ (void)\ test\_name;}
+\DoxyCodeLine{00860\ \}}
+\DoxyCodeLine{00861\ }
+\DoxyCodeLine{00862\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00863\ test\_abort\_(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00864\ \{}
+\DoxyCodeLine{00865\ \ \ \ \ \textcolor{keywordflow}{if}(test\_abort\_has\_jmp\_buf\_)\ \{}
+\DoxyCodeLine{00866\ \ \ \ \ \ \ \ \ longjmp(test\_abort\_jmp\_buf\_,\ 1);}
+\DoxyCodeLine{00867\ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{00868\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(test\_current\_unit\_\ !=\ NULL)}
+\DoxyCodeLine{00869\ \ \ \ \ \ \ \ \ \ \ \ \ test\_fini\_(test\_current\_unit\_-\/>name);}
+\DoxyCodeLine{00870\ \ \ \ \ \ \ \ \ abort();}
+\DoxyCodeLine{00871\ \ \ \ \ \}}
+\DoxyCodeLine{00872\ \}}
+\DoxyCodeLine{00873\ }
+\DoxyCodeLine{00874\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00875\ test\_list\_names\_(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00876\ \{}
+\DoxyCodeLine{00877\ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structtest__}{test\_}}*\ test;}
+\DoxyCodeLine{00878\ }
+\DoxyCodeLine{00879\ \ \ \ \ printf(\textcolor{stringliteral}{"{}Unit\ tests:\(\backslash\)n"{}});}
+\DoxyCodeLine{00880\ \ \ \ \ \textcolor{keywordflow}{for}(test\ =\ \&test\_list\_[0];\ test-\/>func\ !=\ NULL;\ test++)}
+\DoxyCodeLine{00881\ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\ \ \%s\(\backslash\)n"{}},\ test-\/>name);}
+\DoxyCodeLine{00882\ \}}
+\DoxyCodeLine{00883\ }
+\DoxyCodeLine{00884\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00885\ test\_remember\_(\textcolor{keywordtype}{int}\ i)}
+\DoxyCodeLine{00886\ \{}
+\DoxyCodeLine{00887\ \ \ \ \ \textcolor{keywordflow}{if}(test\_details\_[i].flags\ \&\ TEST\_FLAG\_RUN\_)}
+\DoxyCodeLine{00888\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{00889\ }
+\DoxyCodeLine{00890\ \ \ \ \ test\_details\_[i].flags\ |=\ TEST\_FLAG\_RUN\_;}
+\DoxyCodeLine{00891\ \ \ \ \ test\_count\_++;}
+\DoxyCodeLine{00892\ \}}
+\DoxyCodeLine{00893\ }
+\DoxyCodeLine{00894\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00895\ test\_set\_success\_(\textcolor{keywordtype}{int}\ i,\ \textcolor{keywordtype}{int}\ success)}
+\DoxyCodeLine{00896\ \{}
+\DoxyCodeLine{00897\ \ \ \ \ test\_details\_[i].flags\ |=\ success\ ?\ TEST\_FLAG\_SUCCESS\_\ :\ TEST\_FLAG\_FAILURE\_;}
+\DoxyCodeLine{00898\ \}}
+\DoxyCodeLine{00899\ }
+\DoxyCodeLine{00900\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00901\ test\_set\_duration\_(\textcolor{keywordtype}{int}\ i,\ \textcolor{keywordtype}{double}\ duration)}
+\DoxyCodeLine{00902\ \{}
+\DoxyCodeLine{00903\ \ \ \ \ test\_details\_[i].duration\ =\ duration;}
+\DoxyCodeLine{00904\ \}}
+\DoxyCodeLine{00905\ }
+\DoxyCodeLine{00906\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{int}}
+\DoxyCodeLine{00907\ test\_name\_contains\_word\_(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ name,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ pattern)}
+\DoxyCodeLine{00908\ \{}
+\DoxyCodeLine{00909\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ word\_delim[]\ =\ \textcolor{stringliteral}{"{}\ \(\backslash\)t-\/\_/.,:;"{}};}
+\DoxyCodeLine{00910\ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ substr;}
+\DoxyCodeLine{00911\ \ \ \ \ \textcolor{keywordtype}{size\_t}\ pattern\_len;}
+\DoxyCodeLine{00912\ }
+\DoxyCodeLine{00913\ \ \ \ \ pattern\_len\ =\ strlen(pattern);}
+\DoxyCodeLine{00914\ }
+\DoxyCodeLine{00915\ \ \ \ \ substr\ =\ strstr(name,\ pattern);}
+\DoxyCodeLine{00916\ \ \ \ \ \textcolor{keywordflow}{while}(substr\ !=\ NULL)\ \{}
+\DoxyCodeLine{00917\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ starts\_on\_word\_boundary\ =\ (substr\ ==\ name\ ||\ strchr(word\_delim,\ substr[-\/1])\ !=\ NULL);}
+\DoxyCodeLine{00918\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ ends\_on\_word\_boundary\ =\ (substr[pattern\_len]\ ==\ \textcolor{charliteral}{'\(\backslash\)0'}\ ||\ strchr(word\_delim,\ substr[pattern\_len])\ !=\ NULL);}
+\DoxyCodeLine{00919\ }
+\DoxyCodeLine{00920\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(starts\_on\_word\_boundary\ \&\&\ ends\_on\_word\_boundary)}
+\DoxyCodeLine{00921\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ 1;}
+\DoxyCodeLine{00922\ }
+\DoxyCodeLine{00923\ \ \ \ \ \ \ \ \ substr\ =\ strstr(substr+1,\ pattern);}
+\DoxyCodeLine{00924\ \ \ \ \ \}}
+\DoxyCodeLine{00925\ }
+\DoxyCodeLine{00926\ \ \ \ \ \textcolor{keywordflow}{return}\ 0;}
+\DoxyCodeLine{00927\ \}}
+\DoxyCodeLine{00928\ }
+\DoxyCodeLine{00929\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{int}}
+\DoxyCodeLine{00930\ test\_lookup\_(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ pattern)}
+\DoxyCodeLine{00931\ \{}
+\DoxyCodeLine{00932\ \ \ \ \ \textcolor{keywordtype}{int}\ i;}
+\DoxyCodeLine{00933\ \ \ \ \ \textcolor{keywordtype}{int}\ n\ =\ 0;}
+\DoxyCodeLine{00934\ }
+\DoxyCodeLine{00935\ \ \ \ \ \textcolor{comment}{/*\ Try\ exact\ match.\ */}}
+\DoxyCodeLine{00936\ \ \ \ \ \textcolor{keywordflow}{for}(i\ =\ 0;\ i\ <\ (int)\ test\_list\_size\_;\ i++)\ \{}
+\DoxyCodeLine{00937\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(strcmp(test\_list\_[i].name,\ pattern)\ ==\ 0)\ \{}
+\DoxyCodeLine{00938\ \ \ \ \ \ \ \ \ \ \ \ \ test\_remember\_(i);}
+\DoxyCodeLine{00939\ \ \ \ \ \ \ \ \ \ \ \ \ n++;}
+\DoxyCodeLine{00940\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00941\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00942\ \ \ \ \ \}}
+\DoxyCodeLine{00943\ \ \ \ \ \textcolor{keywordflow}{if}(n\ >\ 0)}
+\DoxyCodeLine{00944\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ n;}
+\DoxyCodeLine{00945\ }
+\DoxyCodeLine{00946\ \ \ \ \ \textcolor{comment}{/*\ Try\ word\ match.\ */}}
+\DoxyCodeLine{00947\ \ \ \ \ \textcolor{keywordflow}{for}(i\ =\ 0;\ i\ <\ (int)\ test\_list\_size\_;\ i++)\ \{}
+\DoxyCodeLine{00948\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(test\_name\_contains\_word\_(test\_list\_[i].name,\ pattern))\ \{}
+\DoxyCodeLine{00949\ \ \ \ \ \ \ \ \ \ \ \ \ test\_remember\_(i);}
+\DoxyCodeLine{00950\ \ \ \ \ \ \ \ \ \ \ \ \ n++;}
+\DoxyCodeLine{00951\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00952\ \ \ \ \ \}}
+\DoxyCodeLine{00953\ \ \ \ \ \textcolor{keywordflow}{if}(n\ >\ 0)}
+\DoxyCodeLine{00954\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ n;}
+\DoxyCodeLine{00955\ }
+\DoxyCodeLine{00956\ \ \ \ \ \textcolor{comment}{/*\ Try\ relaxed\ match.\ */}}
+\DoxyCodeLine{00957\ \ \ \ \ \textcolor{keywordflow}{for}(i\ =\ 0;\ i\ <\ (int)\ test\_list\_size\_;\ i++)\ \{}
+\DoxyCodeLine{00958\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(strstr(test\_list\_[i].name,\ pattern)\ !=\ NULL)\ \{}
+\DoxyCodeLine{00959\ \ \ \ \ \ \ \ \ \ \ \ \ test\_remember\_(i);}
+\DoxyCodeLine{00960\ \ \ \ \ \ \ \ \ \ \ \ \ n++;}
+\DoxyCodeLine{00961\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00962\ \ \ \ \ \}}
+\DoxyCodeLine{00963\ }
+\DoxyCodeLine{00964\ \ \ \ \ \textcolor{keywordflow}{return}\ n;}
+\DoxyCodeLine{00965\ \}}
+\DoxyCodeLine{00966\ }
+\DoxyCodeLine{00967\ }
+\DoxyCodeLine{00968\ \textcolor{comment}{/*\ Called\ if\ anything\ goes\ bad\ in\ Acutest,\ or\ if\ the\ unit\ test\ ends\ in\ other}}
+\DoxyCodeLine{00969\ \textcolor{comment}{\ *\ way\ then\ by\ normal\ returning\ from\ its\ function\ (e.g.\ exception\ or\ some}}
+\DoxyCodeLine{00970\ \textcolor{comment}{\ *\ abnormal\ child\ process\ termination).\ */}}
+\DoxyCodeLine{00971\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}\ TEST\_ATTRIBUTE\_(format\ (printf,\ 1,\ 2))}
+\DoxyCodeLine{00972\ test\_error\_(const\ \textcolor{keywordtype}{char}*\ fmt,\ ...)}
+\DoxyCodeLine{00973\ \{}
+\DoxyCodeLine{00974\ \ \ \ \ \textcolor{keywordflow}{if}(test\_verbose\_level\_\ ==\ 0)}
+\DoxyCodeLine{00975\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{00976\ }
+\DoxyCodeLine{00977\ \ \ \ \ \textcolor{keywordflow}{if}(test\_verbose\_level\_\ >=\ 2)\ \{}
+\DoxyCodeLine{00978\ \ \ \ \ \ \ \ \ va\_list\ args;}
+\DoxyCodeLine{00979\ }
+\DoxyCodeLine{00980\ \ \ \ \ \ \ \ \ test\_line\_indent\_(1);}
+\DoxyCodeLine{00981\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(test\_verbose\_level\_\ >=\ 3)}
+\DoxyCodeLine{00982\ \ \ \ \ \ \ \ \ \ \ \ \ test\_print\_in\_color\_(TEST\_COLOR\_RED\_INTENSIVE\_,\ \textcolor{stringliteral}{"{}ERROR:\ "{}});}
+\DoxyCodeLine{00983\ \ \ \ \ \ \ \ \ va\_start(args,\ fmt);}
+\DoxyCodeLine{00984\ \ \ \ \ \ \ \ \ vprintf(fmt,\ args);}
+\DoxyCodeLine{00985\ \ \ \ \ \ \ \ \ va\_end(args);}
+\DoxyCodeLine{00986\ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\(\backslash\)n"{}});}
+\DoxyCodeLine{00987\ \ \ \ \ \}}
+\DoxyCodeLine{00988\ }
+\DoxyCodeLine{00989\ \ \ \ \ \textcolor{keywordflow}{if}(test\_verbose\_level\_\ >=\ 3)\ \{}
+\DoxyCodeLine{00990\ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\(\backslash\)n"{}});}
+\DoxyCodeLine{00991\ \ \ \ \ \}}
+\DoxyCodeLine{00992\ \}}
+\DoxyCodeLine{00993\ }
+\DoxyCodeLine{00994\ \textcolor{comment}{/*\ Call\ directly\ the\ given\ test\ unit\ function.\ */}}
+\DoxyCodeLine{00995\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{int}}
+\DoxyCodeLine{00996\ test\_do\_run\_(\textcolor{keyword}{const}\ \textcolor{keyword}{struct}\ \mbox{\hyperlink{structtest__}{test\_}}*\ test,\ \textcolor{keywordtype}{int}\ index)}
+\DoxyCodeLine{00997\ \{}
+\DoxyCodeLine{00998\ \ \ \ \ \textcolor{keywordtype}{int}\ status\ =\ -\/1;}
+\DoxyCodeLine{00999\ }
+\DoxyCodeLine{01000\ \ \ \ \ test\_was\_aborted\_\ =\ 0;}
+\DoxyCodeLine{01001\ \ \ \ \ test\_current\_unit\_\ =\ test;}
+\DoxyCodeLine{01002\ \ \ \ \ test\_current\_index\_\ =\ index;}
+\DoxyCodeLine{01003\ \ \ \ \ test\_current\_failures\_\ =\ 0;}
+\DoxyCodeLine{01004\ \ \ \ \ test\_current\_already\_logged\_\ =\ 0;}
+\DoxyCodeLine{01005\ \ \ \ \ test\_cond\_failed\_\ =\ 0;}
+\DoxyCodeLine{01006\ }
+\DoxyCodeLine{01007\ \textcolor{preprocessor}{\#ifdef\ \_\_cplusplus}}
+\DoxyCodeLine{01008\ \ \ \ \ \textcolor{keywordflow}{try}\ \{}
+\DoxyCodeLine{01009\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{01010\ \ \ \ \ \ \ \ \ test\_init\_(test-\/>name);}
+\DoxyCodeLine{01011\ \ \ \ \ \ \ \ \ test\_begin\_test\_line\_(test);}
+\DoxyCodeLine{01012\ }
+\DoxyCodeLine{01013\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ This\ is\ good\ to\ do\ in\ case\ the\ test\ unit\ crashes.\ */}}
+\DoxyCodeLine{01014\ \ \ \ \ \ \ \ \ fflush(stdout);}
+\DoxyCodeLine{01015\ \ \ \ \ \ \ \ \ fflush(stderr);}
+\DoxyCodeLine{01016\ }
+\DoxyCodeLine{01017\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(!test\_worker\_)\ \{}
+\DoxyCodeLine{01018\ \ \ \ \ \ \ \ \ \ \ \ \ test\_abort\_has\_jmp\_buf\_\ =\ 1;}
+\DoxyCodeLine{01019\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(setjmp(test\_abort\_jmp\_buf\_)\ !=\ 0)\ \{}
+\DoxyCodeLine{01020\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ test\_was\_aborted\_\ =\ 1;}
+\DoxyCodeLine{01021\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{goto}\ aborted;}
+\DoxyCodeLine{01022\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01023\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01024\ }
+\DoxyCodeLine{01025\ \ \ \ \ \ \ \ \ test\_timer\_get\_time\_(\&test\_timer\_start\_);}
+\DoxyCodeLine{01026\ \ \ \ \ \ \ \ \ test-\/>func();}
+\DoxyCodeLine{01027\ aborted:}
+\DoxyCodeLine{01028\ \ \ \ \ \ \ \ \ test\_abort\_has\_jmp\_buf\_\ =\ 0;}
+\DoxyCodeLine{01029\ \ \ \ \ \ \ \ \ test\_timer\_get\_time\_(\&test\_timer\_end\_);}
+\DoxyCodeLine{01030\ }
+\DoxyCodeLine{01031\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(test\_verbose\_level\_\ >=\ 3)\ \{}
+\DoxyCodeLine{01032\ \ \ \ \ \ \ \ \ \ \ \ \ test\_line\_indent\_(1);}
+\DoxyCodeLine{01033\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(test\_current\_failures\_\ ==\ 0)\ \{}
+\DoxyCodeLine{01034\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ test\_print\_in\_color\_(TEST\_COLOR\_GREEN\_INTENSIVE\_,\ \textcolor{stringliteral}{"{}SUCCESS:\ "{}});}
+\DoxyCodeLine{01035\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}All\ conditions\ have\ passed.\(\backslash\)n"{}});}
+\DoxyCodeLine{01036\ }
+\DoxyCodeLine{01037\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(test\_timer\_)\ \{}
+\DoxyCodeLine{01038\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ test\_line\_indent\_(1);}
+\DoxyCodeLine{01039\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}Duration:\ "{}});}
+\DoxyCodeLine{01040\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ test\_timer\_print\_diff\_();}
+\DoxyCodeLine{01041\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\(\backslash\)n"{}});}
+\DoxyCodeLine{01042\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01043\ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{01044\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ test\_print\_in\_color\_(TEST\_COLOR\_RED\_INTENSIVE\_,\ \textcolor{stringliteral}{"{}FAILED:\ "{}});}
+\DoxyCodeLine{01045\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(!test\_was\_aborted\_)\ \{}
+\DoxyCodeLine{01046\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\%d\ condition\%s\ \%s\ failed.\(\backslash\)n"{}},}
+\DoxyCodeLine{01047\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ test\_current\_failures\_,}
+\DoxyCodeLine{01048\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (test\_current\_failures\_\ ==\ 1)\ ?\ \textcolor{stringliteral}{"{}"{}}\ :\ \textcolor{stringliteral}{"{}s"{}},}
+\DoxyCodeLine{01049\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (test\_current\_failures\_\ ==\ 1)\ ?\ \textcolor{stringliteral}{"{}has"{}}\ :\ \textcolor{stringliteral}{"{}have"{}});}
+\DoxyCodeLine{01050\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{01051\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}Aborted.\(\backslash\)n"{}});}
+\DoxyCodeLine{01052\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01053\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01054\ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\(\backslash\)n"{}});}
+\DoxyCodeLine{01055\ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}(test\_verbose\_level\_\ >=\ 1\ \&\&\ test\_current\_failures\_\ ==\ 0)\ \{}
+\DoxyCodeLine{01056\ \ \ \ \ \ \ \ \ \ \ \ \ test\_finish\_test\_line\_(0);}
+\DoxyCodeLine{01057\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01058\ }
+\DoxyCodeLine{01059\ \ \ \ \ \ \ \ \ status\ =\ (test\_current\_failures\_\ ==\ 0)\ ?\ 0\ :\ -\/1;}
+\DoxyCodeLine{01060\ }
+\DoxyCodeLine{01061\ \textcolor{preprocessor}{\#ifdef\ \_\_cplusplus}}
+\DoxyCodeLine{01062\ \ \ \ \ \}\ \textcolor{keywordflow}{catch}(std::exception\&\ e)\ \{}
+\DoxyCodeLine{01063\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ what\ =\ e.what();}
+\DoxyCodeLine{01064\ \ \ \ \ \ \ \ \ test\_check\_(0,\ NULL,\ 0,\ \textcolor{stringliteral}{"{}Threw\ std::exception"{}});}
+\DoxyCodeLine{01065\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(what\ !=\ NULL)}
+\DoxyCodeLine{01066\ \ \ \ \ \ \ \ \ \ \ \ \ test\_message\_(\textcolor{stringliteral}{"{}std::exception::what():\ \%s"{}},\ what);}
+\DoxyCodeLine{01067\ }
+\DoxyCodeLine{01068\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(test\_verbose\_level\_\ >=\ 3)\ \{}
+\DoxyCodeLine{01069\ \ \ \ \ \ \ \ \ \ \ \ \ test\_line\_indent\_(1);}
+\DoxyCodeLine{01070\ \ \ \ \ \ \ \ \ \ \ \ \ test\_print\_in\_color\_(TEST\_COLOR\_RED\_INTENSIVE\_,\ \textcolor{stringliteral}{"{}FAILED:\ "{}});}
+\DoxyCodeLine{01071\ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}C++\ exception.\(\backslash\)n\(\backslash\)n"{}});}
+\DoxyCodeLine{01072\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01073\ \ \ \ \ \}\ \textcolor{keywordflow}{catch}(...)\ \{}
+\DoxyCodeLine{01074\ \ \ \ \ \ \ \ \ test\_check\_(0,\ NULL,\ 0,\ \textcolor{stringliteral}{"{}Threw\ an\ exception"{}});}
+\DoxyCodeLine{01075\ }
+\DoxyCodeLine{01076\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(test\_verbose\_level\_\ >=\ 3)\ \{}
+\DoxyCodeLine{01077\ \ \ \ \ \ \ \ \ \ \ \ \ test\_line\_indent\_(1);}
+\DoxyCodeLine{01078\ \ \ \ \ \ \ \ \ \ \ \ \ test\_print\_in\_color\_(TEST\_COLOR\_RED\_INTENSIVE\_,\ \textcolor{stringliteral}{"{}FAILED:\ "{}});}
+\DoxyCodeLine{01079\ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}C++\ exception.\(\backslash\)n\(\backslash\)n"{}});}
+\DoxyCodeLine{01080\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01081\ \ \ \ \ \}}
+\DoxyCodeLine{01082\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{01083\ }
+\DoxyCodeLine{01084\ \ \ \ \ test\_fini\_(test-\/>name);}
+\DoxyCodeLine{01085\ \ \ \ \ test\_case\_(NULL);}
+\DoxyCodeLine{01086\ \ \ \ \ test\_current\_unit\_\ =\ NULL;}
+\DoxyCodeLine{01087\ }
+\DoxyCodeLine{01088\ \ \ \ \ \textcolor{keywordflow}{return}\ status;}
+\DoxyCodeLine{01089\ \}}
+\DoxyCodeLine{01090\ }
+\DoxyCodeLine{01091\ \textcolor{comment}{/*\ Trigger\ the\ unit\ test.\ If\ possible\ (and\ not\ suppressed)\ it\ starts\ a\ child}}
+\DoxyCodeLine{01092\ \textcolor{comment}{\ *\ process\ who\ calls\ test\_do\_run\_(),\ otherwise\ it\ calls\ test\_do\_run\_()}}
+\DoxyCodeLine{01093\ \textcolor{comment}{\ *\ directly.\ */}}
+\DoxyCodeLine{01094\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{01095\ test\_run\_(\textcolor{keyword}{const}\ \textcolor{keyword}{struct}\ \mbox{\hyperlink{structtest__}{test\_}}*\ test,\ \textcolor{keywordtype}{int}\ index,\ \textcolor{keywordtype}{int}\ master\_index)}
+\DoxyCodeLine{01096\ \{}
+\DoxyCodeLine{01097\ \ \ \ \ \textcolor{keywordtype}{int}\ failed\ =\ 1;}
+\DoxyCodeLine{01098\ \ \ \ \ test\_timer\_type\_\ start,\ end;}
+\DoxyCodeLine{01099\ }
+\DoxyCodeLine{01100\ \ \ \ \ test\_current\_unit\_\ =\ test;}
+\DoxyCodeLine{01101\ \ \ \ \ test\_current\_already\_logged\_\ =\ 0;}
+\DoxyCodeLine{01102\ \ \ \ \ test\_timer\_get\_time\_(\&start);}
+\DoxyCodeLine{01103\ }
+\DoxyCodeLine{01104\ \ \ \ \ \textcolor{keywordflow}{if}(!test\_no\_exec\_)\ \{}
+\DoxyCodeLine{01105\ }
+\DoxyCodeLine{01106\ \textcolor{preprocessor}{\#if\ defined(ACUTEST\_UNIX\_)}}
+\DoxyCodeLine{01107\ }
+\DoxyCodeLine{01108\ \ \ \ \ \ \ \ \ pid\_t\ pid;}
+\DoxyCodeLine{01109\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ exit\_code;}
+\DoxyCodeLine{01110\ }
+\DoxyCodeLine{01111\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Make\ sure\ the\ child\ starts\ with\ empty\ I/O\ buffers.\ */}}
+\DoxyCodeLine{01112\ \ \ \ \ \ \ \ \ fflush(stdout);}
+\DoxyCodeLine{01113\ \ \ \ \ \ \ \ \ fflush(stderr);}
+\DoxyCodeLine{01114\ }
+\DoxyCodeLine{01115\ \ \ \ \ \ \ \ \ pid\ =\ fork();}
+\DoxyCodeLine{01116\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(pid\ ==\ (pid\_t)-\/1)\ \{}
+\DoxyCodeLine{01117\ \ \ \ \ \ \ \ \ \ \ \ \ test\_error\_(\textcolor{stringliteral}{"{}Cannot\ fork.\ \%s\ [\%d]"{}},\ strerror(errno),\ errno);}
+\DoxyCodeLine{01118\ \ \ \ \ \ \ \ \ \ \ \ \ failed\ =\ 1;}
+\DoxyCodeLine{01119\ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}(pid\ ==\ 0)\ \{}
+\DoxyCodeLine{01120\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Child:\ Do\ the\ test.\ */}}
+\DoxyCodeLine{01121\ \ \ \ \ \ \ \ \ \ \ \ \ test\_worker\_\ =\ 1;}
+\DoxyCodeLine{01122\ \ \ \ \ \ \ \ \ \ \ \ \ failed\ =\ (test\_do\_run\_(test,\ index)\ !=\ 0);}
+\DoxyCodeLine{01123\ \ \ \ \ \ \ \ \ \ \ \ \ test\_exit\_(failed\ ?\ 1\ :\ 0);}
+\DoxyCodeLine{01124\ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{01125\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Parent:\ Wait\ until\ child\ terminates\ and\ analyze\ its\ exit\ code.\ */}}
+\DoxyCodeLine{01126\ \ \ \ \ \ \ \ \ \ \ \ \ waitpid(pid,\ \&exit\_code,\ 0);}
+\DoxyCodeLine{01127\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(WIFEXITED(exit\_code))\ \{}
+\DoxyCodeLine{01128\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{switch}(WEXITSTATUS(exit\_code))\ \{}
+\DoxyCodeLine{01129\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 0:\ \ \ failed\ =\ 0;\ \textcolor{keywordflow}{break};\ \ \ \textcolor{comment}{/*\ test\ has\ passed.\ */}}
+\DoxyCodeLine{01130\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 1:\ \ \ \textcolor{comment}{/*\ noop\ */}\ \textcolor{keywordflow}{break};\ \ \ \ \textcolor{comment}{/*\ "{}normal"{}\ failure.\ */}}
+\DoxyCodeLine{01131\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{default}:\ \ test\_error\_(\textcolor{stringliteral}{"{}Unexpected\ exit\ code\ [\%d]"{}},\ WEXITSTATUS(exit\_code));}
+\DoxyCodeLine{01132\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01133\ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}(WIFSIGNALED(exit\_code))\ \{}
+\DoxyCodeLine{01134\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ tmp[32];}
+\DoxyCodeLine{01135\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ signame;}
+\DoxyCodeLine{01136\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{switch}(WTERMSIG(exit\_code))\ \{}
+\DoxyCodeLine{01137\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ SIGINT:\ \ signame\ =\ \textcolor{stringliteral}{"{}SIGINT"{}};\ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{01138\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ SIGHUP:\ \ signame\ =\ \textcolor{stringliteral}{"{}SIGHUP"{}};\ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{01139\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ SIGQUIT:\ signame\ =\ \textcolor{stringliteral}{"{}SIGQUIT"{}};\ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{01140\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ SIGABRT:\ signame\ =\ \textcolor{stringliteral}{"{}SIGABRT"{}};\ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{01141\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ SIGKILL:\ signame\ =\ \textcolor{stringliteral}{"{}SIGKILL"{}};\ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{01142\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ SIGSEGV:\ signame\ =\ \textcolor{stringliteral}{"{}SIGSEGV"{}};\ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{01143\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ SIGILL:\ \ signame\ =\ \textcolor{stringliteral}{"{}SIGILL"{}};\ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{01144\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ SIGTERM:\ signame\ =\ \textcolor{stringliteral}{"{}SIGTERM"{}};\ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{01145\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{default}:\ \ \ \ \ \ sprintf(tmp,\ \textcolor{stringliteral}{"{}signal\ \%d"{}},\ WTERMSIG(exit\_code));\ signame\ =\ tmp;\ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{01146\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01147\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ test\_error\_(\textcolor{stringliteral}{"{}Test\ interrupted\ by\ \%s."{}},\ signame);}
+\DoxyCodeLine{01148\ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{01149\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ test\_error\_(\textcolor{stringliteral}{"{}Test\ ended\ in\ an\ unexpected\ way\ [\%d]."{}},\ exit\_code);}
+\DoxyCodeLine{01150\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01151\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01152\ }
+\DoxyCodeLine{01153\ \textcolor{preprocessor}{\#elif\ defined(ACUTEST\_WIN\_)}}
+\DoxyCodeLine{01154\ }
+\DoxyCodeLine{01155\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ buffer[512]\ =\ \{0\};}
+\DoxyCodeLine{01156\ \ \ \ \ \ \ \ \ STARTUPINFOA\ startupInfo;}
+\DoxyCodeLine{01157\ \ \ \ \ \ \ \ \ PROCESS\_INFORMATION\ processInfo;}
+\DoxyCodeLine{01158\ \ \ \ \ \ \ \ \ DWORD\ exitCode;}
+\DoxyCodeLine{01159\ }
+\DoxyCodeLine{01160\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Windows\ has\ no\ fork().\ So\ we\ propagate\ all\ info\ into\ the\ child}}
+\DoxyCodeLine{01161\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ *\ through\ a\ command\ line\ arguments.\ */}}
+\DoxyCodeLine{01162\ \ \ \ \ \ \ \ \ \_snprintf(buffer,\ \textcolor{keyword}{sizeof}(buffer)-\/1,}
+\DoxyCodeLine{01163\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\%s\ -\/-\/worker=\%d\ \%s\ -\/-\/no-\/exec\ -\/-\/no-\/summary\ \%s\ -\/-\/verbose=\%d\ -\/-\/color=\%s\ -\/-\/\ \(\backslash\)"{}\%s\(\backslash\)"{}"{}},}
+\DoxyCodeLine{01164\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ test\_argv0\_,\ index,\ test\_timer\_\ ?\ \textcolor{stringliteral}{"{}-\/-\/time"{}}\ :\ \textcolor{stringliteral}{"{}"{}},}
+\DoxyCodeLine{01165\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ test\_tap\_\ ?\ \textcolor{stringliteral}{"{}-\/-\/tap"{}}\ :\ \textcolor{stringliteral}{"{}"{}},\ test\_verbose\_level\_,}
+\DoxyCodeLine{01166\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ test\_colorize\_\ ?\ \textcolor{stringliteral}{"{}always"{}}\ :\ \textcolor{stringliteral}{"{}never"{}},}
+\DoxyCodeLine{01167\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ test-\/>name);}
+\DoxyCodeLine{01168\ \ \ \ \ \ \ \ \ memset(\&startupInfo,\ 0,\ \textcolor{keyword}{sizeof}(startupInfo));}
+\DoxyCodeLine{01169\ \ \ \ \ \ \ \ \ startupInfo.cb\ =\ \textcolor{keyword}{sizeof}(STARTUPINFO);}
+\DoxyCodeLine{01170\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(CreateProcessA(NULL,\ buffer,\ NULL,\ NULL,\ FALSE,\ 0,\ NULL,\ NULL,\ \&startupInfo,\ \&processInfo))\ \{}
+\DoxyCodeLine{01171\ \ \ \ \ \ \ \ \ \ \ \ \ WaitForSingleObject(processInfo.hProcess,\ INFINITE);}
+\DoxyCodeLine{01172\ \ \ \ \ \ \ \ \ \ \ \ \ GetExitCodeProcess(processInfo.hProcess,\ \&exitCode);}
+\DoxyCodeLine{01173\ \ \ \ \ \ \ \ \ \ \ \ \ CloseHandle(processInfo.hThread);}
+\DoxyCodeLine{01174\ \ \ \ \ \ \ \ \ \ \ \ \ CloseHandle(processInfo.hProcess);}
+\DoxyCodeLine{01175\ \ \ \ \ \ \ \ \ \ \ \ \ failed\ =\ (exitCode\ !=\ 0);}
+\DoxyCodeLine{01176\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(exitCode\ >\ 1)\ \{}
+\DoxyCodeLine{01177\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{switch}(exitCode)\ \{}
+\DoxyCodeLine{01178\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 3:\ \ \ \ \ \ \ \ \ \ \ \ \ test\_error\_(\textcolor{stringliteral}{"{}Aborted."{}});\ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{01179\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 0xC0000005:\ \ \ \ test\_error\_(\textcolor{stringliteral}{"{}Access\ violation."{}});\ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{01180\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{default}:\ \ \ \ \ \ \ \ \ \ \ \ test\_error\_(\textcolor{stringliteral}{"{}Test\ ended\ in\ an\ unexpected\ way\ [\%lu]."{}},\ exitCode);\ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{01181\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01182\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01183\ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{01184\ \ \ \ \ \ \ \ \ \ \ \ \ test\_error\_(\textcolor{stringliteral}{"{}Cannot\ create\ unit\ test\ subprocess\ [\%ld]."{}},\ GetLastError());}
+\DoxyCodeLine{01185\ \ \ \ \ \ \ \ \ \ \ \ \ failed\ =\ 1;}
+\DoxyCodeLine{01186\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01187\ }
+\DoxyCodeLine{01188\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{01189\ }
+\DoxyCodeLine{01190\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ A\ platform\ where\ we\ don't\ know\ how\ to\ run\ child\ process.\ */}}
+\DoxyCodeLine{01191\ \ \ \ \ \ \ \ \ failed\ =\ (test\_do\_run\_(test,\ index)\ !=\ 0);}
+\DoxyCodeLine{01192\ }
+\DoxyCodeLine{01193\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{01194\ }
+\DoxyCodeLine{01195\ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{01196\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Child\ processes\ suppressed\ through\ -\/-\/no-\/exec.\ */}}
+\DoxyCodeLine{01197\ \ \ \ \ \ \ \ \ failed\ =\ (test\_do\_run\_(test,\ index)\ !=\ 0);}
+\DoxyCodeLine{01198\ \ \ \ \ \}}
+\DoxyCodeLine{01199\ \ \ \ \ test\_timer\_get\_time\_(\&end);}
+\DoxyCodeLine{01200\ }
+\DoxyCodeLine{01201\ \ \ \ \ test\_current\_unit\_\ =\ NULL;}
+\DoxyCodeLine{01202\ }
+\DoxyCodeLine{01203\ \ \ \ \ test\_stat\_run\_units\_++;}
+\DoxyCodeLine{01204\ \ \ \ \ \textcolor{keywordflow}{if}(failed)}
+\DoxyCodeLine{01205\ \ \ \ \ \ \ \ \ test\_stat\_failed\_units\_++;}
+\DoxyCodeLine{01206\ }
+\DoxyCodeLine{01207\ \ \ \ \ test\_set\_success\_(master\_index,\ !failed);}
+\DoxyCodeLine{01208\ \ \ \ \ test\_set\_duration\_(master\_index,\ test\_timer\_diff\_(start,\ end));}
+\DoxyCodeLine{01209\ \}}
+\DoxyCodeLine{01210\ }
+\DoxyCodeLine{01211\ \textcolor{preprocessor}{\#if\ defined(ACUTEST\_WIN\_)}}
+\DoxyCodeLine{01212\ \textcolor{comment}{/*\ Callback\ for\ SEH\ events.\ */}}
+\DoxyCodeLine{01213\ \textcolor{keyword}{static}\ LONG\ CALLBACK}
+\DoxyCodeLine{01214\ test\_seh\_exception\_filter\_(EXCEPTION\_POINTERS\ *ptrs)}
+\DoxyCodeLine{01215\ \{}
+\DoxyCodeLine{01216\ \ \ \ \ test\_check\_(0,\ NULL,\ 0,\ \textcolor{stringliteral}{"{}Unhandled\ SEH\ exception"{}});}
+\DoxyCodeLine{01217\ \ \ \ \ test\_message\_(\textcolor{stringliteral}{"{}Exception\ code:\ \ \ \ 0x\%08lx"{}},\ ptrs-\/>ExceptionRecord-\/>ExceptionCode);}
+\DoxyCodeLine{01218\ \ \ \ \ test\_message\_(\textcolor{stringliteral}{"{}Exception\ address:\ 0x\%p"{}},\ ptrs-\/>ExceptionRecord-\/>ExceptionAddress);}
+\DoxyCodeLine{01219\ }
+\DoxyCodeLine{01220\ \ \ \ \ fflush(stdout);}
+\DoxyCodeLine{01221\ \ \ \ \ fflush(stderr);}
+\DoxyCodeLine{01222\ }
+\DoxyCodeLine{01223\ \ \ \ \ \textcolor{keywordflow}{return}\ EXCEPTION\_EXECUTE\_HANDLER;}
+\DoxyCodeLine{01224\ \}}
+\DoxyCodeLine{01225\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{01226\ }
+\DoxyCodeLine{01227\ }
+\DoxyCodeLine{01228\ \textcolor{preprocessor}{\#define\ TEST\_CMDLINE\_OPTFLAG\_OPTIONALARG\_\ \ \ 0x0001}}
+\DoxyCodeLine{01229\ \textcolor{preprocessor}{\#define\ TEST\_CMDLINE\_OPTFLAG\_REQUIREDARG\_\ \ \ 0x0002}}
+\DoxyCodeLine{01230\ }
+\DoxyCodeLine{01231\ \textcolor{preprocessor}{\#define\ TEST\_CMDLINE\_OPTID\_NONE\_\ \ \ \ \ \ \ \ \ \ \ \ 0}}
+\DoxyCodeLine{01232\ \textcolor{preprocessor}{\#define\ TEST\_CMDLINE\_OPTID\_UNKNOWN\_\ \ \ \ \ \ \ \ \ (-\/0x7fffffff\ +\ 0)}}
+\DoxyCodeLine{01233\ \textcolor{preprocessor}{\#define\ TEST\_CMDLINE\_OPTID\_MISSINGARG\_\ \ \ \ \ \ (-\/0x7fffffff\ +\ 1)}}
+\DoxyCodeLine{01234\ \textcolor{preprocessor}{\#define\ TEST\_CMDLINE\_OPTID\_BOGUSARG\_\ \ \ \ \ \ \ \ (-\/0x7fffffff\ +\ 2)}}
+\DoxyCodeLine{01235\ }
+\DoxyCodeLine{01236\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{struct_t_e_s_t___c_m_d_l_i_n_e___o_p_t_i_o_n__}{TEST\_CMDLINE\_OPTION\_}}\ \{}
+\DoxyCodeLine{01237\ \ \ \ \ \textcolor{keywordtype}{char}\ shortname;}
+\DoxyCodeLine{01238\ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ longname;}
+\DoxyCodeLine{01239\ \ \ \ \ \textcolor{keywordtype}{int}\ id;}
+\DoxyCodeLine{01240\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ flags;}
+\DoxyCodeLine{01241\ \}\ \mbox{\hyperlink{struct_t_e_s_t___c_m_d_l_i_n_e___o_p_t_i_o_n__}{TEST\_CMDLINE\_OPTION\_}};}
+\DoxyCodeLine{01242\ }
+\DoxyCodeLine{01243\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{int}}
+\DoxyCodeLine{01244\ test\_cmdline\_handle\_short\_opt\_group\_(\textcolor{keyword}{const}\ \mbox{\hyperlink{struct_t_e_s_t___c_m_d_l_i_n_e___o_p_t_i_o_n__}{TEST\_CMDLINE\_OPTION\_}}*\ options,}
+\DoxyCodeLine{01245\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ arggroup,}
+\DoxyCodeLine{01246\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ (*callback)(\textcolor{keywordtype}{int}\ \textcolor{comment}{/*optval*/},\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ \textcolor{comment}{/*arg*/}))}
+\DoxyCodeLine{01247\ \{}
+\DoxyCodeLine{01248\ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{struct_t_e_s_t___c_m_d_l_i_n_e___o_p_t_i_o_n__}{TEST\_CMDLINE\_OPTION\_}}*\ opt;}
+\DoxyCodeLine{01249\ \ \ \ \ \textcolor{keywordtype}{int}\ i;}
+\DoxyCodeLine{01250\ \ \ \ \ \textcolor{keywordtype}{int}\ ret\ =\ 0;}
+\DoxyCodeLine{01251\ }
+\DoxyCodeLine{01252\ \ \ \ \ \textcolor{keywordflow}{for}(i\ =\ 0;\ arggroup[i]\ !=\ \textcolor{charliteral}{'\(\backslash\)0'};\ i++)\ \{}
+\DoxyCodeLine{01253\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(opt\ =\ options;\ opt-\/>id\ !=\ 0;\ opt++)\ \{}
+\DoxyCodeLine{01254\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(arggroup[i]\ ==\ opt-\/>shortname)}
+\DoxyCodeLine{01255\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{01256\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01257\ }
+\DoxyCodeLine{01258\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(opt-\/>id\ !=\ 0\ \ \&\&\ \ !(opt-\/>flags\ \&\ TEST\_CMDLINE\_OPTFLAG\_REQUIREDARG\_))\ \{}
+\DoxyCodeLine{01259\ \ \ \ \ \ \ \ \ \ \ \ \ ret\ =\ callback(opt-\/>id,\ NULL);}
+\DoxyCodeLine{01260\ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{01261\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Unknown\ option.\ */}}
+\DoxyCodeLine{01262\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ badoptname[3];}
+\DoxyCodeLine{01263\ \ \ \ \ \ \ \ \ \ \ \ \ badoptname[0]\ =\ \textcolor{charliteral}{'-\/'};}
+\DoxyCodeLine{01264\ \ \ \ \ \ \ \ \ \ \ \ \ badoptname[1]\ =\ arggroup[i];}
+\DoxyCodeLine{01265\ \ \ \ \ \ \ \ \ \ \ \ \ badoptname[2]\ =\ \textcolor{charliteral}{'\(\backslash\)0'};}
+\DoxyCodeLine{01266\ \ \ \ \ \ \ \ \ \ \ \ \ ret\ =\ callback((opt-\/>id\ !=\ 0\ ?\ TEST\_CMDLINE\_OPTID\_MISSINGARG\_\ :\ TEST\_CMDLINE\_OPTID\_UNKNOWN\_),}
+\DoxyCodeLine{01267\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ badoptname);}
+\DoxyCodeLine{01268\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01269\ }
+\DoxyCodeLine{01270\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(ret\ !=\ 0)}
+\DoxyCodeLine{01271\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{01272\ \ \ \ \ \}}
+\DoxyCodeLine{01273\ }
+\DoxyCodeLine{01274\ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{01275\ \}}
+\DoxyCodeLine{01276\ }
+\DoxyCodeLine{01277\ \textcolor{preprocessor}{\#define\ TEST\_CMDLINE\_AUXBUF\_SIZE\_\ \ 32}}
+\DoxyCodeLine{01278\ }
+\DoxyCodeLine{01279\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{int}}
+\DoxyCodeLine{01280\ test\_cmdline\_read\_(\textcolor{keyword}{const}\ \mbox{\hyperlink{struct_t_e_s_t___c_m_d_l_i_n_e___o_p_t_i_o_n__}{TEST\_CMDLINE\_OPTION\_}}*\ options,\ \textcolor{keywordtype}{int}\ argc,\ \textcolor{keywordtype}{char}**\ argv,}
+\DoxyCodeLine{01281\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ (*callback)(\textcolor{keywordtype}{int}\ \textcolor{comment}{/*optval*/},\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ \textcolor{comment}{/*arg*/}))}
+\DoxyCodeLine{01282\ \{}
+\DoxyCodeLine{01283\ }
+\DoxyCodeLine{01284\ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{struct_t_e_s_t___c_m_d_l_i_n_e___o_p_t_i_o_n__}{TEST\_CMDLINE\_OPTION\_}}*\ opt;}
+\DoxyCodeLine{01285\ \ \ \ \ \textcolor{keywordtype}{char}\ auxbuf[TEST\_CMDLINE\_AUXBUF\_SIZE\_+1];}
+\DoxyCodeLine{01286\ \ \ \ \ \textcolor{keywordtype}{int}\ after\_doubledash\ =\ 0;}
+\DoxyCodeLine{01287\ \ \ \ \ \textcolor{keywordtype}{int}\ i\ =\ 1;}
+\DoxyCodeLine{01288\ \ \ \ \ \textcolor{keywordtype}{int}\ ret\ =\ 0;}
+\DoxyCodeLine{01289\ }
+\DoxyCodeLine{01290\ \ \ \ \ auxbuf[TEST\_CMDLINE\_AUXBUF\_SIZE\_]\ =\ \textcolor{charliteral}{'\(\backslash\)0'};}
+\DoxyCodeLine{01291\ }
+\DoxyCodeLine{01292\ \ \ \ \ \textcolor{keywordflow}{while}(i\ <\ argc)\ \{}
+\DoxyCodeLine{01293\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(after\_doubledash\ \ ||\ \ strcmp(argv[i],\ \textcolor{stringliteral}{"{}-\/"{}})\ ==\ 0)\ \{}
+\DoxyCodeLine{01294\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Non-\/option\ argument.\ */}}
+\DoxyCodeLine{01295\ \ \ \ \ \ \ \ \ \ \ \ \ ret\ =\ callback(TEST\_CMDLINE\_OPTID\_NONE\_,\ argv[i]);}
+\DoxyCodeLine{01296\ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}(strcmp(argv[i],\ \textcolor{stringliteral}{"{}-\/-\/"{}})\ ==\ 0)\ \{}
+\DoxyCodeLine{01297\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ End\ of\ options.\ All\ the\ remaining\ members\ are\ non-\/option\ arguments.\ */}}
+\DoxyCodeLine{01298\ \ \ \ \ \ \ \ \ \ \ \ \ after\_doubledash\ =\ 1;}
+\DoxyCodeLine{01299\ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}(argv[i][0]\ !=\ \textcolor{charliteral}{'-\/'})\ \{}
+\DoxyCodeLine{01300\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Non-\/option\ argument.\ */}}
+\DoxyCodeLine{01301\ \ \ \ \ \ \ \ \ \ \ \ \ ret\ =\ callback(TEST\_CMDLINE\_OPTID\_NONE\_,\ argv[i]);}
+\DoxyCodeLine{01302\ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{01303\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(opt\ =\ options;\ opt-\/>id\ !=\ 0;\ opt++)\ \{}
+\DoxyCodeLine{01304\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(opt-\/>longname\ !=\ NULL\ \ \&\&\ \ strncmp(argv[i],\ \textcolor{stringliteral}{"{}-\/-\/"{}},\ 2)\ ==\ 0)\ \{}
+\DoxyCodeLine{01305\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{size\_t}\ len\ =\ strlen(opt-\/>longname);}
+\DoxyCodeLine{01306\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(strncmp(argv[i]+2,\ opt-\/>longname,\ len)\ ==\ 0)\ \{}
+\DoxyCodeLine{01307\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Regular\ long\ option.\ */}}
+\DoxyCodeLine{01308\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(argv[i][2+len]\ ==\ \textcolor{charliteral}{'\(\backslash\)0'})\ \{}
+\DoxyCodeLine{01309\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ with\ no\ argument\ provided.\ */}}
+\DoxyCodeLine{01310\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(!(opt-\/>flags\ \&\ TEST\_CMDLINE\_OPTFLAG\_REQUIREDARG\_))}
+\DoxyCodeLine{01311\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ret\ =\ callback(opt-\/>id,\ NULL);}
+\DoxyCodeLine{01312\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{01313\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ret\ =\ callback(TEST\_CMDLINE\_OPTID\_MISSINGARG\_,\ argv[i]);}
+\DoxyCodeLine{01314\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{01315\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}(argv[i][2+len]\ ==\ \textcolor{charliteral}{'='})\ \{}
+\DoxyCodeLine{01316\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ with\ an\ argument\ provided.\ */}}
+\DoxyCodeLine{01317\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(opt-\/>flags\ \&\ (TEST\_CMDLINE\_OPTFLAG\_OPTIONALARG\_\ |\ TEST\_CMDLINE\_OPTFLAG\_REQUIREDARG\_))\ \{}
+\DoxyCodeLine{01318\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ret\ =\ callback(opt-\/>id,\ argv[i]+2+len+1);}
+\DoxyCodeLine{01319\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{01320\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sprintf(auxbuf,\ \textcolor{stringliteral}{"{}-\/-\/\%s"{}},\ opt-\/>longname);}
+\DoxyCodeLine{01321\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ret\ =\ callback(TEST\_CMDLINE\_OPTID\_BOGUSARG\_,\ auxbuf);}
+\DoxyCodeLine{01322\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01323\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{01324\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{01325\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue};}
+\DoxyCodeLine{01326\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01327\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01328\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}(opt-\/>shortname\ !=\ \textcolor{charliteral}{'\(\backslash\)0'}\ \ \&\&\ \ argv[i][0]\ ==\ \textcolor{charliteral}{'-\/'})\ \{}
+\DoxyCodeLine{01329\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(argv[i][1]\ ==\ opt-\/>shortname)\ \{}
+\DoxyCodeLine{01330\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Regular\ short\ option.\ */}}
+\DoxyCodeLine{01331\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(opt-\/>flags\ \&\ TEST\_CMDLINE\_OPTFLAG\_REQUIREDARG\_)\ \{}
+\DoxyCodeLine{01332\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(argv[i][2]\ !=\ \textcolor{charliteral}{'\(\backslash\)0'})}
+\DoxyCodeLine{01333\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ret\ =\ callback(opt-\/>id,\ argv[i]+2);}
+\DoxyCodeLine{01334\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}(i+1\ <\ argc)}
+\DoxyCodeLine{01335\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ret\ =\ callback(opt-\/>id,\ argv[++i]);}
+\DoxyCodeLine{01336\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{01337\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ret\ =\ callback(TEST\_CMDLINE\_OPTID\_MISSINGARG\_,\ argv[i]);}
+\DoxyCodeLine{01338\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{01339\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{01340\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ret\ =\ callback(opt-\/>id,\ NULL);}
+\DoxyCodeLine{01341\ }
+\DoxyCodeLine{01342\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ There\ might\ be\ more\ (argument-\/less)\ short\ options}}
+\DoxyCodeLine{01343\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *\ grouped\ together.\ */}}
+\DoxyCodeLine{01344\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(ret\ ==\ 0\ \ \&\&\ \ argv[i][2]\ !=\ \textcolor{charliteral}{'\(\backslash\)0'})}
+\DoxyCodeLine{01345\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ret\ =\ test\_cmdline\_handle\_short\_opt\_group\_(options,\ argv[i]+2,\ callback);}
+\DoxyCodeLine{01346\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{01347\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01348\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01349\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01350\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01351\ }
+\DoxyCodeLine{01352\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(opt-\/>id\ ==\ 0)\ \{\ \ \textcolor{comment}{/*\ still\ not\ handled?\ */}}
+\DoxyCodeLine{01353\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(argv[i][0]\ !=\ \textcolor{charliteral}{'-\/'})\ \{}
+\DoxyCodeLine{01354\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Non-\/option\ argument.\ */}}
+\DoxyCodeLine{01355\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ret\ =\ callback(TEST\_CMDLINE\_OPTID\_NONE\_,\ argv[i]);}
+\DoxyCodeLine{01356\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{01357\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Unknown\ option.\ */}}
+\DoxyCodeLine{01358\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}*\ badoptname\ =\ argv[i];}
+\DoxyCodeLine{01359\ }
+\DoxyCodeLine{01360\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(strncmp(badoptname,\ \textcolor{stringliteral}{"{}-\/-\/"{}},\ 2)\ ==\ 0)\ \{}
+\DoxyCodeLine{01361\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Strip\ any\ argument\ from\ the\ long\ option.\ */}}
+\DoxyCodeLine{01362\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}*\ assignment\ =\ strchr(badoptname,\ \textcolor{charliteral}{'='});}
+\DoxyCodeLine{01363\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(assignment\ !=\ NULL)\ \{}
+\DoxyCodeLine{01364\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{size\_t}\ len\ =\ assignment\ -\/\ badoptname;}
+\DoxyCodeLine{01365\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(len\ >\ TEST\_CMDLINE\_AUXBUF\_SIZE\_)}
+\DoxyCodeLine{01366\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ len\ =\ TEST\_CMDLINE\_AUXBUF\_SIZE\_;}
+\DoxyCodeLine{01367\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ strncpy(auxbuf,\ badoptname,\ len);}
+\DoxyCodeLine{01368\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ auxbuf[len]\ =\ \textcolor{charliteral}{'\(\backslash\)0'};}
+\DoxyCodeLine{01369\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ badoptname\ =\ auxbuf;}
+\DoxyCodeLine{01370\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01371\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01372\ }
+\DoxyCodeLine{01373\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ret\ =\ callback(TEST\_CMDLINE\_OPTID\_UNKNOWN\_,\ badoptname);}
+\DoxyCodeLine{01374\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01375\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01376\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01377\ }
+\DoxyCodeLine{01378\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(ret\ !=\ 0)}
+\DoxyCodeLine{01379\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{01380\ \ \ \ \ \ \ \ \ i++;}
+\DoxyCodeLine{01381\ \ \ \ \ \}}
+\DoxyCodeLine{01382\ }
+\DoxyCodeLine{01383\ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{01384\ \}}
+\DoxyCodeLine{01385\ }
+\DoxyCodeLine{01386\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{01387\ test\_help\_(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{01388\ \{}
+\DoxyCodeLine{01389\ \ \ \ \ printf(\textcolor{stringliteral}{"{}Usage:\ \%s\ [options]\ [test...]\(\backslash\)n"{}},\ test\_argv0\_);}
+\DoxyCodeLine{01390\ \ \ \ \ printf(\textcolor{stringliteral}{"{}\(\backslash\)n"{}});}
+\DoxyCodeLine{01391\ \ \ \ \ printf(\textcolor{stringliteral}{"{}Run\ the\ specified\ unit\ tests;\ or\ if\ the\ option\ '-\/-\/skip'\ is\ used,\ run\ all\(\backslash\)n"{}});}
+\DoxyCodeLine{01392\ \ \ \ \ printf(\textcolor{stringliteral}{"{}tests\ in\ the\ suite\ but\ those\ listed.\ \ By\ default,\ if\ no\ tests\ are\ specified\(\backslash\)n"{}});}
+\DoxyCodeLine{01393\ \ \ \ \ printf(\textcolor{stringliteral}{"{}on\ the\ command\ line,\ all\ unit\ tests\ in\ the\ suite\ are\ run.\(\backslash\)n"{}});}
+\DoxyCodeLine{01394\ \ \ \ \ printf(\textcolor{stringliteral}{"{}\(\backslash\)n"{}});}
+\DoxyCodeLine{01395\ \ \ \ \ printf(\textcolor{stringliteral}{"{}Options:\(\backslash\)n"{}});}
+\DoxyCodeLine{01396\ \ \ \ \ printf(\textcolor{stringliteral}{"{}\ \ -\/s,\ -\/-\/skip\ \ \ \ \ \ \ \ \ \ \ \ Execute\ all\ unit\ tests\ but\ the\ listed\ ones\(\backslash\)n"{}});}
+\DoxyCodeLine{01397\ \ \ \ \ printf(\textcolor{stringliteral}{"{}\ \ \ \ \ \ -\/-\/exec[=WHEN]\ \ \ \ \ If\ supported,\ execute\ unit\ tests\ as\ child\ processes\(\backslash\)n"{}});}
+\DoxyCodeLine{01398\ \ \ \ \ printf(\textcolor{stringliteral}{"{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (WHEN\ is\ one\ of\ 'auto',\ 'always',\ 'never')\(\backslash\)n"{}});}
+\DoxyCodeLine{01399\ \ \ \ \ printf(\textcolor{stringliteral}{"{}\ \ -\/E,\ -\/-\/no-\/exec\ \ \ \ \ \ \ \ \ Same\ as\ -\/-\/exec=never\(\backslash\)n"{}});}
+\DoxyCodeLine{01400\ \textcolor{preprocessor}{\#if\ defined\ ACUTEST\_WIN\_}}
+\DoxyCodeLine{01401\ \ \ \ \ printf(\textcolor{stringliteral}{"{}\ \ -\/t,\ -\/-\/time\ \ \ \ \ \ \ \ \ \ \ \ Measure\ test\ duration\(\backslash\)n"{}});}
+\DoxyCodeLine{01402\ \textcolor{preprocessor}{\#elif\ defined\ ACUTEST\_HAS\_POSIX\_TIMER\_}}
+\DoxyCodeLine{01403\ \ \ \ \ printf(\textcolor{stringliteral}{"{}\ \ -\/t,\ -\/-\/time\ \ \ \ \ \ \ \ \ \ \ \ Measure\ test\ duration\ (real\ time)\(\backslash\)n"{}});}
+\DoxyCodeLine{01404\ \ \ \ \ printf(\textcolor{stringliteral}{"{}\ \ \ \ \ \ -\/-\/time=TIMER\ \ \ \ \ \ Measure\ test\ duration,\ using\ given\ timer\(\backslash\)n"{}});}
+\DoxyCodeLine{01405\ \ \ \ \ printf(\textcolor{stringliteral}{"{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (TIMER\ is\ one\ of\ 'real',\ 'cpu')\(\backslash\)n"{}});}
+\DoxyCodeLine{01406\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{01407\ \ \ \ \ printf(\textcolor{stringliteral}{"{}\ \ \ \ \ \ -\/-\/no-\/summary\ \ \ \ \ \ Suppress\ printing\ of\ test\ results\ summary\(\backslash\)n"{}});}
+\DoxyCodeLine{01408\ \ \ \ \ printf(\textcolor{stringliteral}{"{}\ \ \ \ \ \ -\/-\/tap\ \ \ \ \ \ \ \ \ \ \ \ \ Produce\ TAP-\/compliant\ output\(\backslash\)n"{}});}
+\DoxyCodeLine{01409\ \ \ \ \ printf(\textcolor{stringliteral}{"{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (See\ https://testanything.org/)\(\backslash\)n"{}});}
+\DoxyCodeLine{01410\ \ \ \ \ printf(\textcolor{stringliteral}{"{}\ \ -\/x,\ -\/-\/xml-\/output=FILE\ Enable\ XUnit\ output\ to\ the\ given\ file\(\backslash\)n"{}});}
+\DoxyCodeLine{01411\ \ \ \ \ printf(\textcolor{stringliteral}{"{}\ \ -\/l,\ -\/-\/list\ \ \ \ \ \ \ \ \ \ \ \ List\ unit\ tests\ in\ the\ suite\ and\ exit\(\backslash\)n"{}});}
+\DoxyCodeLine{01412\ \ \ \ \ printf(\textcolor{stringliteral}{"{}\ \ -\/v,\ -\/-\/verbose\ \ \ \ \ \ \ \ \ Make\ output\ more\ verbose\(\backslash\)n"{}});}
+\DoxyCodeLine{01413\ \ \ \ \ printf(\textcolor{stringliteral}{"{}\ \ \ \ \ \ -\/-\/verbose=LEVEL\ \ \ Set\ verbose\ level\ to\ LEVEL:\(\backslash\)n"{}});}
+\DoxyCodeLine{01414\ \ \ \ \ printf(\textcolor{stringliteral}{"{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 0\ ...\ Be\ silent\(\backslash\)n"{}});}
+\DoxyCodeLine{01415\ \ \ \ \ printf(\textcolor{stringliteral}{"{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 1\ ...\ Output\ one\ line\ per\ test\ (and\ summary)\(\backslash\)n"{}});}
+\DoxyCodeLine{01416\ \ \ \ \ printf(\textcolor{stringliteral}{"{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 2\ ...\ As\ 1\ and\ failed\ conditions\ (this\ is\ default)\(\backslash\)n"{}});}
+\DoxyCodeLine{01417\ \ \ \ \ printf(\textcolor{stringliteral}{"{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 3\ ...\ As\ 1\ and\ all\ conditions\ (and\ extended\ summary)\(\backslash\)n"{}});}
+\DoxyCodeLine{01418\ \ \ \ \ printf(\textcolor{stringliteral}{"{}\ \ -\/q,\ -\/-\/quiet\ \ \ \ \ \ \ \ \ \ \ Same\ as\ -\/-\/verbose=0\(\backslash\)n"{}});}
+\DoxyCodeLine{01419\ \ \ \ \ printf(\textcolor{stringliteral}{"{}\ \ \ \ \ \ -\/-\/color[=WHEN]\ \ \ \ Enable\ colorized\ output\(\backslash\)n"{}});}
+\DoxyCodeLine{01420\ \ \ \ \ printf(\textcolor{stringliteral}{"{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (WHEN\ is\ one\ of\ 'auto',\ 'always',\ 'never')\(\backslash\)n"{}});}
+\DoxyCodeLine{01421\ \ \ \ \ printf(\textcolor{stringliteral}{"{}\ \ \ \ \ \ -\/-\/no-\/color\ \ \ \ \ \ \ \ Same\ as\ -\/-\/color=never\(\backslash\)n"{}});}
+\DoxyCodeLine{01422\ \ \ \ \ printf(\textcolor{stringliteral}{"{}\ \ -\/h,\ -\/-\/help\ \ \ \ \ \ \ \ \ \ \ \ Display\ this\ help\ and\ exit\(\backslash\)n"{}});}
+\DoxyCodeLine{01423\ }
+\DoxyCodeLine{01424\ \ \ \ \ \textcolor{keywordflow}{if}(test\_list\_size\_\ <\ 16)\ \{}
+\DoxyCodeLine{01425\ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\(\backslash\)n"{}});}
+\DoxyCodeLine{01426\ \ \ \ \ \ \ \ \ test\_list\_names\_();}
+\DoxyCodeLine{01427\ \ \ \ \ \}}
+\DoxyCodeLine{01428\ \}}
+\DoxyCodeLine{01429\ }
+\DoxyCodeLine{01430\ \textcolor{keyword}{static}\ \textcolor{keyword}{const}\ \mbox{\hyperlink{struct_t_e_s_t___c_m_d_l_i_n_e___o_p_t_i_o_n__}{TEST\_CMDLINE\_OPTION\_}}\ test\_cmdline\_options\_[]\ =\ \{}
+\DoxyCodeLine{01431\ \ \ \ \ \{\ \textcolor{charliteral}{'s'},\ \ \textcolor{stringliteral}{"{}skip"{}},\ \ \ \ \ \ \ \ \ \textcolor{charliteral}{'s'},\ 0\ \},}
+\DoxyCodeLine{01432\ \ \ \ \ \{\ \ 0,\ \ \ \textcolor{stringliteral}{"{}exec"{}},\ \ \ \ \ \ \ \ \ \textcolor{charliteral}{'e'},\ TEST\_CMDLINE\_OPTFLAG\_OPTIONALARG\_\ \},}
+\DoxyCodeLine{01433\ \ \ \ \ \{\ \textcolor{charliteral}{'E'},\ \ \textcolor{stringliteral}{"{}no-\/exec"{}},\ \ \ \ \ \ \textcolor{charliteral}{'E'},\ 0\ \},}
+\DoxyCodeLine{01434\ \textcolor{preprocessor}{\#if\ defined\ ACUTEST\_WIN\_}}
+\DoxyCodeLine{01435\ \ \ \ \ \{\ \textcolor{charliteral}{'t'},\ \ \textcolor{stringliteral}{"{}time"{}},\ \ \ \ \ \ \ \ \ \textcolor{charliteral}{'t'},\ 0\ \},}
+\DoxyCodeLine{01436\ \ \ \ \ \{\ \ 0,\ \ \ \textcolor{stringliteral}{"{}timer"{}},\ \ \ \ \ \ \ \ \textcolor{charliteral}{'t'},\ 0\ \},\ \ \ \textcolor{comment}{/*\ kept\ for\ compatibility\ */}}
+\DoxyCodeLine{01437\ \textcolor{preprocessor}{\#elif\ defined\ ACUTEST\_HAS\_POSIX\_TIMER\_}}
+\DoxyCodeLine{01438\ \ \ \ \ \{\ \textcolor{charliteral}{'t'},\ \ \textcolor{stringliteral}{"{}time"{}},\ \ \ \ \ \ \ \ \ \textcolor{charliteral}{'t'},\ TEST\_CMDLINE\_OPTFLAG\_OPTIONALARG\_\ \},}
+\DoxyCodeLine{01439\ \ \ \ \ \{\ \ 0,\ \ \ \textcolor{stringliteral}{"{}timer"{}},\ \ \ \ \ \ \ \ \textcolor{charliteral}{'t'},\ TEST\_CMDLINE\_OPTFLAG\_OPTIONALARG\_\ \},\ \ \textcolor{comment}{/*\ kept\ for\ compatibility\ */}}
+\DoxyCodeLine{01440\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{01441\ \ \ \ \ \{\ \ 0,\ \ \ \textcolor{stringliteral}{"{}no-\/summary"{}},\ \ \ \textcolor{charliteral}{'S'},\ 0\ \},}
+\DoxyCodeLine{01442\ \ \ \ \ \{\ \ 0,\ \ \ \textcolor{stringliteral}{"{}tap"{}},\ \ \ \ \ \ \ \ \ \ \textcolor{charliteral}{'T'},\ 0\ \},}
+\DoxyCodeLine{01443\ \ \ \ \ \{\ \textcolor{charliteral}{'l'},\ \ \textcolor{stringliteral}{"{}list"{}},\ \ \ \ \ \ \ \ \ \textcolor{charliteral}{'l'},\ 0\ \},}
+\DoxyCodeLine{01444\ \ \ \ \ \{\ \textcolor{charliteral}{'v'},\ \ \textcolor{stringliteral}{"{}verbose"{}},\ \ \ \ \ \ \textcolor{charliteral}{'v'},\ TEST\_CMDLINE\_OPTFLAG\_OPTIONALARG\_\ \},}
+\DoxyCodeLine{01445\ \ \ \ \ \{\ \textcolor{charliteral}{'q'},\ \ \textcolor{stringliteral}{"{}quiet"{}},\ \ \ \ \ \ \ \ \textcolor{charliteral}{'q'},\ 0\ \},}
+\DoxyCodeLine{01446\ \ \ \ \ \{\ \ 0,\ \ \ \textcolor{stringliteral}{"{}color"{}},\ \ \ \ \ \ \ \ \textcolor{charliteral}{'c'},\ TEST\_CMDLINE\_OPTFLAG\_OPTIONALARG\_\ \},}
+\DoxyCodeLine{01447\ \ \ \ \ \{\ \ 0,\ \ \ \textcolor{stringliteral}{"{}no-\/color"{}},\ \ \ \ \ \textcolor{charliteral}{'C'},\ 0\ \},}
+\DoxyCodeLine{01448\ \ \ \ \ \{\ \textcolor{charliteral}{'h'},\ \ \textcolor{stringliteral}{"{}help"{}},\ \ \ \ \ \ \ \ \ \textcolor{charliteral}{'h'},\ 0\ \},}
+\DoxyCodeLine{01449\ \ \ \ \ \{\ \ 0,\ \ \ \textcolor{stringliteral}{"{}worker"{}},\ \ \ \ \ \ \ \textcolor{charliteral}{'w'},\ TEST\_CMDLINE\_OPTFLAG\_REQUIREDARG\_\ \},\ \ \textcolor{comment}{/*\ internal\ */}}
+\DoxyCodeLine{01450\ \ \ \ \ \{\ \textcolor{charliteral}{'x'},\ \ \textcolor{stringliteral}{"{}xml-\/output"{}},\ \ \ \textcolor{charliteral}{'x'},\ TEST\_CMDLINE\_OPTFLAG\_REQUIREDARG\_\ \},}
+\DoxyCodeLine{01451\ \ \ \ \ \{\ \ 0,\ \ \ NULL,\ \ \ \ \ \ \ \ \ \ \ \ 0,\ \ 0\ \}}
+\DoxyCodeLine{01452\ \};}
+\DoxyCodeLine{01453\ }
+\DoxyCodeLine{01454\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{int}}
+\DoxyCodeLine{01455\ test\_cmdline\_callback\_(\textcolor{keywordtype}{int}\ \textcolor{keywordtype}{id},\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ arg)}
+\DoxyCodeLine{01456\ \{}
+\DoxyCodeLine{01457\ \ \ \ \ \textcolor{keywordflow}{switch}(\textcolor{keywordtype}{id})\ \{}
+\DoxyCodeLine{01458\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ \textcolor{charliteral}{'s'}:}
+\DoxyCodeLine{01459\ \ \ \ \ \ \ \ \ \ \ \ \ test\_skip\_mode\_\ =\ 1;}
+\DoxyCodeLine{01460\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{01461\ }
+\DoxyCodeLine{01462\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ \textcolor{charliteral}{'e'}:}
+\DoxyCodeLine{01463\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(arg\ ==\ NULL\ ||\ strcmp(arg,\ \textcolor{stringliteral}{"{}always"{}})\ ==\ 0)\ \{}
+\DoxyCodeLine{01464\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ test\_no\_exec\_\ =\ 0;}
+\DoxyCodeLine{01465\ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}(strcmp(arg,\ \textcolor{stringliteral}{"{}never"{}})\ ==\ 0)\ \{}
+\DoxyCodeLine{01466\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ test\_no\_exec\_\ =\ 1;}
+\DoxyCodeLine{01467\ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}(strcmp(arg,\ \textcolor{stringliteral}{"{}auto"{}})\ ==\ 0)\ \{}
+\DoxyCodeLine{01468\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*noop*/}}
+\DoxyCodeLine{01469\ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{01470\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ fprintf(stderr,\ \textcolor{stringliteral}{"{}\%s:\ Unrecognized\ argument\ '\%s'\ for\ option\ -\/-\/exec.\(\backslash\)n"{}},\ test\_argv0\_,\ arg);}
+\DoxyCodeLine{01471\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ fprintf(stderr,\ \textcolor{stringliteral}{"{}Try\ '\%s\ -\/-\/help'\ for\ more\ information.\(\backslash\)n"{}},\ test\_argv0\_);}
+\DoxyCodeLine{01472\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ test\_exit\_(2);}
+\DoxyCodeLine{01473\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01474\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{01475\ }
+\DoxyCodeLine{01476\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ \textcolor{charliteral}{'E'}:}
+\DoxyCodeLine{01477\ \ \ \ \ \ \ \ \ \ \ \ \ test\_no\_exec\_\ =\ 1;}
+\DoxyCodeLine{01478\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{01479\ }
+\DoxyCodeLine{01480\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ \textcolor{charliteral}{'t'}:}
+\DoxyCodeLine{01481\ \textcolor{preprocessor}{\#if\ defined\ ACUTEST\_WIN\_\ \ ||\ \ defined\ ACUTEST\_HAS\_POSIX\_TIMER\_}}
+\DoxyCodeLine{01482\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(arg\ ==\ NULL\ ||\ strcmp(arg,\ \textcolor{stringliteral}{"{}real"{}})\ ==\ 0)\ \{}
+\DoxyCodeLine{01483\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ test\_timer\_\ =\ 1;}
+\DoxyCodeLine{01484\ \textcolor{preprocessor}{\ \ \ \ \#ifndef\ ACUTEST\_WIN\_}}
+\DoxyCodeLine{01485\ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}(strcmp(arg,\ \textcolor{stringliteral}{"{}cpu"{}})\ ==\ 0)\ \{}
+\DoxyCodeLine{01486\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ test\_timer\_\ =\ 2;}
+\DoxyCodeLine{01487\ \textcolor{preprocessor}{\ \ \ \ \#endif}}
+\DoxyCodeLine{01488\ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{01489\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ fprintf(stderr,\ \textcolor{stringliteral}{"{}\%s:\ Unrecognized\ argument\ '\%s'\ for\ option\ -\/-\/time.\(\backslash\)n"{}},\ test\_argv0\_,\ arg);}
+\DoxyCodeLine{01490\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ fprintf(stderr,\ \textcolor{stringliteral}{"{}Try\ '\%s\ -\/-\/help'\ for\ more\ information.\(\backslash\)n"{}},\ test\_argv0\_);}
+\DoxyCodeLine{01491\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ test\_exit\_(2);}
+\DoxyCodeLine{01492\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01493\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{01494\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{01495\ }
+\DoxyCodeLine{01496\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ \textcolor{charliteral}{'S'}:}
+\DoxyCodeLine{01497\ \ \ \ \ \ \ \ \ \ \ \ \ test\_no\_summary\_\ =\ 1;}
+\DoxyCodeLine{01498\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{01499\ }
+\DoxyCodeLine{01500\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ \textcolor{charliteral}{'T'}:}
+\DoxyCodeLine{01501\ \ \ \ \ \ \ \ \ \ \ \ \ test\_tap\_\ =\ 1;}
+\DoxyCodeLine{01502\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{01503\ }
+\DoxyCodeLine{01504\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ \textcolor{charliteral}{'l'}:}
+\DoxyCodeLine{01505\ \ \ \ \ \ \ \ \ \ \ \ \ test\_list\_names\_();}
+\DoxyCodeLine{01506\ \ \ \ \ \ \ \ \ \ \ \ \ test\_exit\_(0);}
+\DoxyCodeLine{01507\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{01508\ }
+\DoxyCodeLine{01509\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ \textcolor{charliteral}{'v'}:}
+\DoxyCodeLine{01510\ \ \ \ \ \ \ \ \ \ \ \ \ test\_verbose\_level\_\ =\ (arg\ !=\ NULL\ ?\ atoi(arg)\ :\ test\_verbose\_level\_+1);}
+\DoxyCodeLine{01511\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{01512\ }
+\DoxyCodeLine{01513\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ \textcolor{charliteral}{'q'}:}
+\DoxyCodeLine{01514\ \ \ \ \ \ \ \ \ \ \ \ \ test\_verbose\_level\_\ =\ 0;}
+\DoxyCodeLine{01515\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{01516\ }
+\DoxyCodeLine{01517\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ \textcolor{charliteral}{'c'}:}
+\DoxyCodeLine{01518\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(arg\ ==\ NULL\ ||\ strcmp(arg,\ \textcolor{stringliteral}{"{}always"{}})\ ==\ 0)\ \{}
+\DoxyCodeLine{01519\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ test\_colorize\_\ =\ 1;}
+\DoxyCodeLine{01520\ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}(strcmp(arg,\ \textcolor{stringliteral}{"{}never"{}})\ ==\ 0)\ \{}
+\DoxyCodeLine{01521\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ test\_colorize\_\ =\ 0;}
+\DoxyCodeLine{01522\ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}(strcmp(arg,\ \textcolor{stringliteral}{"{}auto"{}})\ ==\ 0)\ \{}
+\DoxyCodeLine{01523\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*noop*/}}
+\DoxyCodeLine{01524\ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{01525\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ fprintf(stderr,\ \textcolor{stringliteral}{"{}\%s:\ Unrecognized\ argument\ '\%s'\ for\ option\ -\/-\/color.\(\backslash\)n"{}},\ test\_argv0\_,\ arg);}
+\DoxyCodeLine{01526\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ fprintf(stderr,\ \textcolor{stringliteral}{"{}Try\ '\%s\ -\/-\/help'\ for\ more\ information.\(\backslash\)n"{}},\ test\_argv0\_);}
+\DoxyCodeLine{01527\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ test\_exit\_(2);}
+\DoxyCodeLine{01528\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01529\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{01530\ }
+\DoxyCodeLine{01531\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ \textcolor{charliteral}{'C'}:}
+\DoxyCodeLine{01532\ \ \ \ \ \ \ \ \ \ \ \ \ test\_colorize\_\ =\ 0;}
+\DoxyCodeLine{01533\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{01534\ }
+\DoxyCodeLine{01535\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ \textcolor{charliteral}{'h'}:}
+\DoxyCodeLine{01536\ \ \ \ \ \ \ \ \ \ \ \ \ test\_help\_();}
+\DoxyCodeLine{01537\ \ \ \ \ \ \ \ \ \ \ \ \ test\_exit\_(0);}
+\DoxyCodeLine{01538\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{01539\ }
+\DoxyCodeLine{01540\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ \textcolor{charliteral}{'w'}:}
+\DoxyCodeLine{01541\ \ \ \ \ \ \ \ \ \ \ \ \ test\_worker\_\ =\ 1;}
+\DoxyCodeLine{01542\ \ \ \ \ \ \ \ \ \ \ \ \ test\_worker\_index\_\ =\ atoi(arg);}
+\DoxyCodeLine{01543\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{01544\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ \textcolor{charliteral}{'x'}:}
+\DoxyCodeLine{01545\ \ \ \ \ \ \ \ \ \ \ \ \ test\_xml\_output\_\ =\ fopen(arg,\ \textcolor{stringliteral}{"{}w"{}});}
+\DoxyCodeLine{01546\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!test\_xml\_output\_)\ \{}
+\DoxyCodeLine{01547\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ fprintf(stderr,\ \textcolor{stringliteral}{"{}Unable\ to\ open\ '\%s':\ \%s\(\backslash\)n"{}},\ arg,\ strerror(errno));}
+\DoxyCodeLine{01548\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ test\_exit\_(2);}
+\DoxyCodeLine{01549\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01550\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{01551\ }
+\DoxyCodeLine{01552\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 0:}
+\DoxyCodeLine{01553\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(test\_lookup\_(arg)\ ==\ 0)\ \{}
+\DoxyCodeLine{01554\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ fprintf(stderr,\ \textcolor{stringliteral}{"{}\%s:\ Unrecognized\ unit\ test\ '\%s'\(\backslash\)n"{}},\ test\_argv0\_,\ arg);}
+\DoxyCodeLine{01555\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ fprintf(stderr,\ \textcolor{stringliteral}{"{}Try\ '\%s\ -\/-\/list'\ for\ list\ of\ unit\ tests.\(\backslash\)n"{}},\ test\_argv0\_);}
+\DoxyCodeLine{01556\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ test\_exit\_(2);}
+\DoxyCodeLine{01557\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01558\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{01559\ }
+\DoxyCodeLine{01560\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ TEST\_CMDLINE\_OPTID\_UNKNOWN\_:}
+\DoxyCodeLine{01561\ \ \ \ \ \ \ \ \ \ \ \ \ fprintf(stderr,\ \textcolor{stringliteral}{"{}Unrecognized\ command\ line\ option\ '\%s'.\(\backslash\)n"{}},\ arg);}
+\DoxyCodeLine{01562\ \ \ \ \ \ \ \ \ \ \ \ \ fprintf(stderr,\ \textcolor{stringliteral}{"{}Try\ '\%s\ -\/-\/help'\ for\ more\ information.\(\backslash\)n"{}},\ test\_argv0\_);}
+\DoxyCodeLine{01563\ \ \ \ \ \ \ \ \ \ \ \ \ test\_exit\_(2);}
+\DoxyCodeLine{01564\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{01565\ }
+\DoxyCodeLine{01566\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ TEST\_CMDLINE\_OPTID\_MISSINGARG\_:}
+\DoxyCodeLine{01567\ \ \ \ \ \ \ \ \ \ \ \ \ fprintf(stderr,\ \textcolor{stringliteral}{"{}The\ command\ line\ option\ '\%s'\ requires\ an\ argument.\(\backslash\)n"{}},\ arg);}
+\DoxyCodeLine{01568\ \ \ \ \ \ \ \ \ \ \ \ \ fprintf(stderr,\ \textcolor{stringliteral}{"{}Try\ '\%s\ -\/-\/help'\ for\ more\ information.\(\backslash\)n"{}},\ test\_argv0\_);}
+\DoxyCodeLine{01569\ \ \ \ \ \ \ \ \ \ \ \ \ test\_exit\_(2);}
+\DoxyCodeLine{01570\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{01571\ }
+\DoxyCodeLine{01572\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ TEST\_CMDLINE\_OPTID\_BOGUSARG\_:}
+\DoxyCodeLine{01573\ \ \ \ \ \ \ \ \ \ \ \ \ fprintf(stderr,\ \textcolor{stringliteral}{"{}The\ command\ line\ option\ '\%s'\ does\ not\ expect\ an\ argument.\(\backslash\)n"{}},\ arg);}
+\DoxyCodeLine{01574\ \ \ \ \ \ \ \ \ \ \ \ \ fprintf(stderr,\ \textcolor{stringliteral}{"{}Try\ '\%s\ -\/-\/help'\ for\ more\ information.\(\backslash\)n"{}},\ test\_argv0\_);}
+\DoxyCodeLine{01575\ \ \ \ \ \ \ \ \ \ \ \ \ test\_exit\_(2);}
+\DoxyCodeLine{01576\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{01577\ \ \ \ \ \}}
+\DoxyCodeLine{01578\ }
+\DoxyCodeLine{01579\ \ \ \ \ \textcolor{keywordflow}{return}\ 0;}
+\DoxyCodeLine{01580\ \}}
+\DoxyCodeLine{01581\ }
+\DoxyCodeLine{01582\ }
+\DoxyCodeLine{01583\ \textcolor{preprocessor}{\#ifdef\ ACUTEST\_LINUX\_}}
+\DoxyCodeLine{01584\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{int}}
+\DoxyCodeLine{01585\ test\_is\_tracer\_present\_(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{01586\ \{}
+\DoxyCodeLine{01587\ \ \ \ \ \textcolor{comment}{/*\ Must\ be\ large\ enough\ so\ the\ line\ 'TracerPid:\ \$\{PID\}'\ can\ fit\ in.\ */}}
+\DoxyCodeLine{01588\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ OVERLAP\ =\ 32;}
+\DoxyCodeLine{01589\ }
+\DoxyCodeLine{01590\ \ \ \ \ \textcolor{keywordtype}{char}\ buf[256+OVERLAP+1];}
+\DoxyCodeLine{01591\ \ \ \ \ \textcolor{keywordtype}{int}\ tracer\_present\ =\ 0;}
+\DoxyCodeLine{01592\ \ \ \ \ \textcolor{keywordtype}{int}\ fd;}
+\DoxyCodeLine{01593\ \ \ \ \ \textcolor{keywordtype}{size\_t}\ n\_read\ =\ 0;}
+\DoxyCodeLine{01594\ }
+\DoxyCodeLine{01595\ \ \ \ \ fd\ =\ open(\textcolor{stringliteral}{"{}/proc/self/status"{}},\ O\_RDONLY);}
+\DoxyCodeLine{01596\ \ \ \ \ \textcolor{keywordflow}{if}(fd\ ==\ -\/1)}
+\DoxyCodeLine{01597\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ 0;}
+\DoxyCodeLine{01598\ }
+\DoxyCodeLine{01599\ \ \ \ \ \textcolor{keywordflow}{while}(1)\ \{}
+\DoxyCodeLine{01600\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ pattern[]\ =\ \textcolor{stringliteral}{"{}TracerPid:"{}};}
+\DoxyCodeLine{01601\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ field;}
+\DoxyCodeLine{01602\ }
+\DoxyCodeLine{01603\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}(n\_read\ <\ \textcolor{keyword}{sizeof}(buf)\ -\/\ 1)\ \{}
+\DoxyCodeLine{01604\ \ \ \ \ \ \ \ \ \ \ \ \ ssize\_t\ n;}
+\DoxyCodeLine{01605\ }
+\DoxyCodeLine{01606\ \ \ \ \ \ \ \ \ \ \ \ \ n\ =\ read(fd,\ buf\ +\ n\_read,\ \textcolor{keyword}{sizeof}(buf)\ -\/\ 1\ -\/\ n\_read);}
+\DoxyCodeLine{01607\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(n\ <=\ 0)}
+\DoxyCodeLine{01608\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{01609\ \ \ \ \ \ \ \ \ \ \ \ \ n\_read\ +=\ n;}
+\DoxyCodeLine{01610\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01611\ \ \ \ \ \ \ \ \ buf[n\_read]\ =\ \textcolor{charliteral}{'\(\backslash\)0'};}
+\DoxyCodeLine{01612\ }
+\DoxyCodeLine{01613\ \ \ \ \ \ \ \ \ field\ =\ strstr(buf,\ pattern);}
+\DoxyCodeLine{01614\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(field\ !=\ NULL\ \ \&\&\ \ field\ <\ buf\ +\ \textcolor{keyword}{sizeof}(buf)\ -\/\ OVERLAP)\ \{}
+\DoxyCodeLine{01615\ \ \ \ \ \ \ \ \ \ \ \ \ pid\_t\ tracer\_pid\ =\ (pid\_t)\ atoi(field\ +\ \textcolor{keyword}{sizeof}(pattern)\ -\/\ 1);}
+\DoxyCodeLine{01616\ \ \ \ \ \ \ \ \ \ \ \ \ tracer\_present\ =\ (tracer\_pid\ !=\ 0);}
+\DoxyCodeLine{01617\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{01618\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01619\ }
+\DoxyCodeLine{01620\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(n\_read\ ==\ \textcolor{keyword}{sizeof}(buf)-\/1)\ \{}
+\DoxyCodeLine{01621\ \ \ \ \ \ \ \ \ \ \ \ \ memmove(buf,\ buf\ +\ \textcolor{keyword}{sizeof}(buf)-\/1\ -\/\ OVERLAP,\ OVERLAP);}
+\DoxyCodeLine{01622\ \ \ \ \ \ \ \ \ \ \ \ \ n\_read\ =\ OVERLAP;}
+\DoxyCodeLine{01623\ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{01624\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{01625\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01626\ \ \ \ \ \}}
+\DoxyCodeLine{01627\ }
+\DoxyCodeLine{01628\ \ \ \ \ close(fd);}
+\DoxyCodeLine{01629\ \ \ \ \ \textcolor{keywordflow}{return}\ tracer\_present;}
+\DoxyCodeLine{01630\ \}}
+\DoxyCodeLine{01631\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{01632\ }
+\DoxyCodeLine{01633\ \textcolor{keywordtype}{int}}
+\DoxyCodeLine{01634\ main(\textcolor{keywordtype}{int}\ argc,\ \textcolor{keywordtype}{char}**\ argv)}
+\DoxyCodeLine{01635\ \{}
+\DoxyCodeLine{01636\ \ \ \ \ \textcolor{keywordtype}{int}\ i;}
+\DoxyCodeLine{01637\ \ \ \ \ test\_argv0\_\ =\ argv[0];}
+\DoxyCodeLine{01638\ }
+\DoxyCodeLine{01639\ \textcolor{preprocessor}{\#if\ defined\ ACUTEST\_UNIX\_}}
+\DoxyCodeLine{01640\ \ \ \ \ test\_colorize\_\ =\ isatty(STDOUT\_FILENO);}
+\DoxyCodeLine{01641\ \textcolor{preprocessor}{\#elif\ defined\ ACUTEST\_WIN\_}}
+\DoxyCodeLine{01642\ \textcolor{preprocessor}{\ \#if\ defined\ \_BORLANDC\_}}
+\DoxyCodeLine{01643\ \ \ \ \ test\_colorize\_\ =\ isatty(\_fileno(stdout));}
+\DoxyCodeLine{01644\ \textcolor{preprocessor}{\ \#else}}
+\DoxyCodeLine{01645\ \ \ \ \ test\_colorize\_\ =\ \_isatty(\_fileno(stdout));}
+\DoxyCodeLine{01646\ \textcolor{preprocessor}{\ \#endif}}
+\DoxyCodeLine{01647\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{01648\ \ \ \ \ test\_colorize\_\ =\ 0;}
+\DoxyCodeLine{01649\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{01650\ }
+\DoxyCodeLine{01651\ \ \ \ \ \textcolor{comment}{/*\ Count\ all\ test\ units\ */}}
+\DoxyCodeLine{01652\ \ \ \ \ test\_list\_size\_\ =\ 0;}
+\DoxyCodeLine{01653\ \ \ \ \ \textcolor{keywordflow}{for}(i\ =\ 0;\ test\_list\_[i].func\ !=\ NULL;\ i++)}
+\DoxyCodeLine{01654\ \ \ \ \ \ \ \ \ test\_list\_size\_++;}
+\DoxyCodeLine{01655\ }
+\DoxyCodeLine{01656\ \ \ \ \ test\_details\_\ =\ (\textcolor{keyword}{struct\ }\mbox{\hyperlink{structtest__detail__}{test\_detail\_}}*)calloc(test\_list\_size\_,\ \textcolor{keyword}{sizeof}(\textcolor{keyword}{struct}\ \mbox{\hyperlink{structtest__detail__}{test\_detail\_}}));}
+\DoxyCodeLine{01657\ \ \ \ \ \textcolor{keywordflow}{if}(test\_details\_\ ==\ NULL)\ \{}
+\DoxyCodeLine{01658\ \ \ \ \ \ \ \ \ fprintf(stderr,\ \textcolor{stringliteral}{"{}Out\ of\ memory.\(\backslash\)n"{}});}
+\DoxyCodeLine{01659\ \ \ \ \ \ \ \ \ test\_exit\_(2);}
+\DoxyCodeLine{01660\ \ \ \ \ \}}
+\DoxyCodeLine{01661\ }
+\DoxyCodeLine{01662\ \ \ \ \ \textcolor{comment}{/*\ Parse\ options\ */}}
+\DoxyCodeLine{01663\ \ \ \ \ test\_cmdline\_read\_(test\_cmdline\_options\_,\ argc,\ argv,\ test\_cmdline\_callback\_);}
+\DoxyCodeLine{01664\ }
+\DoxyCodeLine{01665\ \ \ \ \ \textcolor{comment}{/*\ Initialize\ the\ proper\ timer.\ */}}
+\DoxyCodeLine{01666\ \ \ \ \ test\_timer\_init\_();}
+\DoxyCodeLine{01667\ }
+\DoxyCodeLine{01668\ \textcolor{preprocessor}{\#if\ defined(ACUTEST\_WIN\_)}}
+\DoxyCodeLine{01669\ \ \ \ \ SetUnhandledExceptionFilter(test\_seh\_exception\_filter\_);}
+\DoxyCodeLine{01670\ \textcolor{preprocessor}{\#ifdef\ \_MSC\_VER}}
+\DoxyCodeLine{01671\ \ \ \ \ \_set\_abort\_behavior(0,\ \_WRITE\_ABORT\_MSG);}
+\DoxyCodeLine{01672\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{01673\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{01674\ }
+\DoxyCodeLine{01675\ \ \ \ \ \textcolor{comment}{/*\ By\ default,\ we\ want\ to\ run\ all\ tests.\ */}}
+\DoxyCodeLine{01676\ \ \ \ \ \textcolor{keywordflow}{if}(test\_count\_\ ==\ 0)\ \{}
+\DoxyCodeLine{01677\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(i\ =\ 0;\ test\_list\_[i].func\ !=\ NULL;\ i++)}
+\DoxyCodeLine{01678\ \ \ \ \ \ \ \ \ \ \ \ \ test\_remember\_(i);}
+\DoxyCodeLine{01679\ \ \ \ \ \}}
+\DoxyCodeLine{01680\ }
+\DoxyCodeLine{01681\ \ \ \ \ \textcolor{comment}{/*\ Guess\ whether\ we\ want\ to\ run\ unit\ tests\ as\ child\ processes.\ */}}
+\DoxyCodeLine{01682\ \ \ \ \ \textcolor{keywordflow}{if}(test\_no\_exec\_\ <\ 0)\ \{}
+\DoxyCodeLine{01683\ \ \ \ \ \ \ \ \ test\_no\_exec\_\ =\ 0;}
+\DoxyCodeLine{01684\ }
+\DoxyCodeLine{01685\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(test\_count\_\ <=\ 1)\ \{}
+\DoxyCodeLine{01686\ \ \ \ \ \ \ \ \ \ \ \ \ test\_no\_exec\_\ =\ 1;}
+\DoxyCodeLine{01687\ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{01688\ \textcolor{preprocessor}{\#ifdef\ ACUTEST\_WIN\_}}
+\DoxyCodeLine{01689\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(IsDebuggerPresent())}
+\DoxyCodeLine{01690\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ test\_no\_exec\_\ =\ 1;}
+\DoxyCodeLine{01691\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{01692\ \textcolor{preprocessor}{\#ifdef\ ACUTEST\_LINUX\_}}
+\DoxyCodeLine{01693\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(test\_is\_tracer\_present\_())}
+\DoxyCodeLine{01694\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ test\_no\_exec\_\ =\ 1;}
+\DoxyCodeLine{01695\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{01696\ \textcolor{preprocessor}{\#ifdef\ RUNNING\_ON\_VALGRIND}}
+\DoxyCodeLine{01697\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ RUNNING\_ON\_VALGRIND\ is\ provided\ by\ valgrind.h\ */}}
+\DoxyCodeLine{01698\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(RUNNING\_ON\_VALGRIND)}
+\DoxyCodeLine{01699\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ test\_no\_exec\_\ =\ 1;}
+\DoxyCodeLine{01700\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{01701\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01702\ \ \ \ \ \}}
+\DoxyCodeLine{01703\ }
+\DoxyCodeLine{01704\ \ \ \ \ \textcolor{keywordflow}{if}(test\_tap\_)\ \{}
+\DoxyCodeLine{01705\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ TAP\ requires\ we\ know\ test\ result\ ("{}ok"{},\ "{}not\ ok"{})\ before\ we\ output}}
+\DoxyCodeLine{01706\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ *\ anything\ about\ the\ test,\ and\ this\ gets\ problematic\ for\ larger\ verbose}}
+\DoxyCodeLine{01707\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ *\ levels.\ */}}
+\DoxyCodeLine{01708\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(test\_verbose\_level\_\ >\ 2)}
+\DoxyCodeLine{01709\ \ \ \ \ \ \ \ \ \ \ \ \ test\_verbose\_level\_\ =\ 2;}
+\DoxyCodeLine{01710\ }
+\DoxyCodeLine{01711\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ TAP\ harness\ should\ provide\ some\ summary.\ */}}
+\DoxyCodeLine{01712\ \ \ \ \ \ \ \ \ test\_no\_summary\_\ =\ 1;}
+\DoxyCodeLine{01713\ }
+\DoxyCodeLine{01714\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(!test\_worker\_)}
+\DoxyCodeLine{01715\ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}1..\%d\(\backslash\)n"{}},\ (\textcolor{keywordtype}{int})\ test\_count\_);}
+\DoxyCodeLine{01716\ \ \ \ \ \}}
+\DoxyCodeLine{01717\ }
+\DoxyCodeLine{01718\ \ \ \ \ \textcolor{keywordtype}{int}\ index\ =\ test\_worker\_index\_;}
+\DoxyCodeLine{01719\ \ \ \ \ \textcolor{keywordflow}{for}(i\ =\ 0;\ test\_list\_[i].func\ !=\ NULL;\ i++)\ \{}
+\DoxyCodeLine{01720\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ run\ =\ (test\_details\_[i].flags\ \&\ TEST\_FLAG\_RUN\_);}
+\DoxyCodeLine{01721\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (test\_skip\_mode\_)\ \textcolor{comment}{/*\ Run\ all\ tests\ except\ those\ listed.\ */}}
+\DoxyCodeLine{01722\ \ \ \ \ \ \ \ \ \ \ \ \ run\ =\ !run;}
+\DoxyCodeLine{01723\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(run)}
+\DoxyCodeLine{01724\ \ \ \ \ \ \ \ \ \ \ \ \ test\_run\_(\&test\_list\_[i],\ index++,\ i);}
+\DoxyCodeLine{01725\ \ \ \ \ \}}
+\DoxyCodeLine{01726\ }
+\DoxyCodeLine{01727\ \ \ \ \ \textcolor{comment}{/*\ Write\ a\ summary\ */}}
+\DoxyCodeLine{01728\ \ \ \ \ \textcolor{keywordflow}{if}(!test\_no\_summary\_\ \&\&\ test\_verbose\_level\_\ >=\ 1)\ \{}
+\DoxyCodeLine{01729\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(test\_verbose\_level\_\ >=\ 3)\ \{}
+\DoxyCodeLine{01730\ \ \ \ \ \ \ \ \ \ \ \ \ test\_print\_in\_color\_(TEST\_COLOR\_DEFAULT\_INTENSIVE\_,\ \textcolor{stringliteral}{"{}Summary:\(\backslash\)n"{}});}
+\DoxyCodeLine{01731\ }
+\DoxyCodeLine{01732\ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\ \ Count\ of\ all\ unit\ tests:\ \ \ \ \ \%4d\(\backslash\)n"{}},\ (\textcolor{keywordtype}{int})\ test\_list\_size\_);}
+\DoxyCodeLine{01733\ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\ \ Count\ of\ run\ unit\ tests:\ \ \ \ \ \%4d\(\backslash\)n"{}},\ test\_stat\_run\_units\_);}
+\DoxyCodeLine{01734\ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\ \ Count\ of\ failed\ unit\ tests:\ \ \%4d\(\backslash\)n"{}},\ test\_stat\_failed\_units\_);}
+\DoxyCodeLine{01735\ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\ \ Count\ of\ skipped\ unit\ tests:\ \%4d\(\backslash\)n"{}},\ (\textcolor{keywordtype}{int})\ test\_list\_size\_\ -\/\ test\_stat\_run\_units\_);}
+\DoxyCodeLine{01736\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01737\ }
+\DoxyCodeLine{01738\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(test\_stat\_failed\_units\_\ ==\ 0)\ \{}
+\DoxyCodeLine{01739\ \ \ \ \ \ \ \ \ \ \ \ \ test\_print\_in\_color\_(TEST\_COLOR\_GREEN\_INTENSIVE\_,\ \textcolor{stringliteral}{"{}SUCCESS:"{}});}
+\DoxyCodeLine{01740\ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\ All\ unit\ tests\ have\ passed.\(\backslash\)n"{}});}
+\DoxyCodeLine{01741\ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{01742\ \ \ \ \ \ \ \ \ \ \ \ \ test\_print\_in\_color\_(TEST\_COLOR\_RED\_INTENSIVE\_,\ \textcolor{stringliteral}{"{}FAILED:"{}});}
+\DoxyCodeLine{01743\ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\ \%d\ of\ \%d\ unit\ tests\ \%s\ failed.\(\backslash\)n"{}},}
+\DoxyCodeLine{01744\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ test\_stat\_failed\_units\_,\ test\_stat\_run\_units\_,}
+\DoxyCodeLine{01745\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (test\_stat\_failed\_units\_\ ==\ 1)\ ?\ \textcolor{stringliteral}{"{}has"{}}\ :\ \textcolor{stringliteral}{"{}have"{}});}
+\DoxyCodeLine{01746\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01747\ }
+\DoxyCodeLine{01748\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(test\_verbose\_level\_\ >=\ 3)}
+\DoxyCodeLine{01749\ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}\(\backslash\)n"{}});}
+\DoxyCodeLine{01750\ \ \ \ \ \}}
+\DoxyCodeLine{01751\ }
+\DoxyCodeLine{01752\ \ \ \ \ \textcolor{keywordflow}{if}\ (test\_xml\_output\_)\ \{}
+\DoxyCodeLine{01753\ \textcolor{preprocessor}{\#if\ defined\ ACUTEST\_UNIX\_}}
+\DoxyCodeLine{01754\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ *suite\_name\ =\ basename(argv[0]);}
+\DoxyCodeLine{01755\ \textcolor{preprocessor}{\#elif\ defined\ ACUTEST\_WIN\_}}
+\DoxyCodeLine{01756\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ suite\_name[\_MAX\_FNAME];}
+\DoxyCodeLine{01757\ \ \ \ \ \ \ \ \ \_splitpath(argv[0],\ NULL,\ NULL,\ suite\_name,\ NULL);}
+\DoxyCodeLine{01758\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{01759\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *suite\_name\ =\ argv[0];}
+\DoxyCodeLine{01760\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{01761\ \ \ \ \ \ \ \ \ fprintf(test\_xml\_output\_,\ \textcolor{stringliteral}{"{}<?xml\ version=\(\backslash\)"{}1.0\(\backslash\)"{}\ encoding=\(\backslash\)"{}UTF-\/8\(\backslash\)"{}?>\(\backslash\)n"{}});}
+\DoxyCodeLine{01762\ \ \ \ \ \ \ \ \ fprintf(test\_xml\_output\_,\ \textcolor{stringliteral}{"{}<testsuite\ name=\(\backslash\)"{}\%s\(\backslash\)"{}\ tests=\(\backslash\)"{}\%d\(\backslash\)"{}\ errors=\(\backslash\)"{}\%d\(\backslash\)"{}\ failures=\(\backslash\)"{}\%d\(\backslash\)"{}\ skip=\(\backslash\)"{}\%d\(\backslash\)"{}>\(\backslash\)n"{}},}
+\DoxyCodeLine{01763\ \ \ \ \ \ \ \ \ \ \ \ \ suite\_name,\ (\textcolor{keywordtype}{int})test\_list\_size\_,\ test\_stat\_failed\_units\_,\ test\_stat\_failed\_units\_,}
+\DoxyCodeLine{01764\ \ \ \ \ \ \ \ \ \ \ \ \ (\textcolor{keywordtype}{int})test\_list\_size\_\ -\/\ test\_stat\_run\_units\_);}
+\DoxyCodeLine{01765\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(i\ =\ 0;\ test\_list\_[i].func\ !=\ NULL;\ i++)\ \{}
+\DoxyCodeLine{01766\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structtest__detail__}{test\_detail\_}}\ *details\ =\ \&test\_details\_[i];}
+\DoxyCodeLine{01767\ \ \ \ \ \ \ \ \ \ \ \ \ fprintf(test\_xml\_output\_,\ \textcolor{stringliteral}{"{}\ \ <testcase\ name=\(\backslash\)"{}\%s\(\backslash\)"{}\ time=\(\backslash\)"{}\%.2f\(\backslash\)"{}>\(\backslash\)n"{}},\ test\_list\_[i].name,\ details-\/>duration);}
+\DoxyCodeLine{01768\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (details-\/>flags\ \&\ TEST\_FLAG\_FAILURE\_)}
+\DoxyCodeLine{01769\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ fprintf(test\_xml\_output\_,\ \textcolor{stringliteral}{"{}\ \ \ \ <failure\ />\(\backslash\)n"{}});}
+\DoxyCodeLine{01770\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!(details-\/>flags\ \&\ TEST\_FLAG\_FAILURE\_)\ \&\&\ !(details-\/>flags\ \&\ TEST\_FLAG\_SUCCESS\_))}
+\DoxyCodeLine{01771\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ fprintf(test\_xml\_output\_,\ \textcolor{stringliteral}{"{}\ \ \ \ <skipped\ />\(\backslash\)n"{}});}
+\DoxyCodeLine{01772\ \ \ \ \ \ \ \ \ \ \ \ \ fprintf(test\_xml\_output\_,\ \textcolor{stringliteral}{"{}\ \ </testcase>\(\backslash\)n"{}});}
+\DoxyCodeLine{01773\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01774\ \ \ \ \ \ \ \ \ fprintf(test\_xml\_output\_,\ \textcolor{stringliteral}{"{}</testsuite>\(\backslash\)n"{}});}
+\DoxyCodeLine{01775\ \ \ \ \ \ \ \ \ fclose(test\_xml\_output\_);}
+\DoxyCodeLine{01776\ \ \ \ \ \}}
+\DoxyCodeLine{01777\ }
+\DoxyCodeLine{01778\ \ \ \ \ test\_cleanup\_();}
+\DoxyCodeLine{01779\ }
+\DoxyCodeLine{01780\ \ \ \ \ \textcolor{keywordflow}{return}\ (test\_stat\_failed\_units\_\ ==\ 0)\ ?\ 0\ :\ 1;}
+\DoxyCodeLine{01781\ \}}
+\DoxyCodeLine{01782\ }
+\DoxyCodeLine{01783\ }
+\DoxyCodeLine{01784\ \textcolor{preprocessor}{\#endif\ \ }\textcolor{comment}{/*\ \#ifndef\ TEST\_NO\_MAIN\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{01785\ }
+\DoxyCodeLine{01786\ \textcolor{preprocessor}{\#ifdef\ \_MSC\_VER}}
+\DoxyCodeLine{01787\ \textcolor{preprocessor}{\ \ \ \ \#pragma\ warning(pop)}}
+\DoxyCodeLine{01788\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{01789\ }
+\DoxyCodeLine{01790\ \textcolor{preprocessor}{\#ifdef\ \_\_cplusplus}}
+\DoxyCodeLine{01791\ \ \ \ \ \}\ \ \textcolor{comment}{/*\ extern\ "{}C"{}\ */}}
+\DoxyCodeLine{01792\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{01793\ }
+\DoxyCodeLine{01794\ \textcolor{preprocessor}{\#endif\ \ }\textcolor{comment}{/*\ \#ifndef\ ACUTEST\_H\ */}\textcolor{preprocessor}{}}
+
+\end{DoxyCode}

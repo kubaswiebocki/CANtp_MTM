@@ -1,0 +1,46 @@
+\doxysection{Com\+Stack\+\_\+\+Types.\+h}
+\hypertarget{_com_stack___types_8h_source}{}\label{_com_stack___types_8h_source}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#ifndef\ COMSTACK\_TYPES\_H}}
+\DoxyCodeLine{00002\ \textcolor{preprocessor}{\#define\ COMSTACK\_TYPES\_H}}
+\DoxyCodeLine{00003\ }
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ "{}Std\_Types.h"{}}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ "{}Platform\_Types.h"{}}}
+\DoxyCodeLine{00006\ }
+\DoxyCodeLine{00007\ \textcolor{keyword}{typedef}\ uint16\ PduIdType;}
+\DoxyCodeLine{00008\ \textcolor{keyword}{typedef}\ uint32\ PduLengthType;}
+\DoxyCodeLine{00009\ }
+\DoxyCodeLine{00010\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{enum}\ \{}
+\DoxyCodeLine{00011\ \ \ \ \ BUFREQ\_OK,\ \ \ \ \ \ \ }
+\DoxyCodeLine{00012\ \ \ \ \ BUFREQ\_E\_NOT\_OK,\ }
+\DoxyCodeLine{00013\ \ \ \ \ BUFREQ\_BUSY,\ \ \ \ \ }
+\DoxyCodeLine{00014\ \ \ \ \ BUFREQ\_OVFL\ }
+\DoxyCodeLine{00015\ \}BufReq\_ReturnType;}
+\DoxyCodeLine{00016\ }
+\DoxyCodeLine{00017\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{enum}\ \{}
+\DoxyCodeLine{00018\ \ \ \ \ TP\_DATA\_CONF,\ }
+\DoxyCodeLine{00019\ \ \ \ \ TP\_DATARETRY,\ \ \ }
+\DoxyCodeLine{00020\ \ \ \ \ TP\_CONFPENDING\ \ }
+\DoxyCodeLine{00021\ \}TpDataStateType;}
+\DoxyCodeLine{00022\ }
+\DoxyCodeLine{00023\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{enum}\{}
+\DoxyCodeLine{00024\ \ \ \ \ TP\_STMIN,\ \ }
+\DoxyCodeLine{00025\ \ \ \ \ TP\_BS,\ \ \ \ \ \ }
+\DoxyCodeLine{00026\ \ \ \ \ TP\_BC\ \ \ \ \ \ \ }
+\DoxyCodeLine{00027\ \}TPParameterType;}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct}\{}
+\DoxyCodeLine{00030\ \ \ \ \ uint8*\ \ \ \ \ \ \ \ SduDataPtr;\ \ \ }
+\DoxyCodeLine{00031\ \ \ \ \ uint8*\ \ \ \ \ \ \ \ MetaDataPtr;\ \ }
+\DoxyCodeLine{00032\ \ \ \ \ PduLengthType\ SduLength;\ \ \ \ }
+\DoxyCodeLine{00033\ \}\mbox{\hyperlink{struct_pdu_info_type}{PduInfoType}};}
+\DoxyCodeLine{00034\ }
+\DoxyCodeLine{00035\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct}\{}
+\DoxyCodeLine{00036\ \ \ \ \ TpDataStateType\ TpDataStateType;\ }
+\DoxyCodeLine{00037\ \ \ \ \ PduLengthType\ \ \ TxTpDataCnt;}
+\DoxyCodeLine{00038\ }
+\DoxyCodeLine{00039\ \}\mbox{\hyperlink{struct_retry_info_type}{RetryInfoType}};}
+\DoxyCodeLine{00040\ }
+\DoxyCodeLine{00041\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ COMSTACK\_TYPES\_H\ */}\textcolor{preprocessor}{}}
+
+\end{DoxyCode}

@@ -1,0 +1,884 @@
+\doxysection{Can\+Tp.\+c}
+\hypertarget{_can_tp_8c_source}{}\label{_can_tp_8c_source}\mbox{\hyperlink{_can_tp_8c}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ }
+\DoxyCodeLine{00009\ \textcolor{comment}{/*====================================================================================================================*\(\backslash\)}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ \ \ \ Załączenie\ nagłówków}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\(\backslash\)*====================================================================================================================*/}}
+\DoxyCodeLine{00012\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{_can_tp_8h}{CanTp.h}}"{}}}
+\DoxyCodeLine{00013\ \textcolor{preprocessor}{\#include\ "{}CanIf.h"{}}}
+\DoxyCodeLine{00014\ \textcolor{preprocessor}{\#include\ "{}PduR.h"{}}}
+\DoxyCodeLine{00015\ }
+\DoxyCodeLine{00016\ \textcolor{comment}{/*====================================================================================================================*\(\backslash\)}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ \ \ \ Zmienne\ globalne}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\(\backslash\)*====================================================================================================================*/}}
+\DoxyCodeLine{00019\ CanTpState\_type\ CanTp\_State;\ }
+\DoxyCodeLine{00020\ }
+\DoxyCodeLine{00021\ \mbox{\hyperlink{struct_can_tp___variables_t_x__type}{CanTp\_VariablesTX\_type}}\ CanTp\_VariablesTX;}
+\DoxyCodeLine{00022\ }
+\DoxyCodeLine{00023\ \mbox{\hyperlink{struct_can_tp___variables_r_x__type}{CanTp\_VariablesRX\_type}}\ CanTp\_VariablesRX;}
+\DoxyCodeLine{00024\ }
+\DoxyCodeLine{00025\ \mbox{\hyperlink{struct_can_tp___timer__type}{CanTp\_Timer\_type}}\ N\_Ar\_timer\ =\ \ \ \{TIMER\_DISABLE,\ 0,\ N\_AR\_TIMEOUT\_VAL\};}
+\DoxyCodeLine{00026\ \mbox{\hyperlink{struct_can_tp___timer__type}{CanTp\_Timer\_type}}\ N\_Br\_timer\ =\ \ \ \{TIMER\_DISABLE,\ 0,\ N\_BR\_TIMEOUT\_VAL\};}
+\DoxyCodeLine{00027\ \mbox{\hyperlink{struct_can_tp___timer__type}{CanTp\_Timer\_type}}\ N\_Cr\_timer\ =\ \ \ \{TIMER\_DISABLE,\ 0,\ N\_CR\_TIMEOUT\_VAL\};}
+\DoxyCodeLine{00028\ \mbox{\hyperlink{struct_can_tp___timer__type}{CanTp\_Timer\_type}}\ N\_As\_timer\ =\ \ \ \{TIMER\_DISABLE,\ 0,\ N\_AS\_TIMEOUT\_VAL\};}
+\DoxyCodeLine{00029\ \mbox{\hyperlink{struct_can_tp___timer__type}{CanTp\_Timer\_type}}\ N\_Bs\_timer\ =\ \ \ \{TIMER\_DISABLE,\ 0,\ N\_BS\_TIMEOUT\_VAL\};}
+\DoxyCodeLine{00030\ \mbox{\hyperlink{struct_can_tp___timer__type}{CanTp\_Timer\_type}}\ N\_Cs\_timer\ =\ \ \ \{TIMER\_DISABLE,\ 0,\ N\_CS\_TIMEOUT\_VAL\};}
+\DoxyCodeLine{00031\ \mbox{\hyperlink{struct_can_tp___timer__type}{CanTp\_Timer\_type}}\ STMmin\_timer\ =\ \{TIMER\_DISABLE,\ 0,\ STMmin\_TIMEOUT\_VAL\};}
+\DoxyCodeLine{00032\ uint32\ FC\_Wait\_frame\_ctr;}
+\DoxyCodeLine{00033\ \textcolor{comment}{/*====================================================================================================================*\(\backslash\)}}
+\DoxyCodeLine{00034\ \textcolor{comment}{\ \ \ \ Deklaracje\ funkcji\ lokalnych}}
+\DoxyCodeLine{00035\ \textcolor{comment}{\(\backslash\)*====================================================================================================================*/}}
+\DoxyCodeLine{00036\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}\ CanTp\_ResetRX(\textcolor{keywordtype}{void});}
+\DoxyCodeLine{00037\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}\ CanTp\_ResetTX(\textcolor{keywordtype}{void});}
+\DoxyCodeLine{00038\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}\ CanTp\_SendNextCF(\textcolor{keywordtype}{void});}
+\DoxyCodeLine{00039\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}\ CanTp\_FlowControlReception(PduIdType\ RxPduId,\ \mbox{\hyperlink{struct_can_p_c_i___type}{CanPCI\_Type}}\ *CanPCI);}
+\DoxyCodeLine{00040\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}\ CanTp\_FirstFrameReception(PduIdType\ RxPduId,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{struct_pdu_info_type}{PduInfoType}}\ *PduInfoPtr,\ \mbox{\hyperlink{struct_can_p_c_i___type}{CanPCI\_Type}}\ *CanPCI);}
+\DoxyCodeLine{00041\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}\ CanTp\_SingleFrameReception(PduIdType\ RxPduId,\ \mbox{\hyperlink{struct_can_p_c_i___type}{CanPCI\_Type}}\ *CanPCI,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{struct_pdu_info_type}{PduInfoType}}*\ PduInfoPtr);}
+\DoxyCodeLine{00042\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}\ CanTp\_ConsecutiveFrameReception(PduIdType\ RxPduId,\ \mbox{\hyperlink{struct_can_p_c_i___type}{CanPCI\_Type}}\ *CanPCI,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{struct_pdu_info_type}{PduInfoType}}*\ PduInfoPtr);}
+\DoxyCodeLine{00043\ }
+\DoxyCodeLine{00044\ \textcolor{keyword}{static}\ uint16\ CanTp\_CalcBlocksSize(uint16\ uiBufferSize);}
+\DoxyCodeLine{00045\ }
+\DoxyCodeLine{00046\ \textcolor{keyword}{static}\ Std\_ReturnType\ CanTp\_GetPCI(\textcolor{keyword}{const}\ \mbox{\hyperlink{struct_pdu_info_type}{PduInfoType}}*\ CanData,\ \mbox{\hyperlink{struct_can_p_c_i___type}{CanPCI\_Type}}*\ CanFrameInfo);}
+\DoxyCodeLine{00047\ \textcolor{keyword}{static}\ Std\_ReturnType\ CanTp\_SendFlowControl(PduIdType\ ID,\ uint8\ uiBlockSize,\ FlowControlStatus\_type\ FC\_Status,\ uint8\ uiSeparationTime);}
+\DoxyCodeLine{00048\ \textcolor{keyword}{static}\ Std\_ReturnType\ CanTp\_SendConsecutiveFrame(PduIdType\ \textcolor{keywordtype}{id},\ uint8\ uiSequenceNumber,\ uint8*\ puiPayload,\ uint32\ uiSize);}
+\DoxyCodeLine{00049\ \textcolor{keyword}{static}\ Std\_ReturnType\ CanTp\_SendSingleFrame(PduIdType\ \textcolor{keywordtype}{id},\ uint8*\ puiPayload,\ uint32\ uiSize);}
+\DoxyCodeLine{00050\ \textcolor{keyword}{static}\ Std\_ReturnType\ CanTp\_SendFirstFrame(PduIdType\ \textcolor{keywordtype}{id},\ uint32\ uiMsgLen);}
+\DoxyCodeLine{00051\ \textcolor{keyword}{static}\ Std\_ReturnType\ CanTp\_PrepareSegmenetedFrame(\mbox{\hyperlink{struct_can_p_c_i___type}{CanPCI\_Type}}\ *CanPCI,\ \mbox{\hyperlink{struct_pdu_info_type}{PduInfoType}}\ *CanPdu\_Info,\ uint8\_t\ *puiCanPayload);}
+\DoxyCodeLine{00052\ \textcolor{comment}{/*====================================================================================================================*\(\backslash\)}}
+\DoxyCodeLine{00053\ \textcolor{comment}{\ \ \ \ Kod\ funkcji}}
+\DoxyCodeLine{00054\ \textcolor{comment}{\(\backslash\)*====================================================================================================================*/}}
+\DoxyCodeLine{00055\ }
+\DoxyCodeLine{00056\ \textcolor{comment}{/*====================================================================================================================*/}}
+\DoxyCodeLine{00062\ \textcolor{comment}{/*====================================================================================================================*/}}
+\DoxyCodeLine{00063\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{_can_tp_8c_a3dfe72ec51f271c2ad5c8f9569226920}{CanTp\_Init}}\ (\textcolor{keywordtype}{void})\{}
+\DoxyCodeLine{00064\ \ \ \ \ CanTp\_ResetRX();}
+\DoxyCodeLine{00065\ \ \ \ \ CanTp\_ResetTX();}
+\DoxyCodeLine{00066\ \ \ \ \ CanTp\_State\ =\ CANTP\_ON;}
+\DoxyCodeLine{00067\ \}}
+\DoxyCodeLine{00068\ \textcolor{comment}{/*====================================================================================================================*/}}
+\DoxyCodeLine{00074\ \textcolor{comment}{/*====================================================================================================================*/}}
+\DoxyCodeLine{00075\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{_can_tp_8c_ada90d4609fd6248ee2c845368339dd62}{CanTp\_GetVersionInfo}}(\mbox{\hyperlink{struct_std___version_info_type}{Std\_VersionInfoType}}\ *versioninfo)\ \{}
+\DoxyCodeLine{00076\ \ \ \ \ \textcolor{keywordflow}{if}\ (versioninfo\ !=\ NULL\_PTR)\ \{}
+\DoxyCodeLine{00077\ \ \ \ \ \ \ \ \ versioninfo-\/>sw\_major\_version\ =\ CANTP\_SW\_MAJOR\_V;}
+\DoxyCodeLine{00078\ \ \ \ \ \ \ \ \ versioninfo-\/>sw\_minor\_version\ =\ CANTP\_SW\_MINOR\_V;}
+\DoxyCodeLine{00079\ \ \ \ \ \ \ \ \ versioninfo-\/>sw\_patch\_version\ =\ CANTP\_SW\_PATCH\_V;}
+\DoxyCodeLine{00080\ \ \ \ \ \ \ \ \ versioninfo-\/>moduleID\ =\ (uint16)CANTP\_MODULE\_ID;}
+\DoxyCodeLine{00081\ \ \ \ \ \ \ \ \ versioninfo-\/>vendorID\ =\ 0x00u;}
+\DoxyCodeLine{00082\ \ \ \ \ \}}
+\DoxyCodeLine{00083\ \}}
+\DoxyCodeLine{00084\ \textcolor{comment}{/*====================================================================================================================*/}}
+\DoxyCodeLine{00094\ \textcolor{comment}{/*====================================================================================================================*/}}
+\DoxyCodeLine{00095\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{_can_tp_8c_a2d4971d9e47654df28a65bd1c14a0d00}{CanTp\_Shutdown}}(\textcolor{keywordtype}{void})\{}
+\DoxyCodeLine{00096\ \ \ \ \ \textcolor{comment}{/*\ Wypełnia\ [SWS\_CANTP\_00202]*/}}
+\DoxyCodeLine{00097\ \ \ \ \ CanTp\_ResetRX();}
+\DoxyCodeLine{00098\ \ \ \ \ CanTp\_ResetTX();}
+\DoxyCodeLine{00099\ \ \ \ \ \textcolor{comment}{/*\ Wypełnia\ [SWS\_CANTP\_00200]*/}}
+\DoxyCodeLine{00100\ \ \ \ \ CanTp\_State\ =\ CANTP\_OFF;}
+\DoxyCodeLine{00101\ \}}
+\DoxyCodeLine{00102\ \textcolor{comment}{/*====================================================================================================================*/}}
+\DoxyCodeLine{00117\ \textcolor{comment}{/*====================================================================================================================*/}}
+\DoxyCodeLine{00118\ Std\_ReturnType\ \mbox{\hyperlink{_can_tp_8c_ab98661fa30a5912c26c1d622fa171104}{CanTp\_Transmit}}(PduIdType\ TxPduId,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{struct_pdu_info_type}{PduInfoType}}*\ PduInfoPtr)\{}
+\DoxyCodeLine{00119\ \ \ \ \ BufReq\_ReturnType\ BufReqState;}
+\DoxyCodeLine{00120\ \ \ \ \ PduLengthType\ PduLen;}
+\DoxyCodeLine{00121\ \ \ \ \ Std\_ReturnType\ ret\ =\ E\_OK;}
+\DoxyCodeLine{00122\ \ \ \ \ \mbox{\hyperlink{struct_pdu_info_type}{PduInfoType}}\ PduTmp;}
+\DoxyCodeLine{00123\ \ \ \ \ uint8\_t\ uiPayload[8];}
+\DoxyCodeLine{00124\ \ \ \ \ PduTmp.SduDataPtr\ =\ uiPayload;}
+\DoxyCodeLine{00125\ \ \ \ \ PduTmp.MetaDataPtr\ =\ NULL;\ \ }
+\DoxyCodeLine{00126\ \ \ \ \ \textcolor{keywordflow}{if}(CanTp\_State\ ==\ CANTP\_ON)\{}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(\ CanTp\_VariablesTX.eCanTp\_StateTX\ ==\ CANTP\_TX\_WAIT)\{}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(PduInfoPtr-\/>SduLength\ <\ 8)\{}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ PduTmp.SduLength\ =\ PduInfoPtr-\/>SduLength;}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ BufReqState\ =\ PduR\_CanTpCopyTxData(TxPduId,\ \&PduTmp,\ NULL,\ \&PduLen);}
+\DoxyCodeLine{00131\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(BufReqState\ ==\ BUFREQ\_OK)\{}
+\DoxyCodeLine{00132\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Wypełnia\ [SWS\_CANTP\_00231]*/}}
+\DoxyCodeLine{00133\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Wypełnia\ [SWS\_CANTP\_00354]*/}}
+\DoxyCodeLine{00134\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ret\ =\ CanTp\_SendSingleFrame(TxPduId,\ PduTmp.SduDataPtr,\ PduInfoPtr-\/>SduLength\ );}
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00136\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Wypełnia\ [SWS\_CANTP\_00298]*/}}
+\DoxyCodeLine{00137\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}(BufReqState\ ==\ BUFREQ\_E\_NOT\_OK)\{}
+\DoxyCodeLine{00138\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_ResetTX();\ \ }
+\DoxyCodeLine{00139\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Wypełnia\ [SWS\_CANTP\_00205]*/}}
+\DoxyCodeLine{00140\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ PduR\_CanTpTxConfirmation(TxPduId,\ E\_NOT\_OK);}
+\DoxyCodeLine{00141\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ret\ =\ E\_NOT\_OK;}
+\DoxyCodeLine{00142\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00143\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{00144\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Wypełnia\ [SWS\_CANTP\_00204]*/}}
+\DoxyCodeLine{00145\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ PduR\_CanTpTxConfirmation(TxPduId,\ E\_OK);}}
+\DoxyCodeLine{00146\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_can_tp_8c_a36e809b3871fd6f5949e3ed395b4dc20}{CanTp\_TimerStart}}(\&N\_Cs\_timer);}
+\DoxyCodeLine{00147\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ret\ =\ E\_OK;}
+\DoxyCodeLine{00148\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00150\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\{}
+\DoxyCodeLine{00151\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(CanTp\_SendFirstFrame(TxPduId,\ PduInfoPtr-\/>SduLength)\ ==\ E\_OK)\{}
+\DoxyCodeLine{00152\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_VariablesTX.eCanTp\_StateTX\ =\ TxPduId;}
+\DoxyCodeLine{00153\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_VariablesTX.eCanTp\_StateTX\ =\ CANTP\_TX\_PROCESSING\_SUSPENDED;}
+\DoxyCodeLine{00154\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_VariablesTX.uiMsgLen\ =\ PduInfoPtr-\/>SduLength;}
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_VariablesTX.uiTransmittedBytes\ =\ 0;}
+\DoxyCodeLine{00156\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ret\ =\ E\_OK;}
+\DoxyCodeLine{00157\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00158\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\{}
+\DoxyCodeLine{00159\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ret\ =\ E\_NOT\_OK;}
+\DoxyCodeLine{00160\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00161\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00162\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00163\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\{}
+\DoxyCodeLine{00164\ \ \ \ \ \ \ \ \ \ \ \ \ ret\ =\ E\_NOT\_OK;}
+\DoxyCodeLine{00165\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00166\ \ \ \ \ \}\ \ \ }
+\DoxyCodeLine{00167\ \ \ \ \ \textcolor{keywordflow}{else}\{\ }
+\DoxyCodeLine{00168\ \ \ \ \ \ \ \ \ ret\ =\ E\_NOT\_OK;}
+\DoxyCodeLine{00169\ \ \ \ \ \}}
+\DoxyCodeLine{00170\ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{00171\ \}}
+\DoxyCodeLine{00172\ }
+\DoxyCodeLine{00182\ Std\_ReturnType\ \mbox{\hyperlink{_can_tp_8c_ab9bb0d37d8dcb66315fec58c79aa1fff}{CanTp\_CancelTransmit}}(PduIdType\ TxPduId)\{}
+\DoxyCodeLine{00183\ \ \ \ \ Std\_ReturnType\ ret;\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00184\ \ \ \ \ \textcolor{keywordflow}{if}(CanTp\_VariablesTX.CanTp\_Current\_TxId\ ==\ TxPduId\ )\{}
+\DoxyCodeLine{00185\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Wypełnia\ [SWS\_CANTP\_00255]*/}}
+\DoxyCodeLine{00186\ \ \ \ \ \ \ \ \ PduR\_CanTpTxConfirmation(CanTp\_VariablesTX.CanTp\_Current\_TxId,\ E\_NOT\_OK);}
+\DoxyCodeLine{00187\ \ \ \ \ \ \ \ \ CanTp\_ResetTX();}
+\DoxyCodeLine{00188\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Wypełnia\ [SWS\_CANTP\_00256]*/}}
+\DoxyCodeLine{00189\ \ \ \ \ \ \ \ \ ret\ =\ E\_OK;}
+\DoxyCodeLine{00190\ \ \ \ \ \}}
+\DoxyCodeLine{00191\ \ \ \ \ \textcolor{keywordflow}{else}\{}
+\DoxyCodeLine{00192\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Wypełnia\ [SWS\_CANTP\_00254]*/}}
+\DoxyCodeLine{00193\ \ \ \ \ \ \ \ \ ret\ =\ E\_NOT\_OK;}
+\DoxyCodeLine{00194\ \ \ \ \ \}}
+\DoxyCodeLine{00195\ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{00196\ \}}
+\DoxyCodeLine{00197\ }
+\DoxyCodeLine{00209\ Std\_ReturnType\ \mbox{\hyperlink{_can_tp_8c_a4348d7c8d1f4372eac3652e5d22556c7}{CanTp\_CancelReceive}}(PduIdType\ RxPduId)\{}
+\DoxyCodeLine{00210\ \ \ \ \ Std\_ReturnType\ ret;\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00211\ \ \ \ \ \textcolor{keywordflow}{if}(\ CanTp\_VariablesRX.CanTp\_Current\_RxId\ ==\ RxPduId\ )\{}
+\DoxyCodeLine{00212\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Wypełnia\ [SWS\_CANTP\_00263]*/}}
+\DoxyCodeLine{00213\ \ \ \ \ \ \ \ \ PduR\_CanTpRxIndication(CanTp\_VariablesRX.CanTp\_Current\_RxId,\ E\_NOT\_OK);}
+\DoxyCodeLine{00214\ \ \ \ \ \ \ \ \ CanTp\_ResetRX();}
+\DoxyCodeLine{00215\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Wypełnia\ [SWS\_CANTP\_00261]*/}}
+\DoxyCodeLine{00216\ \ \ \ \ \ \ \ \ ret\ =\ E\_OK;}
+\DoxyCodeLine{00217\ \ \ \ \ \}}
+\DoxyCodeLine{00218\ \ \ \ \ \textcolor{keywordflow}{else}\{}
+\DoxyCodeLine{00219\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Wypełnia\ [SWS\_CANTP\_00260]*/}}
+\DoxyCodeLine{00220\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Wypełnia\ [SWS\_CANTP\_00262]*/}}
+\DoxyCodeLine{00221\ \ \ \ \ \ \ \ \ ret\ =\ E\_NOT\_OK;}
+\DoxyCodeLine{00222\ \ \ \ \ \}}
+\DoxyCodeLine{00223\ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{00224\ \}}
+\DoxyCodeLine{00225\ }
+\DoxyCodeLine{00236\ Std\_ReturnType\ \mbox{\hyperlink{_can_tp_8c_a801a48975f33fb07cac861602967b8d0}{CanTp\_ChangeParameter}}(PduIdType\ \textcolor{keywordtype}{id},\ TPParameterType\ parameter,\ uint16\ value)\{}
+\DoxyCodeLine{00237\ \ \ \ \ Std\_ReturnType\ ret\ =\ E\_NOT\_OK;}
+\DoxyCodeLine{00238\ \ \ \ \ \textcolor{keywordflow}{if}\ (CanTp\_State\ ==\ CANTP\_ON)\{}
+\DoxyCodeLine{00239\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{switch}(parameter)\{}
+\DoxyCodeLine{00240\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ TP\_STMIN:}
+\DoxyCodeLine{00241\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ret\ =\ E\_OK;}
+\DoxyCodeLine{00242\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00243\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ TP\_BS:}
+\DoxyCodeLine{00244\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ret\ =\ E\_OK;}
+\DoxyCodeLine{00245\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00246\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ TP\_BC:}
+\DoxyCodeLine{00247\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00248\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{default}:}
+\DoxyCodeLine{00249\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00250\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00251\ \ \ \ \ \}}
+\DoxyCodeLine{00252\ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{00253\ \}}
+\DoxyCodeLine{00261\ Std\_ReturnType\ \mbox{\hyperlink{_can_tp_8c_a040a55bfce6f27335a218ab99622b037}{CanTp\_ReadParameter}}(PduIdType\ \textcolor{keywordtype}{id},\ TPParameterType\ parameter,\ uint16*\ value)\{}
+\DoxyCodeLine{00262\ \ \ \ \ Std\_ReturnType\ ret\ =\ E\_NOT\_OK;}
+\DoxyCodeLine{00263\ \ \ \ \ \textcolor{keywordflow}{if}\ (CanTp\_State\ ==\ CANTP\_ON)\{}
+\DoxyCodeLine{00264\ \ \ \ \ \ \ \ \ uint16\ readVal;}
+\DoxyCodeLine{00265\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{switch}\ (parameter)\ \{}
+\DoxyCodeLine{00266\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ TP\_STMIN:}
+\DoxyCodeLine{00267\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ readVal\ =\ 1;}
+\DoxyCodeLine{00268\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ret\ =\ E\_OK;}
+\DoxyCodeLine{00269\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00270\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ TP\_BS:}
+\DoxyCodeLine{00271\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ readVal\ =\ 1;}
+\DoxyCodeLine{00272\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ret\ =\ E\_OK;}
+\DoxyCodeLine{00273\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00274\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ TP\_BC:}
+\DoxyCodeLine{00275\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{default}:}
+\DoxyCodeLine{00276\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00277\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00278\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ ((ret\ ==\ E\_OK)\ \&\&\ (readVal\ <=\ 0xff))\ \{}
+\DoxyCodeLine{00279\ \ \ \ \ \ \ \ \ \ \ \ \ *value\ =\ readVal;}
+\DoxyCodeLine{00280\ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{00281\ \ \ \ \ \ \ \ \ \ \ \ \ ret\ =\ E\_NOT\_OK;}
+\DoxyCodeLine{00282\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00283\ \ \ \ \ \}}
+\DoxyCodeLine{00284\ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{00285\ \}}
+\DoxyCodeLine{00286\ }
+\DoxyCodeLine{00294\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{_can_tp_8c_a28b31e1ad8e52490124ef883a8d69150}{CanTp\_MainFunction}}(\textcolor{keywordtype}{void})\{}
+\DoxyCodeLine{00295\ \ \ \ \ \textcolor{comment}{/*\ Wypełnia\ [SWS\_CANTP\_00164]*/}}
+\DoxyCodeLine{00296\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{boolean}\ N\_Ar\_timeout,\ N\_Br\_timeout,\ N\_Cr\_timeout,\ N\_As\_timeout,\ N\_Bs\_timeout,\ N\_Cs\_timeout,\ STMmin\_timeout;}
+\DoxyCodeLine{00297\ \ \ \ \ \textcolor{keyword}{static}\ PduLengthType\ PduLen;}
+\DoxyCodeLine{00298\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keyword}{const}\ \mbox{\hyperlink{struct_pdu_info_type}{PduInfoType}}\ PduInfoConst\ =\ \{NULL,\ NULL,\ 0\};}
+\DoxyCodeLine{00299\ \ \ \ \ uint16\ uiBlockSize;}
+\DoxyCodeLine{00300\ \ \ \ \ uint8\ uiSeparationTime;}
+\DoxyCodeLine{00301\ \ \ \ \ BufReq\_ReturnType\ BufReqState;\ }
+\DoxyCodeLine{00302\ }
+\DoxyCodeLine{00303\ \ \ \ \ \mbox{\hyperlink{_can_tp_8c_a4e05dc50d66ad5809d8a10d562ad17d7}{CanTp\_TimerTick}}(\&N\_Ar\_timer);}
+\DoxyCodeLine{00304\ \ \ \ \ \mbox{\hyperlink{_can_tp_8c_a4e05dc50d66ad5809d8a10d562ad17d7}{CanTp\_TimerTick}}(\&N\_Br\_timer);}
+\DoxyCodeLine{00305\ \ \ \ \ \mbox{\hyperlink{_can_tp_8c_a4e05dc50d66ad5809d8a10d562ad17d7}{CanTp\_TimerTick}}(\&N\_Cr\_timer);}
+\DoxyCodeLine{00306\ }
+\DoxyCodeLine{00307\ \ \ \ \ \mbox{\hyperlink{_can_tp_8c_a4e05dc50d66ad5809d8a10d562ad17d7}{CanTp\_TimerTick}}(\&N\_As\_timer);}
+\DoxyCodeLine{00308\ \ \ \ \ \mbox{\hyperlink{_can_tp_8c_a4e05dc50d66ad5809d8a10d562ad17d7}{CanTp\_TimerTick}}(\&N\_Bs\_timer);}
+\DoxyCodeLine{00309\ \ \ \ \ \mbox{\hyperlink{_can_tp_8c_a4e05dc50d66ad5809d8a10d562ad17d7}{CanTp\_TimerTick}}(\&N\_Cs\_timer);}
+\DoxyCodeLine{00310\ }
+\DoxyCodeLine{00311\ \ \ \ \textcolor{keywordflow}{if}(N\_Br\_timer.eState\ ==\ TIMER\_ENABLE)\{}
+\DoxyCodeLine{00312\ \ \ \ \ \ \ \ BufReqState\ =\ PduR\_CanTpCopyRxData(CanTp\_VariablesRX.CanTp\_Current\_RxId,\ \&PduInfoConst,\ \&PduLen);}
+\DoxyCodeLine{00313\ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(BufReqState\ ==\ BUFREQ\_E\_NOT\_OK)\{}
+\DoxyCodeLine{00314\ \ \ \ \ \ \ \ \ \ \ \ PduR\_CanTpRxIndication(CanTp\_VariablesRX.CanTp\_Current\_RxId,\ E\_NOT\_OK);}
+\DoxyCodeLine{00315\ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00316\ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\{}
+\DoxyCodeLine{00317\ \ \ \ \ \ \ \ \ \ \ \ \ uiBlockSize\ =\ CanTp\_CalcBlocksSize(PduLen);}
+\DoxyCodeLine{00318\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(uiBlockSize\ >\ 0)\{}
+\DoxyCodeLine{00319\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_VariablesRX.uiBlocksNxtCts\ =\ uiBlockSize;}
+\DoxyCodeLine{00320\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_VariablesRX.eCanTp\_StateRX\ =\ CANTP\_RX\_PROCESSING;}
+\DoxyCodeLine{00321\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(CanTp\_SendFlowControl(CanTp\_VariablesRX.CanTp\_Current\_RxId,\ uiBlockSize,\ FC\_CTS,\ uiSeparationTime)\ ==\ E\_NOT\_OK)\{\ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00322\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_ResetRX();}
+\DoxyCodeLine{00323\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00324\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\{}
+\DoxyCodeLine{00325\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_can_tp_8c_a9d97bacf210d61dd6e586abe50a62b47}{CanTp\_TimerReset}}(\&N\_Br\_timer);\ }
+\DoxyCodeLine{00326\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \ }
+\DoxyCodeLine{00327\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00328\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(\mbox{\hyperlink{_can_tp_8c_ad6087c8d49ce4d7a0ca27ae3ab98763e}{CanTp\_TimerTimeout}}(\&N\_Br\_timer))\{}
+\DoxyCodeLine{00329\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ FC\_Wait\_frame\_ctr++;}
+\DoxyCodeLine{00330\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ N\_Br\_timer.uiCounter\ =\ 0;}
+\DoxyCodeLine{00331\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(FC\_Wait\_frame\_ctr\ >=\ FC\_WAIT\_FRAME\_CTR\_MAX)\{}
+\DoxyCodeLine{00332\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ PduR\_CanTpRxIndication\ (CanTp\_VariablesRX.CanTp\_Current\_RxId,\ E\_NOT\_OK);}
+\DoxyCodeLine{00333\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_ResetRX();\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00334\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ FC\_Wait\_frame\_ctr\ =\ 0;}
+\DoxyCodeLine{00335\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00336\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\{}
+\DoxyCodeLine{00337\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(CanTp\_SendFlowControl(CanTp\_VariablesRX.CanTp\_Current\_RxId,\ uiBlockSize,\ FC\_WAIT,\ uiSeparationTime)\ ==\ E\_NOT\_OK)\{}
+\DoxyCodeLine{00338\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_ResetRX();}
+\DoxyCodeLine{00339\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00340\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00341\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00342\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00343\ \ \ \ \}}
+\DoxyCodeLine{00344\ \ \ \ \textcolor{keywordflow}{if}(N\_Cr\_timer.eState\ ==\ TIMER\_ENABLE)\{}
+\DoxyCodeLine{00345\ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(\mbox{\hyperlink{_can_tp_8c_ad6087c8d49ce4d7a0ca27ae3ab98763e}{CanTp\_TimerTimeout}}(\&N\_Cr\_timer)\ ==\ E\_NOT\_OK)\{}
+\DoxyCodeLine{00346\ \ \ \ \ \ \ \ \ \ \ \ \ PduR\_CanTpRxIndication(CanTp\_VariablesRX.CanTp\_Current\_RxId,\ E\_NOT\_OK);}
+\DoxyCodeLine{00347\ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_ResetRX();}
+\DoxyCodeLine{00348\ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00349\ \ \ \ \}}
+\DoxyCodeLine{00350\ \ \ \ \textcolor{keywordflow}{if}(N\_Ar\_timer.eState\ ==\ TIMER\_ENABLE)\{}
+\DoxyCodeLine{00351\ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(\mbox{\hyperlink{_can_tp_8c_ad6087c8d49ce4d7a0ca27ae3ab98763e}{CanTp\_TimerTimeout}}(\&N\_Ar\_timer)\ ==\ E\_NOT\_OK)\{}
+\DoxyCodeLine{00352\ \ \ \ \ \ \ \ \ \ \ \ \ PduR\_CanTpRxIndication(CanTp\_VariablesRX.CanTp\_Current\_RxId,\ E\_NOT\_OK);}
+\DoxyCodeLine{00353\ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_ResetRX();}
+\DoxyCodeLine{00354\ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00355\ \ \ \ \}}
+\DoxyCodeLine{00356\ \ \ \ \ \textcolor{keywordflow}{if}(N\_Cs\_timer.eState\ ==\ TIMER\_ENABLE)\{}
+\DoxyCodeLine{00357\ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(\mbox{\hyperlink{_can_tp_8c_ad6087c8d49ce4d7a0ca27ae3ab98763e}{CanTp\_TimerTimeout}}(\&N\_Cs\_timer)\ ==\ E\_NOT\_OK)\{}
+\DoxyCodeLine{00358\ \ \ \ \ \ \ \ \ \ \ \ \ PduR\_CanTpTxConfirmation(CanTp\_VariablesTX.CanTp\_Current\_TxId,\ E\_NOT\_OK);}
+\DoxyCodeLine{00359\ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_ResetTX();}
+\DoxyCodeLine{00360\ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00361\ \ \ \ \}}
+\DoxyCodeLine{00362\ \ \ \ \ \textcolor{keywordflow}{if}(N\_As\_timer.eState\ ==\ TIMER\_ENABLE)\{}
+\DoxyCodeLine{00363\ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(\mbox{\hyperlink{_can_tp_8c_ad6087c8d49ce4d7a0ca27ae3ab98763e}{CanTp\_TimerTimeout}}(\&N\_As\_timer)\ ==\ E\_NOT\_OK)\{}
+\DoxyCodeLine{00364\ \ \ \ \ \ \ \ \ \ \ \ \ PduR\_CanTpTxConfirmation(CanTp\_VariablesTX.CanTp\_Current\_TxId,\ E\_NOT\_OK);}
+\DoxyCodeLine{00365\ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_ResetTX();}
+\DoxyCodeLine{00366\ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00367\ \ \ \ \}}
+\DoxyCodeLine{00368\ \ \ \ \ \textcolor{keywordflow}{if}(N\_Bs\_timer.eState\ ==\ TIMER\_ENABLE)\{}
+\DoxyCodeLine{00369\ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(\mbox{\hyperlink{_can_tp_8c_ad6087c8d49ce4d7a0ca27ae3ab98763e}{CanTp\_TimerTimeout}}(\&N\_Bs\_timer)\ ==\ E\_NOT\_OK)\{}
+\DoxyCodeLine{00370\ \ \ \ \ \ \ \ \ \ \ \ \ PduR\_CanTpTxConfirmation(CanTp\_VariablesTX.CanTp\_Current\_TxId,\ E\_NOT\_OK);}
+\DoxyCodeLine{00371\ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_ResetTX();}
+\DoxyCodeLine{00372\ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00373\ \ \ \ \}}
+\DoxyCodeLine{00374\ \}\ }
+\DoxyCodeLine{00375\ }
+\DoxyCodeLine{00385\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{_can_tp_8c_a4c81c6399330bff84bdf2e0cd6254de9}{CanTp\_RxIndication}}(PduIdType\ RxPduId,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{struct_pdu_info_type}{PduInfoType}}*\ PduInfoPtr)\{}
+\DoxyCodeLine{00386\ \ \ \ \ }
+\DoxyCodeLine{00387\ \ \ \ \ \mbox{\hyperlink{struct_can_p_c_i___type}{CanPCI\_Type}}\ CanPCI;\ \ \ \ }
+\DoxyCodeLine{00388\ }
+\DoxyCodeLine{00389\ \ \ \ \ \textcolor{keywordflow}{if}(CanTp\_State\ ==\ CANTP\_ON)\{}
+\DoxyCodeLine{00390\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(CanTp\_VariablesRX.eCanTp\_StateRX\ ==\ CANTP\_RX\_WAIT)\{}
+\DoxyCodeLine{00391\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00392\ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_GetPCI(PduInfoPtr,\ \&CanPCI);}
+\DoxyCodeLine{00393\ }
+\DoxyCodeLine{00394\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(CanPCI.eFrameType\ ==\ CAN\_FF)\{}
+\DoxyCodeLine{00395\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_FirstFrameReception(RxPduId,\ PduInfoPtr,\ \&CanPCI);}
+\DoxyCodeLine{00396\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00397\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}(CanPCI.eFrameType\ ==\ CAN\_SF)\{}
+\DoxyCodeLine{00398\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_SingleFrameReception(RxPduId,\ \&CanPCI,\ PduInfoPtr);\ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00399\ \ \ \ \ \ \ \ \ \ \ \ \ \}\ }
+\DoxyCodeLine{00400\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}(CanPCI.eFrameType\ ==\ CAN\_FC)\{}
+\DoxyCodeLine{00401\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_FlowControlReception(RxPduId,\ \&CanPCI);}
+\DoxyCodeLine{00402\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00403\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00404\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00405\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_VariablesRX.eCanTp\_StateRX\ =\ CANTP\_RX\_WAIT;\ }
+\DoxyCodeLine{00406\ \ \ \ \ \ \ \ \ \ \ \ \ \}\ }
+\DoxyCodeLine{00407\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00408\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}(CanTp\_VariablesRX.eCanTp\_StateRX\ ==\ CANTP\_RX\_PROCESSING)\{}
+\DoxyCodeLine{00409\ \ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_GetPCI(PduInfoPtr,\ \&CanPCI);}
+\DoxyCodeLine{00410\ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(CanPCI.eFrameType\ ==\ CAN\_CF)\{}
+\DoxyCodeLine{00411\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_ConsecutiveFrameReception(RxPduId,\ \&CanPCI,\ PduInfoPtr);}
+\DoxyCodeLine{00412\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00413\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}(CanPCI.eFrameType\ ==\ CAN\_FC)\{}
+\DoxyCodeLine{00414\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_FlowControlReception(RxPduId,\ \&CanPCI);}
+\DoxyCodeLine{00415\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00416\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}(CanPCI.eFrameType\ ==\ CAN\_FF)\{\ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00417\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ PduR\_CanTpRxIndication\ (CanTp\_VariablesRX.CanTp\_Current\_RxId,\ E\_NOT\_OK);}
+\DoxyCodeLine{00418\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_ResetRX();}
+\DoxyCodeLine{00419\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_FirstFrameReception(RxPduId,\ PduInfoPtr,\ \&CanPCI);}
+\DoxyCodeLine{00420\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00421\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}(CanPCI.eFrameType\ ==\ CAN\_SF)\{\ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00422\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ PduR\_CanTpRxIndication\ (CanTp\_VariablesRX.CanTp\_Current\_RxId,\ E\_NOT\_OK);}
+\DoxyCodeLine{00423\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_ResetRX();}
+\DoxyCodeLine{00424\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_SingleFrameReception(RxPduId,\ \&CanPCI,\ PduInfoPtr);}
+\DoxyCodeLine{00425\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00426\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\{}
+\DoxyCodeLine{00427\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00428\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00429\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \{\ \ \ \ }
+\DoxyCodeLine{00430\ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_GetPCI(PduInfoPtr,\ \&CanPCI);}
+\DoxyCodeLine{00431\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(CanPCI.eFrameType\ ==\ CAN\_FC)\{}
+\DoxyCodeLine{00432\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_FlowControlReception(RxPduId,\ \&CanPCI);}
+\DoxyCodeLine{00433\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00434\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}(CanPCI.eFrameType\ ==\ CAN\_FF)\ \{\ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00435\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ PduR\_CanTpRxIndication\ (CanTp\_VariablesRX.CanTp\_Current\_RxId,\ E\_NOT\_OK);}
+\DoxyCodeLine{00436\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_ResetRX();}
+\DoxyCodeLine{00437\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_FirstFrameReception(RxPduId,\ PduInfoPtr,\ \&CanPCI);}
+\DoxyCodeLine{00438\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00439\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}(CanPCI.eFrameType\ ==\ CAN\_SF)\ \{\ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00440\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ PduR\_CanTpRxIndication\ (CanTp\_VariablesRX.CanTp\_Current\_RxId,\ E\_NOT\_OK);}
+\DoxyCodeLine{00441\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_ResetRX();}
+\DoxyCodeLine{00442\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_SingleFrameReception(RxPduId,\ \&CanPCI,\ PduInfoPtr);}
+\DoxyCodeLine{00443\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00444\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{00445\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ PduR\_CanTpRxIndication\ (CanTp\_VariablesRX.CanTp\_Current\_RxId,\ E\_NOT\_OK);}
+\DoxyCodeLine{00446\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_ResetRX();}
+\DoxyCodeLine{00447\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00448\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00449\ \ \ \ \ \}}
+\DoxyCodeLine{00450\ \}}
+\DoxyCodeLine{00451\ }
+\DoxyCodeLine{00459\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{_can_tp_8c_a371d9eb76ded3dfac596dfbcc63e758a}{CanTp\_TxConfirmation}}(PduIdType\ TxPduId,\ Std\_ReturnType\ result)\{}
+\DoxyCodeLine{00460\ \textcolor{keywordflow}{if}(\ CanTp\_State\ ==\ CANTP\_ON\ )\{\ \ }
+\DoxyCodeLine{00461\ \ \ \ \ \textcolor{keywordflow}{if}(CanTp\_VariablesRX.CanTp\_Current\_RxId\ ==\ TxPduId)\{}
+\DoxyCodeLine{00462\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(\ (CanTp\_VariablesRX.eCanTp\_StateRX\ ==\ CANTP\_RX\_PROCESSING\ )\ ||\ (CanTp\_VariablesRX.eCanTp\_StateRX\ ==\ CANTP\_RX\_PROCESSING\_SUSPEND))\{}
+\DoxyCodeLine{00463\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(result\ ==\ E\_OK)\{}
+\DoxyCodeLine{00464\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_can_tp_8c_a9d97bacf210d61dd6e586abe50a62b47}{CanTp\_TimerReset}}(\&N\_Ar\_timer);\ \ \ }
+\DoxyCodeLine{00465\ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \ \ \ }
+\DoxyCodeLine{00466\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\{}
+\DoxyCodeLine{00467\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ PduR\_CanTpRxIndication(CanTp\_VariablesRX.CanTp\_Current\_RxId,\ E\_NOT\_OK);}
+\DoxyCodeLine{00468\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_ResetRX();}
+\DoxyCodeLine{00469\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00470\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00471\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\{\}\ }
+\DoxyCodeLine{00472\ \ \ \ \ \}}
+\DoxyCodeLine{00473\ \ \ \ \ \textcolor{keywordflow}{if}(CanTp\_VariablesTX.CanTp\_Current\_TxId\ ==\ TxPduId\ )\{}
+\DoxyCodeLine{00474\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(result\ ==\ E\_OK)\{}
+\DoxyCodeLine{00475\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(CanTp\_VariablesTX.eCanTp\_StateTX\ ==\ CANTP\_TX\_PROCESSING)}
+\DoxyCodeLine{00476\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00477\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_SendNextCF();\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00478\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00479\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\{\}}
+\DoxyCodeLine{00480\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00481\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\{}
+\DoxyCodeLine{00482\ \ \ \ \ \ \ \ \ \ \ \ \ PduR\_CanTpTxConfirmation(CanTp\_VariablesTX.CanTp\_Current\_TxId,\ E\_NOT\_OK);}
+\DoxyCodeLine{00483\ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_ResetTX();}
+\DoxyCodeLine{00484\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00485\ \ \ \ \ \}}
+\DoxyCodeLine{00486\ \ \ \ \ \textcolor{keywordflow}{else}\{\}}
+\DoxyCodeLine{00487\ \}}
+\DoxyCodeLine{00488\ \}}
+\DoxyCodeLine{00489\ }
+\DoxyCodeLine{00490\ \textcolor{comment}{/*====================================================================================================================*\(\backslash\)}}
+\DoxyCodeLine{00491\ \textcolor{comment}{\ \ \ \ Definicja\ funkcji\ lokalnych}}
+\DoxyCodeLine{00492\ \textcolor{comment}{\(\backslash\)*====================================================================================================================*/}}
+\DoxyCodeLine{00493\ }
+\DoxyCodeLine{00494\ \textcolor{comment}{/*====================================================================================================================*/}}
+\DoxyCodeLine{00498\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}\ CanTp\_ResetRX(\textcolor{keywordtype}{void})\{}
+\DoxyCodeLine{00499\ \ \ \ \ CanTp\_VariablesRX.eCanTp\_StateRX\ =\ CANTP\_RX\_WAIT;}
+\DoxyCodeLine{00500\ \ \ \ \ CanTp\_VariablesRX.uiMsgLen\ =\ 0;}
+\DoxyCodeLine{00501\ \ \ \ \ CanTp\_VariablesRX.uiTransmittedBytes\ =\ 0;}
+\DoxyCodeLine{00502\ \ \ \ \ CanTp\_VariablesRX.uiExpected\_CF\_SN\ =\ 0;}
+\DoxyCodeLine{00503\ \ \ \ \ CanTp\_VariablesRX.uiBlocksNxtCts\ =\ 0;}
+\DoxyCodeLine{00504\ \ \ \ \ CanTp\_VariablesRX.CanTp\_Current\_RxId\ =\ 0;}
+\DoxyCodeLine{00505\ \ \ \ \ \mbox{\hyperlink{_can_tp_8c_a9d97bacf210d61dd6e586abe50a62b47}{CanTp\_TimerReset}}(\&N\_Ar\_timer);}
+\DoxyCodeLine{00506\ \ \ \ \ \mbox{\hyperlink{_can_tp_8c_a9d97bacf210d61dd6e586abe50a62b47}{CanTp\_TimerReset}}(\&N\_Br\_timer);}
+\DoxyCodeLine{00507\ \ \ \ \ \mbox{\hyperlink{_can_tp_8c_a9d97bacf210d61dd6e586abe50a62b47}{CanTp\_TimerReset}}(\&N\_Cr\_timer);}
+\DoxyCodeLine{00508\ \}}
+\DoxyCodeLine{00512\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}\ CanTp\_ResetTX(\textcolor{keywordtype}{void})\{}
+\DoxyCodeLine{00513\ \ \ \ \ CanTp\_VariablesTX.eCanTp\_StateTX\ =\ CANTP\_TX\_WAIT;}
+\DoxyCodeLine{00514\ \ \ \ \ CanTp\_VariablesTX.uiMsgLen\ =\ 0;}
+\DoxyCodeLine{00515\ \ \ \ \ CanTp\_VariablesTX.uiTransmittedBytes\ =\ 0;}
+\DoxyCodeLine{00516\ \ \ \ \ CanTp\_VariablesTX.uiFrameNrFC\ =\ 0;}
+\DoxyCodeLine{00517\ \ \ \ \ CanTp\_VariablesTX.CanTp\_Current\_TxId\ =\ 0;}
+\DoxyCodeLine{00518\ \ \ \ \ \mbox{\hyperlink{_can_tp_8c_a9d97bacf210d61dd6e586abe50a62b47}{CanTp\_TimerReset}}(\&N\_As\_timer);}
+\DoxyCodeLine{00519\ \ \ \ \ \mbox{\hyperlink{_can_tp_8c_a9d97bacf210d61dd6e586abe50a62b47}{CanTp\_TimerReset}}(\&N\_Bs\_timer);}
+\DoxyCodeLine{00520\ \ \ \ \ \mbox{\hyperlink{_can_tp_8c_a9d97bacf210d61dd6e586abe50a62b47}{CanTp\_TimerReset}}(\&N\_Cs\_timer);}
+\DoxyCodeLine{00521\ \}}
+\DoxyCodeLine{00522\ }
+\DoxyCodeLine{00526\ \textcolor{keyword}{static}\ Std\_ReturnType\ CanTp\_PrepareSegmenetedFrame(\mbox{\hyperlink{struct_can_p_c_i___type}{CanPCI\_Type}}\ *CanPCI,\ \mbox{\hyperlink{struct_pdu_info_type}{PduInfoType}}\ *CanPdu\_Info,\ uint8\_t\ *puiCanPayload)\{}
+\DoxyCodeLine{00527\ }
+\DoxyCodeLine{00528\ \ \ \ \ Std\_ReturnType\ ret\ =\ E\_OK;}
+\DoxyCodeLine{00529\ }
+\DoxyCodeLine{00530\ \ \ \ \ \textcolor{keywordflow}{if}(NE\_NULL\_PTR(CanPCI)\ \&\&\ NE\_NULL\_PTR(CanPdu\_Info)\ \&\&\ NE\_NULL\_PTR(puiCanPayload))\{\ \ }
+\DoxyCodeLine{00531\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00532\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{switch}(CanPCI-\/>eFrameType)\{}
+\DoxyCodeLine{00533\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ CAN\_SF:}
+\DoxyCodeLine{00534\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *(CanPdu\_Info-\/>SduDataPtr)\ =\ 0;}
+\DoxyCodeLine{00535\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *(CanPdu\_Info-\/>SduDataPtr)\ =\ CAN\_SF\ <<\ 4;}
+\DoxyCodeLine{00536\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00537\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(CanPCI-\/>uiFrameLenght\ <=\ 7)\{}
+\DoxyCodeLine{00538\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *(CanPdu\_Info-\/>SduDataPtr)\ =\ 0x0F\ \&\ CanPCI-\/>uiFrameLenght;\ }
+\DoxyCodeLine{00539\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(uint8\_t\ i\ =\ 0;\ i\ <\ CanPCI-\/>uiFrameLenght;\ i++)\{}
+\DoxyCodeLine{00540\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *(CanPdu\_Info-\/>SduDataPtr\ +\ (i\ +\ 1))\ =\ *(puiCanPayload\ +\ i);}
+\DoxyCodeLine{00541\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \ }
+\DoxyCodeLine{00542\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00543\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\{}
+\DoxyCodeLine{00544\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ret\ =\ E\_NOT\_OK;}
+\DoxyCodeLine{00545\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00546\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00547\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ CAN\_CF:\ }
+\DoxyCodeLine{00548\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *(CanPdu\_Info-\/>SduDataPtr)\ =\ 0;}
+\DoxyCodeLine{00549\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *(CanPdu\_Info-\/>SduDataPtr)\ =\ CAN\_CF\ <<\ 4;}
+\DoxyCodeLine{00550\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(CanPCI-\/>uiSequenceNumber\ <\ 7)\{}
+\DoxyCodeLine{00551\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *(CanPdu\_Info-\/>SduDataPtr)\ |=\ (0x0F\ \&\ CanPCI-\/>uiSequenceNumber);}
+\DoxyCodeLine{00552\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *(CanPdu\_Info-\/>SduDataPtr\ +\ 1)\ =\ *(puiCanPayload);}
+\DoxyCodeLine{00553\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *(CanPdu\_Info-\/>SduDataPtr\ +\ 2)\ =\ *(puiCanPayload\ +\ 1);}
+\DoxyCodeLine{00554\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *(CanPdu\_Info-\/>SduDataPtr\ +\ 3)\ =\ *(puiCanPayload\ +\ 2);}
+\DoxyCodeLine{00555\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *(CanPdu\_Info-\/>SduDataPtr\ +\ 4)\ =\ *(puiCanPayload\ +\ 3);}
+\DoxyCodeLine{00556\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *(CanPdu\_Info-\/>SduDataPtr\ +\ 5)\ =\ *(puiCanPayload\ +\ 4);}
+\DoxyCodeLine{00557\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *(CanPdu\_Info-\/>SduDataPtr\ +\ 6)\ =\ *(puiCanPayload\ +\ 5);}
+\DoxyCodeLine{00558\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *(CanPdu\_Info-\/>SduDataPtr\ +\ 7)\ =\ *(puiCanPayload\ +\ 6);}
+\DoxyCodeLine{00559\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00560\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\{}
+\DoxyCodeLine{00561\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ret\ =\ E\_NOT\_OK;\ }
+\DoxyCodeLine{00562\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00563\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00564\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ CAN\_FF:\ \ \ \ }
+\DoxyCodeLine{00565\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *(CanPdu\_Info-\/>SduDataPtr)\ =\ 0;}
+\DoxyCodeLine{00566\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *(CanPdu\_Info-\/>SduDataPtr)\ =\ CAN\_FF\ <<\ 4;}
+\DoxyCodeLine{00567\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(CanPCI-\/>uiFrameLenght\ <=\ 4095)\{}
+\DoxyCodeLine{00568\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *(CanPdu\_Info-\/>SduDataPtr)\ |=\ (0x0F\ \&\ (CanPCI-\/>uiFrameLenght\ >>\ 8));}
+\DoxyCodeLine{00569\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *(CanPdu\_Info-\/>SduDataPtr\ +\ 1)\ =\ (0xFF\ \&\ (CanPCI-\/>uiFrameLenght));}
+\DoxyCodeLine{00570\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *(CanPdu\_Info-\/>SduDataPtr\ +\ 2)\ =\ *(puiCanPayload);}
+\DoxyCodeLine{00571\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *(CanPdu\_Info-\/>SduDataPtr\ +\ 3)\ =\ *(puiCanPayload\ +\ 1);}
+\DoxyCodeLine{00572\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *(CanPdu\_Info-\/>SduDataPtr\ +\ 4)\ =\ *(puiCanPayload\ +\ 2);}
+\DoxyCodeLine{00573\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *(CanPdu\_Info-\/>SduDataPtr\ +\ 5)\ =\ *(puiCanPayload\ +\ 3);}
+\DoxyCodeLine{00574\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *(CanPdu\_Info-\/>SduDataPtr\ +\ 6)\ =\ *(puiCanPayload\ +\ 4);}
+\DoxyCodeLine{00575\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *(CanPdu\_Info-\/>SduDataPtr\ +\ 7)\ =\ *(puiCanPayload\ +\ 5);}
+\DoxyCodeLine{00576\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00577\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\{}
+\DoxyCodeLine{00578\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *(CanPdu\_Info-\/>SduDataPtr\ +\ 1)\ =\ 0;}
+\DoxyCodeLine{00579\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *(CanPdu\_Info-\/>SduDataPtr\ +\ 2)\ =\ (CanPCI-\/>uiFrameLenght\ >>\ 24)\ \&\ 0xFF;}
+\DoxyCodeLine{00580\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *(CanPdu\_Info-\/>SduDataPtr\ +\ 3)\ =\ (CanPCI-\/>uiFrameLenght\ >>\ 16)\ \&\ 0xFF;}
+\DoxyCodeLine{00581\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *(CanPdu\_Info-\/>SduDataPtr\ +\ 4)\ =\ (CanPCI-\/>uiFrameLenght\ >>\ 8)\ \&\ 0xFF;}
+\DoxyCodeLine{00582\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *(CanPdu\_Info-\/>SduDataPtr\ +\ 5)\ =\ (CanPCI-\/>uiFrameLenght\ >>\ 0)\ \&\ 0xFF;}
+\DoxyCodeLine{00583\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *(CanPdu\_Info-\/>SduDataPtr\ +\ 6)\ =\ *(puiCanPayload);}
+\DoxyCodeLine{00584\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *(CanPdu\_Info-\/>SduDataPtr\ +\ 7)\ =\ *(puiCanPayload\ +\ 1);}
+\DoxyCodeLine{00585\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00586\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00587\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ CAN\_FC:}
+\DoxyCodeLine{00588\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *(CanPdu\_Info-\/>SduDataPtr)\ =\ 0;}
+\DoxyCodeLine{00589\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *(CanPdu\_Info-\/>SduDataPtr)\ =\ CAN\_FC\ <<\ 4;}
+\DoxyCodeLine{00590\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(CanPCI-\/>uiFlowStatus\ <\ 7)\{}
+\DoxyCodeLine{00591\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *(CanPdu\_Info-\/>SduDataPtr)\ |=\ (0x0F\ \&\ CanPCI-\/>uiFlowStatus);}
+\DoxyCodeLine{00592\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *(CanPdu\_Info-\/>SduDataPtr\ +\ 1)\ =\ CanPCI-\/>uiBlockSize;}
+\DoxyCodeLine{00593\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *(CanPdu\_Info-\/>SduDataPtr\ +\ 2)\ =\ CanPCI-\/>uiSeparationTime;}
+\DoxyCodeLine{00594\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00595\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\{}
+\DoxyCodeLine{00596\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ret\ =\ E\_NOT\_OK;}
+\DoxyCodeLine{00597\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00598\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00599\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{default}:}
+\DoxyCodeLine{00600\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ret\ =\ E\_NOT\_OK;}
+\DoxyCodeLine{00601\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00602\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00603\ \ \ \ \ \}}
+\DoxyCodeLine{00604\ \ \ \ \ \textcolor{keywordflow}{else}\{}
+\DoxyCodeLine{00605\ \ \ \ \ \ \ \ \ ret\ =\ E\_NOT\_OK;}
+\DoxyCodeLine{00606\ \ \ \ \ \}}
+\DoxyCodeLine{00607\ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{00608\ \}}
+\DoxyCodeLine{00612\ \textcolor{keyword}{static}\ Std\_ReturnType\ CanTp\_SendSingleFrame(PduIdType\ \textcolor{keywordtype}{id},\ uint8*\ puiPayload,\ uint32\ uiSize)\{}
+\DoxyCodeLine{00613\ \ \ \ \ \mbox{\hyperlink{struct_pdu_info_type}{PduInfoType}}\ PduInfo;}
+\DoxyCodeLine{00614\ \ \ \ \ uint8\ puiSduData[8];}
+\DoxyCodeLine{00615\ \ \ \ \ uint8\ *puiMetaData;}
+\DoxyCodeLine{00616\ \ \ \ \ PduInfo.MetaDataPtr\ =\ puiMetaData;}
+\DoxyCodeLine{00617\ \ \ \ \ PduInfo.SduDataPtr\ =\ puiSduData;}
+\DoxyCodeLine{00618\ }
+\DoxyCodeLine{00619\ \ \ \ \ \mbox{\hyperlink{struct_can_p_c_i___type}{CanPCI\_Type}}\ CanPCI\ =\ \{CANTP\_N\_PCI\_TYPE\_SF,\ uiSize,\ 0,\ 0,\ 0,\ 0\};}
+\DoxyCodeLine{00620\ \ \ \ \ Std\_ReturnType\ ret\ =\ E\_OK;}
+\DoxyCodeLine{00621\ \ \ \ \ ret\ =\ E\_OK;}
+\DoxyCodeLine{00622\ \ \ \ \ CanTp\_PrepareSegmenetedFrame(\&CanPCI,\ \&PduInfo,\ puiPayload);}
+\DoxyCodeLine{00623\ \ \ \ \ }
+\DoxyCodeLine{00624\ \ \ \ \ \textcolor{keywordflow}{if}(CanIf\_Transmit(\textcolor{keywordtype}{id},\ \&PduInfo)\ ==\ E\_OK\ )\{}
+\DoxyCodeLine{00625\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_can_tp_8c_a36e809b3871fd6f5949e3ed395b4dc20}{CanTp\_TimerStart}}(\&N\_As\_timer);}
+\DoxyCodeLine{00626\ \ \ \ \ \}}
+\DoxyCodeLine{00627\ \ \ \ \ \textcolor{keywordflow}{else}\{}
+\DoxyCodeLine{00628\ \ \ \ \ \ \ \ \ PduR\_CanTpTxConfirmation(\textcolor{keywordtype}{id},\ E\_NOT\_OK);}
+\DoxyCodeLine{00629\ \ \ \ \ \ \ \ \ ret\ =\ E\_NOT\_OK;}
+\DoxyCodeLine{00630\ \ \ \ \ \}}
+\DoxyCodeLine{00631\ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{00632\ \}}
+\DoxyCodeLine{00636\ \textcolor{keyword}{static}\ Std\_ReturnType\ CanTp\_SendFirstFrame(PduIdType\ \textcolor{keywordtype}{id},\ uint32\ uiMsgLen)\{}
+\DoxyCodeLine{00637\ \ \ \ \ \mbox{\hyperlink{struct_pdu_info_type}{PduInfoType}}\ PduInfo;}
+\DoxyCodeLine{00638\ \ \ \ \ uint8\ puiSduData[8];}
+\DoxyCodeLine{00639\ \ \ \ \ uint8\ *puiMetaData;}
+\DoxyCodeLine{00640\ \ \ \ \ PduInfo.MetaDataPtr\ =\ puiMetaData;}
+\DoxyCodeLine{00641\ \ \ \ \ PduInfo.SduDataPtr\ =\ puiSduData;}
+\DoxyCodeLine{00642\ }
+\DoxyCodeLine{00643\ \ \ \ \ \mbox{\hyperlink{struct_can_p_c_i___type}{CanPCI\_Type}}\ CanPCI\ =\ \{CANTP\_N\_PCI\_TYPE\_FF,\ uiMsgLen,\ 0,\ 0,\ 0,\ 0\};\ }
+\DoxyCodeLine{00644\ \ \ \ \ uint8\ uiPayload[8]\ =\ \{0,0,0,0,0,0,0,0\};}
+\DoxyCodeLine{00645\ \ \ \ \ Std\_ReturnType\ ret\ =\ E\_OK;}
+\DoxyCodeLine{00646\ }
+\DoxyCodeLine{00647\ \ \ \ \ CanTp\_PrepareSegmenetedFrame(\&CanPCI,\ \&PduInfo,\ uiPayload);}
+\DoxyCodeLine{00648\ }
+\DoxyCodeLine{00649\ \ \ \ \ \textcolor{keywordflow}{if}(CanIf\_Transmit(\textcolor{keywordtype}{id},\ \&PduInfo)\ ==\ E\_OK\ )\{}
+\DoxyCodeLine{00650\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_can_tp_8c_a36e809b3871fd6f5949e3ed395b4dc20}{CanTp\_TimerStart}}(\&N\_As\_timer);}
+\DoxyCodeLine{00651\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_can_tp_8c_a36e809b3871fd6f5949e3ed395b4dc20}{CanTp\_TimerStart}}(\&N\_Bs\_timer);}
+\DoxyCodeLine{00652\ \ \ \ \ \}}
+\DoxyCodeLine{00653\ \ \ \ \ \textcolor{keywordflow}{else}\{}
+\DoxyCodeLine{00654\ \ \ \ \ \ \ \ \ PduR\_CanTpTxConfirmation(\textcolor{keywordtype}{id},\ E\_NOT\_OK);}
+\DoxyCodeLine{00655\ \ \ \ \ \ \ \ \ ret\ =\ E\_NOT\_OK;}
+\DoxyCodeLine{00656\ \ \ \ \ \}}
+\DoxyCodeLine{00657\ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{00658\ \}}
+\DoxyCodeLine{00662\ \textcolor{keyword}{static}\ Std\_ReturnType\ CanTp\_GetPCI(\textcolor{keyword}{const}\ \mbox{\hyperlink{struct_pdu_info_type}{PduInfoType}}*\ CanData,\ \mbox{\hyperlink{struct_can_p_c_i___type}{CanPCI\_Type}}*\ CanFrameInfo)\{}
+\DoxyCodeLine{00663\ \ \ \ \ Std\_ReturnType\ ret\ =\ E\_OK;}
+\DoxyCodeLine{00664\ }
+\DoxyCodeLine{00665\ \ \ \ \ \textcolor{keywordflow}{if}(NE\_NULL\_PTR(CanData)\ \&\&\ NE\_NULL\_PTR(CanFrameInfo)\ \&\&\ (NE\_NULL\_PTR(CanData-\/>SduDataPtr)))\{}
+\DoxyCodeLine{00666\ \ \ \ \ \ \ \ \ CanFrameInfo-\/>eFrameType\ =\ DEFAULT;}
+\DoxyCodeLine{00667\ \ \ \ \ \ \ \ \ CanFrameInfo-\/>uiFrameLenght\ =\ 0;}
+\DoxyCodeLine{00668\ \ \ \ \ \ \ \ \ CanFrameInfo-\/>uiBlockSize\ =\ 0;}
+\DoxyCodeLine{00669\ \ \ \ \ \ \ \ \ CanFrameInfo-\/>uiFlowStatus\ =\ 0;}
+\DoxyCodeLine{00670\ \ \ \ \ \ \ \ \ CanFrameInfo-\/>uiSeparationTime\ =\ 0;}
+\DoxyCodeLine{00671\ \ \ \ \ \ \ \ \ CanFrameInfo-\/>uiSequenceNumber\ =\ 0;}
+\DoxyCodeLine{00672\ }
+\DoxyCodeLine{00673\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{switch}((CanData-\/>SduDataPtr[0])\ >>\ 4)\{}
+\DoxyCodeLine{00674\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ CANTP\_N\_PCI\_TYPE\_SF:}
+\DoxyCodeLine{00675\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanFrameInfo-\/>eFrameType\ =\ CAN\_SF;}
+\DoxyCodeLine{00676\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanFrameInfo-\/>uiFrameLenght\ =\ CanData-\/>SduDataPtr[0];}
+\DoxyCodeLine{00677\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00678\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ CANTP\_N\_PCI\_TYPE\_FF:}
+\DoxyCodeLine{00679\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanFrameInfo-\/>eFrameType\ =\ CAN\_FF;}
+\DoxyCodeLine{00680\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(\ (CanData-\/>SduDataPtr[0]\ \&\ 0x0F)\ |\ CanData-\/>SduDataPtr[1]\ )\ \{}
+\DoxyCodeLine{00681\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanFrameInfo-\/>uiFrameLenght\ =\ \ CanData-\/>SduDataPtr[0]\ \&\ 0x0F;}
+\DoxyCodeLine{00682\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanFrameInfo-\/>uiFrameLenght\ =\ \ (CanFrameInfo-\/>uiFrameLenght\ <<\ 8)\ |\ CanData-\/>SduDataPtr[1];\ }
+\DoxyCodeLine{00683\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00684\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\{}
+\DoxyCodeLine{00685\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanFrameInfo-\/>uiFrameLenght\ =\ \ CanData-\/>SduDataPtr[2];}
+\DoxyCodeLine{00686\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanFrameInfo-\/>uiFrameLenght\ =\ \ (CanFrameInfo-\/>uiFrameLenght\ <<\ 8)\ |\ CanData-\/>SduDataPtr[3];\ }
+\DoxyCodeLine{00687\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanFrameInfo-\/>uiFrameLenght\ =\ \ (CanFrameInfo-\/>uiFrameLenght\ <<\ 8)\ |\ CanData-\/>SduDataPtr[4];}
+\DoxyCodeLine{00688\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanFrameInfo-\/>uiFrameLenght\ =\ \ (CanFrameInfo-\/>uiFrameLenght\ <<\ 8)\ |\ CanData-\/>SduDataPtr[5];}
+\DoxyCodeLine{00689\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00690\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00691\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ CANTP\_N\_PCI\_TYPE\_CF:}
+\DoxyCodeLine{00692\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanFrameInfo-\/>eFrameType\ =\ CAN\_CF;}
+\DoxyCodeLine{00693\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanFrameInfo-\/>uiSequenceNumber=\ (CanData-\/>SduDataPtr[0]\ \&\ 0x0F\ );}
+\DoxyCodeLine{00694\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00695\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ CANTP\_N\_PCI\_TYPE\_FC:}
+\DoxyCodeLine{00696\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanFrameInfo-\/>eFrameType\ =\ CAN\_FC;}
+\DoxyCodeLine{00697\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanFrameInfo-\/>uiFlowStatus\ =\ CanData-\/>SduDataPtr[0]\ \&\ 0x0F;\ }
+\DoxyCodeLine{00698\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanFrameInfo-\/>uiBlockSize\ =\ CanData-\/>SduDataPtr[1];\ }
+\DoxyCodeLine{00699\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanFrameInfo-\/>uiSeparationTime\ =\ CanData-\/>SduDataPtr[2];\ }
+\DoxyCodeLine{00700\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00701\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{default}:}
+\DoxyCodeLine{00702\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanFrameInfo-\/>eFrameType\ =\ DEFAULT;}
+\DoxyCodeLine{00703\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ret\ =\ E\_NOT\_OK;}
+\DoxyCodeLine{00704\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00705\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00706\ \ \ \ \ \}}
+\DoxyCodeLine{00707\ \ \ \ \ \textcolor{keywordflow}{else}\{}
+\DoxyCodeLine{00708\ \ \ \ \ \ \ \ \ ret\ =\ E\_NOT\_OK;}
+\DoxyCodeLine{00709\ \ \ \ \ \}}
+\DoxyCodeLine{00710\ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{00711\ \}}
+\DoxyCodeLine{00715\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}\ CanTp\_FirstFrameReception(PduIdType\ RxPduId,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{struct_pdu_info_type}{PduInfoType}}\ *PduInfoPtr,\ \mbox{\hyperlink{struct_can_p_c_i___type}{CanPCI\_Type}}\ *CanPCI)\{\ \ }
+\DoxyCodeLine{00716\ \ \ \ \ PduLengthType\ BufferSize;\ }
+\DoxyCodeLine{00717\ \ \ \ \ BufReq\_ReturnType\ BufferState;\ }
+\DoxyCodeLine{00718\ \ \ \ \ uint16\ uiCurrentBlockSize;}
+\DoxyCodeLine{00719\ \ \ \ \ BufferState\ =\ PduR\_CanTpStartOfReception(\ RxPduId,\ PduInfoPtr,\ CanPCI-\/>uiFrameLenght,\ \&BufferSize);}
+\DoxyCodeLine{00720\ \ \ \ \ \textcolor{keywordflow}{if}(BufferState\ ==\ BUFREQ\_OK)\{}
+\DoxyCodeLine{00721\ \ \ \ \ \ \ \ \ CanTp\_VariablesRX.uiMsgLen\ =\ CanPCI-\/>uiFrameLenght;}
+\DoxyCodeLine{00722\ \ \ \ \ \ \ \ \ CanTp\_VariablesRX.CanTp\_Current\_RxId\ =\ RxPduId;}
+\DoxyCodeLine{00723\ \ \ \ \ \ \ \ \ uiCurrentBlockSize\ =\ CanTp\_CalcBlocksSize(BufferSize);\ }
+\DoxyCodeLine{00724\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(\ uiCurrentBlockSize\ >\ 0)\{\ \ \ \ }
+\DoxyCodeLine{00725\ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_SendFlowControl(CanTp\_VariablesRX.CanTp\_Current\_RxId,\ uiCurrentBlockSize,\ FC\_CTS,\ DEFAULT\_ST);\ \ \ }
+\DoxyCodeLine{00726\ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_VariablesRX.uiBlocksNxtCts\ =\ uiCurrentBlockSize;}
+\DoxyCodeLine{00727\ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_VariablesRX.eCanTp\_StateRX\ =\ CANTP\_RX\_PROCESSING;}
+\DoxyCodeLine{00728\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00729\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\{}
+\DoxyCodeLine{00730\ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_VariablesRX.uiBlocksNxtCts\ =\ uiCurrentBlockSize;}
+\DoxyCodeLine{00731\ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_SendFlowControl(CanTp\_VariablesRX.CanTp\_Current\_RxId,\ uiCurrentBlockSize,\ FC\_WAIT,\ DEFAULT\_ST\ );\ \ \ }
+\DoxyCodeLine{00732\ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_VariablesRX.eCanTp\_StateRX\ =\ CANTP\_RX\_PROCESSING\_SUSPEND;}
+\DoxyCodeLine{00733\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00734\ \ \ \ \ \ \ \ \ CanTp\_VariablesRX.uiExpected\_CF\_SN\ =\ 1;\ }
+\DoxyCodeLine{00735\ \ \ \ \ \}\ }
+\DoxyCodeLine{00736\ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (BufferState\ ==\ BUFREQ\_OVFL)\{}
+\DoxyCodeLine{00737\ \ \ \ \ \ \ \ \ CanTp\_SendFlowControl(CanTp\_VariablesRX.CanTp\_Current\_RxId,\ uiCurrentBlockSize,\ FC\_OVFLW,\ DEFAULT\_ST\ );}
+\DoxyCodeLine{00738\ \ \ \ \ \ \ \ \ CanTp\_ResetRX();}
+\DoxyCodeLine{00739\ \ \ \ \ \ \ \ \ CanTp\_VariablesRX.eCanTp\_StateRX\ =\ CANTP\_RX\_WAIT;}
+\DoxyCodeLine{00740\ \ \ \ \ \}}
+\DoxyCodeLine{00741\ \ \ \ \ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{00742\ \ \ \ \ \ \ \ \ CanTp\_ResetRX();}
+\DoxyCodeLine{00743\ \ \ \ \ \}}
+\DoxyCodeLine{00744\ \}}
+\DoxyCodeLine{00748\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}\ CanTp\_SingleFrameReception(PduIdType\ RxPduId,\ \mbox{\hyperlink{struct_can_p_c_i___type}{CanPCI\_Type}}\ *CanPCI,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{struct_pdu_info_type}{PduInfoType}}*\ PduInfoPtr)\{}
+\DoxyCodeLine{00749\ \ \ \ \ PduLengthType\ BufferSize;\ }
+\DoxyCodeLine{00750\ \ \ \ \ BufReq\_ReturnType\ BufferState;\ \ }
+\DoxyCodeLine{00751\ \ \ \ \ \mbox{\hyperlink{struct_pdu_info_type}{PduInfoType}}\ ExtractedData;}
+\DoxyCodeLine{00752\ \ \ \ \ CanTp\_VariablesRX.eCanTp\_StateRX\ =\ CANTP\_RX\_WAIT;}
+\DoxyCodeLine{00753\ \ \ \ \ BufferState\ =\ PduR\_CanTpStartOfReception(\ RxPduId,\ PduInfoPtr,\ CanPCI-\/>uiFrameLenght,\ \&BufferSize);}
+\DoxyCodeLine{00754\ }
+\DoxyCodeLine{00755\ \ \ \ \ \textcolor{keywordflow}{if}((BufferState\ ==\ BUFREQ\_OK))\{\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00756\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(BufferSize\ >=\ CanPCI-\/>uiFrameLenght)\{}
+\DoxyCodeLine{00757\ \ \ \ \ \ \ \ \ \ \ \ \ ExtractedData.SduLength\ =\ CanPCI-\/>uiFrameLenght;}
+\DoxyCodeLine{00758\ \ \ \ \ \ \ \ \ \ \ \ \ ExtractedData.SduDataPtr\ =\ (PduInfoPtr-\/>SduDataPtr+1);}
+\DoxyCodeLine{00759\ \ \ \ \ \ \ \ \ \ \ \ \ BufferState\ =\ PduR\_CanTpCopyRxData(RxPduId,\ \ \&ExtractedData,\ \&BufferSize);}
+\DoxyCodeLine{00760\ \ \ \ \ \ \ \ \ \ \ \ \ PduR\_CanTpRxIndication(RxPduId,\ BufferState);\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00761\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00762\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\{}
+\DoxyCodeLine{00763\ \ \ \ \ \ \ \ \ \ \ \ \ PduR\_CanTpRxIndication(RxPduId,\ E\_NOT\_OK);}
+\DoxyCodeLine{00764\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00765\ \ \ \ \ \}}
+\DoxyCodeLine{00766\ \ \ \ \ \textcolor{keywordflow}{else}\{\}}
+\DoxyCodeLine{00767\ \}}
+\DoxyCodeLine{00771\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}\ CanTp\_ConsecutiveFrameReception(PduIdType\ RxPduId,\ \mbox{\hyperlink{struct_can_p_c_i___type}{CanPCI\_Type}}\ *CanPCI,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{struct_pdu_info_type}{PduInfoType}}*\ PduInfoPtr)\{}
+\DoxyCodeLine{00772\ \ \ \ \ PduLengthType\ BufferSize;\ \ \ \ \ \ }
+\DoxyCodeLine{00773\ \ \ \ \ BufReq\_ReturnType\ BufferState;\ \ \ }
+\DoxyCodeLine{00774\ \ \ \ \ \mbox{\hyperlink{struct_pdu_info_type}{PduInfoType}}\ ExtractedData;}
+\DoxyCodeLine{00775\ \ \ \ \ uint16\ uiCurrentBlockSize;}
+\DoxyCodeLine{00776\ }
+\DoxyCodeLine{00777\ \ \ \ \ \mbox{\hyperlink{_can_tp_8c_a9d97bacf210d61dd6e586abe50a62b47}{CanTp\_TimerReset}}(\&N\_Cr\_timer);}
+\DoxyCodeLine{00778\ }
+\DoxyCodeLine{00779\ \ \ \ \ \textcolor{keywordflow}{if}(CanTp\_VariablesRX.CanTp\_Current\_RxId\ ==\ \ RxPduId)\{}
+\DoxyCodeLine{00780\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(CanTp\_VariablesRX.uiExpected\_CF\_SN\ ==\ CanPCI-\/>uiSequenceNumber)\{}
+\DoxyCodeLine{00781\ \ \ \ \ \ \ \ \ \ \ \ \ ExtractedData.SduLength\ =\ CanPCI-\/>uiFrameLenght;}
+\DoxyCodeLine{00782\ \ \ \ \ \ \ \ \ \ \ \ \ ExtractedData.SduDataPtr\ =\ (PduInfoPtr-\/>SduDataPtr+1);}
+\DoxyCodeLine{00783\ \ \ \ \ \ \ \ \ \ \ \ \ BufferState\ =\ PduR\_CanTpCopyRxData(RxPduId,\ \ \&ExtractedData,\ \&BufferSize);}
+\DoxyCodeLine{00784\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(BufferState\ ==\ BUFREQ\_OK)\{}
+\DoxyCodeLine{00785\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_VariablesRX.uiTransmittedBytes\ +=\ PduInfoPtr-\/>SduLength;}
+\DoxyCodeLine{00786\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_VariablesRX.uiBlocksNxtCts-\/-\/;}
+\DoxyCodeLine{00787\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(\ CanTp\_VariablesRX.uiTransmittedBytes\ ==\ CanTp\_VariablesRX.uiMsgLen)\{}
+\DoxyCodeLine{00788\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ PduR\_CanTpRxIndication(CanTp\_VariablesRX.CanTp\_Current\_RxId,\ E\_OK);}
+\DoxyCodeLine{00789\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_ResetRX();}
+\DoxyCodeLine{00790\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \ \ \ \ }
+\DoxyCodeLine{00791\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\{\ }
+\DoxyCodeLine{00792\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_VariablesRX.uiExpected\_CF\_SN++;}
+\DoxyCodeLine{00793\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_VariablesRX.uiExpected\_CF\_SN\%8;}
+\DoxyCodeLine{00794\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ uiCurrentBlockSize\ =\ CanTp\_CalcBlocksSize(BufferSize);}
+\DoxyCodeLine{00795\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(uiCurrentBlockSize\ >\ 0)\{}
+\DoxyCodeLine{00796\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_can_tp_8c_a36e809b3871fd6f5949e3ed395b4dc20}{CanTp\_TimerStart}}(\&N\_Cr\_timer);}
+\DoxyCodeLine{00797\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(CanTp\_VariablesRX.uiBlocksNxtCts\ ==\ 0\ )\{}
+\DoxyCodeLine{00798\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_SendFlowControl(CanTp\_VariablesRX.CanTp\_Current\_RxId,\ uiCurrentBlockSize,\ FC\_CTS,\ DEFAULT\_ST\ );}
+\DoxyCodeLine{00799\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_VariablesRX.uiBlocksNxtCts\ =\ uiCurrentBlockSize;}
+\DoxyCodeLine{00800\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00801\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_VariablesRX.eCanTp\_StateRX\ =\ CANTP\_RX\_PROCESSING;\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00802\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00803\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\{}
+\DoxyCodeLine{00804\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_VariablesRX.eCanTp\_StateRX\ =\ CANTP\_RX\_PROCESSING\_SUSPEND;}
+\DoxyCodeLine{00805\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_SendFlowControl(CanTp\_VariablesRX.CanTp\_Current\_RxId,\ uiCurrentBlockSize,\ FC\_WAIT,\ DEFAULT\_ST\ );\ }
+\DoxyCodeLine{00806\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00807\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00808\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00809\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\{\ }
+\DoxyCodeLine{00810\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ PduR\_CanTpRxIndication(CanTp\_VariablesRX.CanTp\_Current\_RxId,\ E\_NOT\_OK);}
+\DoxyCodeLine{00811\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_ResetRX();}
+\DoxyCodeLine{00812\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00813\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00814\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\{\ }
+\DoxyCodeLine{00815\ \ \ \ \ \ \ \ \ \ \ \ \ PduR\_CanTpRxIndication(CanTp\_VariablesRX.CanTp\_Current\_RxId,\ E\_NOT\_OK);}
+\DoxyCodeLine{00816\ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_ResetRX();}
+\DoxyCodeLine{00817\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00818\ \ \ \ \ \}}
+\DoxyCodeLine{00819\ \ \ \ \ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{00820\ \ \ \ \ \ \ \ \ PduR\_CanTpRxIndication(CanTp\_VariablesRX.CanTp\_Current\_RxId,\ E\_NOT\_OK);}
+\DoxyCodeLine{00821\ \ \ \ \ \ \ \ \ CanTp\_ResetRX();}
+\DoxyCodeLine{00822\ \ \ \ \ \}}
+\DoxyCodeLine{00823\ \}}
+\DoxyCodeLine{00827\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}\ CanTp\_FlowControlReception(PduIdType\ RxPduId,\ \mbox{\hyperlink{struct_can_p_c_i___type}{CanPCI\_Type}}\ *CanPCI)\{}
+\DoxyCodeLine{00828\ \ \ \ \ \textcolor{keywordflow}{if}(\ CanTp\_VariablesTX.eCanTp\_StateTX\ ==\ CANTP\_TX\_PROCESSING\_SUSPENDED\ )\{}
+\DoxyCodeLine{00829\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(CanTp\_VariablesTX.CanTp\_Current\_TxId\ ==\ RxPduId\ )\{}
+\DoxyCodeLine{00830\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(CanPCI-\/>uiFlowStatus\ ==\ FC\_CTS)\{}
+\DoxyCodeLine{00831\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_VariablesTX.uiFrameNrFC\ =\ CanPCI-\/>uiBlockSize;\ }
+\DoxyCodeLine{00832\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_SendNextCF();}
+\DoxyCodeLine{00833\ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \ \ }
+\DoxyCodeLine{00834\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}(CanPCI-\/>uiFlowStatus\ ==\ FC\_WAIT)\{}
+\DoxyCodeLine{00835\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_can_tp_8c_a9d97bacf210d61dd6e586abe50a62b47}{CanTp\_TimerReset}}(\&N\_Bs\_timer);}
+\DoxyCodeLine{00836\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_can_tp_8c_a36e809b3871fd6f5949e3ed395b4dc20}{CanTp\_TimerStart}}(\&N\_Bs\_timer);}
+\DoxyCodeLine{00837\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00838\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}(CanPCI-\/>uiFlowStatus\ ==\ FC\_OVFLW)\{}
+\DoxyCodeLine{00839\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ PduR\_CanTpTxConfirmation(CanTp\_VariablesTX.CanTp\_Current\_TxId,\ E\_NOT\_OK);}
+\DoxyCodeLine{00840\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_ResetTX();}
+\DoxyCodeLine{00841\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00842\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\{}
+\DoxyCodeLine{00843\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ PduR\_CanTpTxConfirmation(CanTp\_VariablesTX.CanTp\_Current\_TxId,\ E\_NOT\_OK);}
+\DoxyCodeLine{00844\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_ResetTX();}
+\DoxyCodeLine{00845\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00846\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00847\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\{\}}
+\DoxyCodeLine{00848\ \ \ \ \ \}}
+\DoxyCodeLine{00849\ \ \ \ \ \textcolor{keywordflow}{else}\{\}}
+\DoxyCodeLine{00850\ \}}
+\DoxyCodeLine{00854\ \textcolor{keyword}{static}\ uint16\ CanTp\_CalcBlocksSize(uint16\ uiBufferSize)\{}
+\DoxyCodeLine{00855\ \ \ \ \ uint16\ ret;\ }
+\DoxyCodeLine{00856\ \ \ \ \ uint16\ uiBytesLeft\ =\ CanTp\_VariablesRX.uiMsgLen\ -\/\ CanTp\_VariablesRX.uiTransmittedBytes;}
+\DoxyCodeLine{00857\ \ \ \ \ \textcolor{keywordflow}{if}(uiBufferSize\ >=\ uiBytesLeft)\{}
+\DoxyCodeLine{00858\ \ \ \ \ \ \ \ \ ret\ =\ uiBytesLeft/7;}
+\DoxyCodeLine{00859\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(CanTp\_VariablesRX.uiMsgLen\%7\ >\ 0)\ ret++;\ }
+\DoxyCodeLine{00860\ \ \ \ \ \}}
+\DoxyCodeLine{00861\ \ \ \ \ \textcolor{keywordflow}{else}\{}
+\DoxyCodeLine{00862\ \ \ \ \ \ \ \ \ ret\ =\ uiBufferSize/7;}
+\DoxyCodeLine{00863\ \ \ \ \ \}}
+\DoxyCodeLine{00864\ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{00865\ \}\ }
+\DoxyCodeLine{00869\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}\ CanTp\_SendNextCF(\textcolor{keywordtype}{void})\{}
+\DoxyCodeLine{00870\ \ \ \ \ BufReq\_ReturnType\ BufReqState;}
+\DoxyCodeLine{00871\ \ \ \ \ \mbox{\hyperlink{struct_pdu_info_type}{PduInfoType}}\ PduInfoPtr;}
+\DoxyCodeLine{00872\ \ \ \ \ PduLengthType\ PduLen;}
+\DoxyCodeLine{00873\ \ \ \ \ Std\_ReturnType\ ret;}
+\DoxyCodeLine{00874\ \ \ \ \ uint8\ uiBytesToSend;}
+\DoxyCodeLine{00875\ \ \ \ \ uint8\_t\ uiPayload[8];}
+\DoxyCodeLine{00876\ }
+\DoxyCodeLine{00877\ \ \ \ \ PduInfoPtr.SduDataPtr\ =\ uiPayload;}
+\DoxyCodeLine{00878\ \ \ \ \ PduInfoPtr.MetaDataPtr\ =\ NULL;}
+\DoxyCodeLine{00879\ \ \ \ \ }
+\DoxyCodeLine{00880\ \ \ \ \ \textcolor{keywordflow}{if}(CanTp\_VariablesTX.uiTransmittedBytes\ ==\ CanTp\_VariablesTX.uiMsgLen)\{}
+\DoxyCodeLine{00881\ \ \ \ \ \ \ \ \ PduR\_CanTpTxConfirmation(CanTp\_VariablesTX.CanTp\_Current\_TxId,\ E\_OK);}
+\DoxyCodeLine{00882\ \ \ \ \ \ \ \ \ CanTp\_ResetTX();}
+\DoxyCodeLine{00883\ \ \ \ \ \}}
+\DoxyCodeLine{00884\ \ \ \ \ \textcolor{keywordflow}{else}\{}
+\DoxyCodeLine{00885\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(CanTp\_VariablesTX.uiMsgLen\ -\/\ CanTp\_VariablesTX.uiTransmittedBytes\ <\ 7)\ uiBytesToSend\ =\ CanTp\_VariablesTX.uiMsgLen\ -\/\ CanTp\_VariablesTX.uiTransmittedBytes;}
+\DoxyCodeLine{00886\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ uiBytesToSend\ =\ 7;}
+\DoxyCodeLine{00887\ \ \ \ \ \ \ \ \ PduInfoPtr.SduLength\ =\ uiBytesToSend;}
+\DoxyCodeLine{00888\ \ \ \ \ \ \ \ \ BufReqState\ =\ PduR\_CanTpCopyTxData(CanTp\_VariablesTX.CanTp\_Current\_TxId,\ \&PduInfoPtr,\ NULL,\ \&PduLen);}
+\DoxyCodeLine{00889\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(BufReqState\ ==\ BUFREQ\_OK)\{}
+\DoxyCodeLine{00890\ \ \ \ \ \ \ \ \ \ \ \ \ ret\ =\ CanTp\_SendConsecutiveFrame(CanTp\_VariablesTX.CanTp\_Current\_TxId,\ CanTp\_VariablesTX.uiNxtSN,\ PduInfoPtr.SduDataPtr,\ uiBytesToSend);}
+\DoxyCodeLine{00891\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(\ ret\ ==\ E\_OK\ )\{}
+\DoxyCodeLine{00892\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_VariablesTX.uiTransmittedBytes\ =\ CanTp\_VariablesTX.uiTransmittedBytes\ +\ uiBytesToSend;}
+\DoxyCodeLine{00893\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_VariablesTX.uiFrameNrFC-\/-\/;}
+\DoxyCodeLine{00894\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_VariablesTX.uiNxtSN\ =\ (CanTp\_VariablesTX.uiNxtSN\ +\ 1)\%8;}
+\DoxyCodeLine{00895\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}((CanTp\_VariablesTX.uiFrameNrFC\ ==\ 0)\ \&\&\ (CanTp\_VariablesTX.uiTransmittedBytes\ !=\ CanTp\_VariablesTX.uiMsgLen))CanTp\_VariablesTX.eCanTp\_StateTX\ =\ CANTP\_TX\_PROCESSING\_SUSPENDED;}
+\DoxyCodeLine{00896\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ CanTp\_VariablesTX.eCanTp\_StateTX\ =\ CANTP\_TX\_PROCESSING;\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00897\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00898\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\{}
+\DoxyCodeLine{00899\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_ResetTX();}
+\DoxyCodeLine{00900\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00901\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00902\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}(BufReqState\ ==\ BUFREQ\_E\_NOT\_OK)\{}
+\DoxyCodeLine{00903\ \ \ \ \ \ \ \ \ \ \ \ \ PduR\_CanTpTxConfirmation(CanTp\_VariablesTX.CanTp\_Current\_TxId,\ E\_NOT\_OK);}
+\DoxyCodeLine{00904\ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_ResetTX();\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00905\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00906\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{00907\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_can_tp_8c_a36e809b3871fd6f5949e3ed395b4dc20}{CanTp\_TimerStart}}(\&N\_Cs\_timer);}
+\DoxyCodeLine{00908\ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_VariablesTX.eCanTp\_StateTX\ =\ CANTP\_TX\_PROCESSING\_SUSPENDED;}
+\DoxyCodeLine{00909\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00910\ \ \ \ \ \}}
+\DoxyCodeLine{00911\ \}}
+\DoxyCodeLine{00912\ }
+\DoxyCodeLine{00916\ \textcolor{keyword}{static}\ Std\_ReturnType\ CanTp\_SendConsecutiveFrame(PduIdType\ \textcolor{keywordtype}{id},\ uint8\ uiSequenceNumber,\ uint8*\ uiPayload,\ uint32\ uiSize)\{}
+\DoxyCodeLine{00917\ \ \ \ \ \mbox{\hyperlink{struct_pdu_info_type}{PduInfoType}}\ PduInfo;}
+\DoxyCodeLine{00918\ \ \ \ \ uint8\ puiSduData[8];}
+\DoxyCodeLine{00919\ \ \ \ \ uint8\ *puiMetaData;}
+\DoxyCodeLine{00920\ \ \ \ \ PduInfo.MetaDataPtr\ =\ puiMetaData;}
+\DoxyCodeLine{00921\ \ \ \ \ PduInfo.SduDataPtr\ =\ puiSduData;}
+\DoxyCodeLine{00922\ \ \ \ \ PduInfo.SduLength\ =\ uiSize;}
+\DoxyCodeLine{00923\ \ \ \ \ \mbox{\hyperlink{struct_can_p_c_i___type}{CanPCI\_Type}}\ CanPCI;}
+\DoxyCodeLine{00924\ }
+\DoxyCodeLine{00925\ \ \ \ \ CanPCI.eFrameType\ =\ CAN\_CF;}
+\DoxyCodeLine{00926\ \ \ \ \ CanPCI.uiSequenceNumber\ =\ uiSequenceNumber;}
+\DoxyCodeLine{00927\ }
+\DoxyCodeLine{00928\ \ \ \ \ Std\_ReturnType\ ret\ =\ E\_OK;}
+\DoxyCodeLine{00929\ \ \ \ \ CanTp\_PrepareSegmenetedFrame(\&CanPCI,\ \&PduInfo,\ uiPayload);}
+\DoxyCodeLine{00930\ \ \ \ \ \textcolor{keywordflow}{if}(CanIf\_Transmit(\textcolor{keywordtype}{id}\ ,\ \&PduInfo)\ ==\ E\_OK)\{}
+\DoxyCodeLine{00931\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_can_tp_8c_a36e809b3871fd6f5949e3ed395b4dc20}{CanTp\_TimerStart}}(\&N\_As\_timer);}
+\DoxyCodeLine{00932\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_can_tp_8c_a36e809b3871fd6f5949e3ed395b4dc20}{CanTp\_TimerStart}}(\&N\_Bs\_timer);}
+\DoxyCodeLine{00933\ \ \ \ \ \}}
+\DoxyCodeLine{00934\ \ \ \ \ \textcolor{keywordflow}{else}\{}
+\DoxyCodeLine{00935\ \ \ \ \ \ \ \ \ PduR\_CanTpTxConfirmation(\textcolor{keywordtype}{id},\ E\_NOT\_OK);}
+\DoxyCodeLine{00936\ \ \ \ \ \ \ \ \ ret\ =\ E\_NOT\_OK;}
+\DoxyCodeLine{00937\ \ \ \ \ \}}
+\DoxyCodeLine{00938\ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{00939\ \}}
+\DoxyCodeLine{00940\ }
+\DoxyCodeLine{00944\ \textcolor{keyword}{static}\ Std\_ReturnType\ CanTp\_SendFlowControl(PduIdType\ ID,\ uint8\ uiBlockSize,\ FlowControlStatus\_type\ FC\_Status,\ uint8\ uiSeparationTime\ )\{}
+\DoxyCodeLine{00945\ \ \ \ \ Std\_ReturnType\ ret\ =\ E\_OK;}
+\DoxyCodeLine{00946\ \ \ \ \ \mbox{\hyperlink{struct_pdu_info_type}{PduInfoType}}\ PduInfoPtr;}
+\DoxyCodeLine{00947\ \ \ \ \ \mbox{\hyperlink{struct_can_p_c_i___type}{CanPCI\_Type}}\ CanPCI;}
+\DoxyCodeLine{00948\ \ \ \ \ uint8\ uiPayload[8];}
+\DoxyCodeLine{00949\ \ \ \ \ uint8\ *puiMetaData;}
+\DoxyCodeLine{00950\ \ \ \ \ uint8\ puiSduData[8];}
+\DoxyCodeLine{00951\ \ \ \ \ CanPCI.eFrameType\ =\ CAN\_FC;}
+\DoxyCodeLine{00952\ \ \ \ \ CanPCI.uiFlowStatus\ =\ FC\_Status;}
+\DoxyCodeLine{00953\ \ \ \ \ CanPCI.uiBlockSize\ =\ uiBlockSize;}
+\DoxyCodeLine{00954\ \ \ \ \ CanPCI.uiSeparationTime\ =\ uiSeparationTime;}
+\DoxyCodeLine{00955\ \ \ \ \ PduInfoPtr.SduLength\ =\ 0;}
+\DoxyCodeLine{00956\ \ \ \ \ PduInfoPtr.MetaDataPtr\ =\ puiMetaData;}
+\DoxyCodeLine{00957\ \ \ \ \ PduInfoPtr.SduDataPtr\ =\ puiSduData;}
+\DoxyCodeLine{00958\ }
+\DoxyCodeLine{00959\ \ \ \ \textcolor{keywordflow}{if}((\ FC\_Status\ ==\ FC\_OVFLW\ )||}
+\DoxyCodeLine{00960\ \ \ \ \ \ \ (\ FC\_Status\ ==\ FC\_WAIT\ \ )||}
+\DoxyCodeLine{00961\ \ \ \ \ \ \ (\ FC\_Status\ ==\ FC\_CTS\ \ \ ))}
+\DoxyCodeLine{00962\ \ \ \ \ \{}
+\DoxyCodeLine{00963\ \ \ \ \ \ \ \ CanTp\_PrepareSegmenetedFrame(\&CanPCI,\ \&PduInfoPtr,\ uiPayload);}
+\DoxyCodeLine{00964\ \ \ \ \ \ \ \ \ ret\ =\ CanIf\_Transmit(ID,\ \&PduInfoPtr);}
+\DoxyCodeLine{00965\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(\ ret\ ==\ E\_NOT\_OK\ )\{}
+\DoxyCodeLine{00966\ \ \ \ \ \ \ \ \ \ \ \ \ CanTp\_ResetRX();}
+\DoxyCodeLine{00967\ \ \ \ \ \ \ \ \ \ \ \ \ PduR\_CanTpRxIndication(ID,\ E\_NOT\_OK);}
+\DoxyCodeLine{00968\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00969\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\{}
+\DoxyCodeLine{00970\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_can_tp_8c_a36e809b3871fd6f5949e3ed395b4dc20}{CanTp\_TimerStart}}(\&N\_Ar\_timer);}
+\DoxyCodeLine{00971\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(FC\_Status\ ==\ FC\_CTS)\{}
+\DoxyCodeLine{00972\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_can_tp_8c_a36e809b3871fd6f5949e3ed395b4dc20}{CanTp\_TimerStart}}(\&N\_Cr\_timer);}
+\DoxyCodeLine{00973\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00974\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}(FC\_Status\ ==\ FC\_WAIT)\{}
+\DoxyCodeLine{00975\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{_can_tp_8c_a36e809b3871fd6f5949e3ed395b4dc20}{CanTp\_TimerStart}}(\&N\_Br\_timer);}
+\DoxyCodeLine{00976\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00977\ \ \ \ \ \ \ \ \ \}\ }
+\DoxyCodeLine{00978\ \ \ \ \ \}}
+\DoxyCodeLine{00979\ \ \ \ \ \textcolor{keywordflow}{else}\{}
+\DoxyCodeLine{00980\ \ \ \ \ \ \ \ ret\ =\ E\_NOT\_OK;\ }
+\DoxyCodeLine{00981\ \ \ \ \ \}}
+\DoxyCodeLine{00982\ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{00983\ \}}
+\DoxyCodeLine{00984\ }
+\DoxyCodeLine{00985\ }
+\DoxyCodeLine{00986\ \textcolor{comment}{/*====================================================================================================================*\(\backslash\)}}
+\DoxyCodeLine{00987\ \textcolor{comment}{\ \ \ \ Definicje\ funkcji\ Timera}}
+\DoxyCodeLine{00988\ \textcolor{comment}{\(\backslash\)*====================================================================================================================*/}}
+\DoxyCodeLine{00989\ }
+\DoxyCodeLine{00990\ \textcolor{comment}{/*====================================================================================================================*/}}
+\DoxyCodeLine{00991\ }
+\DoxyCodeLine{00995\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{_can_tp_8c_a36e809b3871fd6f5949e3ed395b4dc20}{CanTp\_TimerStart}}(\mbox{\hyperlink{struct_can_tp___timer__type}{CanTp\_Timer\_type}}\ *pTimer)\{}
+\DoxyCodeLine{00996\ \ \ \ \ pTimer-\/>eState\ =\ TIMER\_ENABLE;}
+\DoxyCodeLine{00997\ \}}
+\DoxyCodeLine{00998\ }
+\DoxyCodeLine{01002\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{_can_tp_8c_a9d97bacf210d61dd6e586abe50a62b47}{CanTp\_TimerReset}}(\mbox{\hyperlink{struct_can_tp___timer__type}{CanTp\_Timer\_type}}\ *pTimer)\{}
+\DoxyCodeLine{01003\ \ \ \ \ pTimer-\/>eState\ =\ TIMER\_DISABLE;}
+\DoxyCodeLine{01004\ \ \ \ \ pTimer-\/>uiCounter\ =\ 0;}
+\DoxyCodeLine{01005\ \}}
+\DoxyCodeLine{01006\ }
+\DoxyCodeLine{01010\ Std\_ReturnType\ \mbox{\hyperlink{_can_tp_8c_a4e05dc50d66ad5809d8a10d562ad17d7}{CanTp\_TimerTick}}(\mbox{\hyperlink{struct_can_tp___timer__type}{CanTp\_Timer\_type}}\ *pTimer)\{}
+\DoxyCodeLine{01011\ \ \ \ \ Std\_ReturnType\ ret\ =\ E\_OK;\ \ \ }
+\DoxyCodeLine{01012\ \ \ \ \ \textcolor{keywordflow}{if}(pTimer-\/>eState\ ==\ TIMER\_ENABLE)\{}
+\DoxyCodeLine{01013\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(pTimer-\/>uiCounter\ <\ UINT32\_MAX)\{}
+\DoxyCodeLine{01014\ \ \ \ \ \ \ \ \ \ \ \ \ pTimer-\/>uiCounter++;}
+\DoxyCodeLine{01015\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01016\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\{}
+\DoxyCodeLine{01017\ \ \ \ \ \ \ \ \ \ \ \ \ ret\ =\ E\_NOT\_OK;}
+\DoxyCodeLine{01018\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01019\ \ \ \ \ \}}
+\DoxyCodeLine{01020\ \ \ \ \ \textcolor{keywordflow}{return}\ ret;}
+\DoxyCodeLine{01021\ \}}
+\DoxyCodeLine{01022\ }
+\DoxyCodeLine{01026\ Std\_ReturnType\ \mbox{\hyperlink{_can_tp_8c_ad6087c8d49ce4d7a0ca27ae3ab98763e}{CanTp\_TimerTimeout}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{struct_can_tp___timer__type}{CanTp\_Timer\_type}}\ *pTimer)\{}
+\DoxyCodeLine{01027\ \ \ \ \ \textcolor{keywordflow}{if}(pTimer-\/>uiCounter\ >=\ pTimer-\/>uiTimeout)\{}
+\DoxyCodeLine{01028\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ E\_NOT\_OK;}
+\DoxyCodeLine{01029\ \ \ \ \ \}}
+\DoxyCodeLine{01030\ \ \ \ \ \textcolor{keywordflow}{else}\{}
+\DoxyCodeLine{01031\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ E\_OK;}
+\DoxyCodeLine{01032\ \ \ \ \ \}}
+\DoxyCodeLine{01033\ \}}
+
+\end{DoxyCode}

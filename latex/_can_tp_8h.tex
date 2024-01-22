@@ -1,0 +1,270 @@
+\doxysection{Can\+Tp.\+h File Reference}
+\hypertarget{_can_tp_8h}{}\label{_can_tp_8h}\index{CanTp.h@{CanTp.h}}
+
+
+Can Transport Layer.  
+
+
+{\ttfamily \#include "{}Com\+Stack\+\_\+\+Types.\+h"{}}\newline
+\doxysubsubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{struct_can_tp___variables_r_x__type}{Can\+Tp\+\_\+\+Variables\+RX\+\_\+type}}
+\item 
+struct \mbox{\hyperlink{struct_can_tp___variables_t_x__type}{Can\+Tp\+\_\+\+Variables\+TX\+\_\+type}}
+\item 
+struct \mbox{\hyperlink{struct_can_p_c_i___type}{Can\+PCI\+\_\+\+Type}}
+\item 
+struct \mbox{\hyperlink{struct_can_tp___timer__type}{Can\+Tp\+\_\+\+Timer\+\_\+type}}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{_can_tp_8h_a410dd91dd6b09ab30afec463509aa370}\label{_can_tp_8h_a410dd91dd6b09ab30afec463509aa370} 
+\#define {\bfseries NE\+\_\+\+NULL\+\_\+\+PTR}(ptr)~(ptr != NULL)
+\item 
+\Hypertarget{_can_tp_8h_ab20d77d37afb2ff11db4964e7e558e46}\label{_can_tp_8h_ab20d77d37afb2ff11db4964e7e558e46} 
+\#define {\bfseries DEFAULT\+\_\+\+ST}~0
+\item 
+\Hypertarget{_can_tp_8h_a530f11a96e508d171d28564c8dc20942}\label{_can_tp_8h_a530f11a96e508d171d28564c8dc20942} 
+\#define {\bfseries NULL\+\_\+\+PTR}~((void \texorpdfstring{$\ast$}{*})0x00u)
+\item 
+\Hypertarget{_can_tp_8h_a5fe4093bed77f664983baa02cf181591}\label{_can_tp_8h_a5fe4093bed77f664983baa02cf181591} 
+\#define {\bfseries CANTP\+\_\+\+MODULE\+\_\+\+ID}~(0x0\+Eu)
+\item 
+\Hypertarget{_can_tp_8h_ad9c615ee9e3cb4d8551bb6789d896648}\label{_can_tp_8h_ad9c615ee9e3cb4d8551bb6789d896648} 
+\#define {\bfseries CANTP\+\_\+\+SW\+\_\+\+MAJOR\+\_\+V}~(0x00u)
+\item 
+\Hypertarget{_can_tp_8h_a5f07098e402e12bf43c029d1933fcfe2}\label{_can_tp_8h_a5f07098e402e12bf43c029d1933fcfe2} 
+\#define {\bfseries CANTP\+\_\+\+SW\+\_\+\+MINOR\+\_\+V}~(0x01u)
+\item 
+\Hypertarget{_can_tp_8h_ab12012b76a9a87672495701e9a94db9b}\label{_can_tp_8h_ab12012b76a9a87672495701e9a94db9b} 
+\#define {\bfseries CANTP\+\_\+\+SW\+\_\+\+PATCH\+\_\+V}~(0x00u)
+\item 
+\Hypertarget{_can_tp_8h_a5b7494441090d981c2aa0e7ecfdb69c9}\label{_can_tp_8h_a5b7494441090d981c2aa0e7ecfdb69c9} 
+\#define {\bfseries CANTP\+\_\+\+N\+\_\+\+PCI\+\_\+\+TYPE\+\_\+\+SF}~(0x00u)
+\item 
+\Hypertarget{_can_tp_8h_aa45507f2ce498f91ad26a201b5d9ecd3}\label{_can_tp_8h_aa45507f2ce498f91ad26a201b5d9ecd3} 
+\#define {\bfseries CANTP\+\_\+\+N\+\_\+\+PCI\+\_\+\+TYPE\+\_\+\+FF}~(0x01u)
+\item 
+\Hypertarget{_can_tp_8h_ada077d80c7fe6ef003bc2cb46cacd90e}\label{_can_tp_8h_ada077d80c7fe6ef003bc2cb46cacd90e} 
+\#define {\bfseries CANTP\+\_\+\+N\+\_\+\+PCI\+\_\+\+TYPE\+\_\+\+CF}~(0x02u)
+\item 
+\Hypertarget{_can_tp_8h_ac411d228e2c2fe3c64ac2b4143191c81}\label{_can_tp_8h_ac411d228e2c2fe3c64ac2b4143191c81} 
+\#define {\bfseries CANTP\+\_\+\+N\+\_\+\+PCI\+\_\+\+TYPE\+\_\+\+FC}~(0x03u)
+\item 
+\Hypertarget{_can_tp_8h_a698150716f6441d64b10c1123a1840c4}\label{_can_tp_8h_a698150716f6441d64b10c1123a1840c4} 
+\#define {\bfseries CANTP\+\_\+\+CAN\+\_\+\+FRAME\+\_\+\+SIZE}~(0x08u)
+\item 
+\Hypertarget{_can_tp_8h_a49f03e0d3f90ff7a78db681f7348f60f}\label{_can_tp_8h_a49f03e0d3f90ff7a78db681f7348f60f} 
+\#define {\bfseries N\+\_\+\+AR\+\_\+\+TIMEOUT\+\_\+\+VAL}~100
+\item 
+\Hypertarget{_can_tp_8h_aa2acf8b9d292f0e437a19499b87bb981}\label{_can_tp_8h_aa2acf8b9d292f0e437a19499b87bb981} 
+\#define {\bfseries N\+\_\+\+BR\+\_\+\+TIMEOUT\+\_\+\+VAL}~100
+\item 
+\Hypertarget{_can_tp_8h_a4bba9a718a8cdd9e5c77c53777329e3e}\label{_can_tp_8h_a4bba9a718a8cdd9e5c77c53777329e3e} 
+\#define {\bfseries N\+\_\+\+CR\+\_\+\+TIMEOUT\+\_\+\+VAL}~100
+\item 
+\Hypertarget{_can_tp_8h_a09ae211e3f34a1f18194e5740271af10}\label{_can_tp_8h_a09ae211e3f34a1f18194e5740271af10} 
+\#define {\bfseries N\+\_\+\+AS\+\_\+\+TIMEOUT\+\_\+\+VAL}~100
+\item 
+\Hypertarget{_can_tp_8h_a7556e05d16c982940593afb060ccbeb2}\label{_can_tp_8h_a7556e05d16c982940593afb060ccbeb2} 
+\#define {\bfseries N\+\_\+\+BS\+\_\+\+TIMEOUT\+\_\+\+VAL}~100
+\item 
+\Hypertarget{_can_tp_8h_a12dfec51bb840967f6e0017f2d54754e}\label{_can_tp_8h_a12dfec51bb840967f6e0017f2d54754e} 
+\#define {\bfseries N\+\_\+\+CS\+\_\+\+TIMEOUT\+\_\+\+VAL}~100
+\item 
+\Hypertarget{_can_tp_8h_ae1eb271d8af9eb7edd0d1df4bc5e8d6e}\label{_can_tp_8h_ae1eb271d8af9eb7edd0d1df4bc5e8d6e} 
+\#define {\bfseries STMmin\+\_\+\+TIMEOUT\+\_\+\+VAL}~100
+\item 
+\Hypertarget{_can_tp_8h_a767690ddedabf646ce6ef464c04bcda2}\label{_can_tp_8h_a767690ddedabf646ce6ef464c04bcda2} 
+\#define {\bfseries FC\+\_\+\+WAIT\+\_\+\+FRAME\+\_\+\+CTR\+\_\+\+MAX}~10
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{_can_tp_8h_a99e580eb9ff0831229ac361d976e5422}\label{_can_tp_8h_a99e580eb9ff0831229ac361d976e5422} 
+enum {\bfseries Can\+Tp\+State\+\_\+type} \{ {\bfseries CANTP\+\_\+\+ON}
+, {\bfseries CANTP\+\_\+\+OFF}
+ \}
+\item 
+\Hypertarget{_can_tp_8h_abc08e2a17ed67c9d4a1318e2aaeb0d1d}\label{_can_tp_8h_abc08e2a17ed67c9d4a1318e2aaeb0d1d} 
+enum {\bfseries Can\+Tp\+State\+RX\+\_\+type} \{ {\bfseries CANTP\+\_\+\+RX\+\_\+\+WAIT}
+, {\bfseries CANTP\+\_\+\+RX\+\_\+\+PROCESSING}
+, {\bfseries CANTP\+\_\+\+RX\+\_\+\+PROCESSING\+\_\+\+SUSPEND}
+ \}
+\item 
+\Hypertarget{_can_tp_8h_aeedf6a43b6a127698e8eceeb476d76ab}\label{_can_tp_8h_aeedf6a43b6a127698e8eceeb476d76ab} 
+enum {\bfseries Can\+Tp\+State\+TX\+\_\+type} \{ {\bfseries CANTP\+\_\+\+TX\+\_\+\+WAIT}
+, {\bfseries CANTP\+\_\+\+TX\+\_\+\+PROCESSING}
+, {\bfseries CANTP\+\_\+\+TX\+\_\+\+PROCESSING\+\_\+\+SUSPENDED}
+ \}
+\item 
+\Hypertarget{_can_tp_8h_ad495a9f61af7fff07d7e97979d1ab854}\label{_can_tp_8h_ad495a9f61af7fff07d7e97979d1ab854} 
+enum {\bfseries Frame\+Type} \{ \newline
+{\bfseries CAN\+\_\+\+SF} = 0
+, {\bfseries CAN\+\_\+\+FF} = 1
+, {\bfseries CAN\+\_\+\+CF} = 2
+, {\bfseries CAN\+\_\+\+FC} = 3
+, \newline
+{\bfseries DEFAULT} = 4
+ \}
+\item 
+\Hypertarget{_can_tp_8h_a2ef9dfafd9980fbdf5d7bceb54809704}\label{_can_tp_8h_a2ef9dfafd9980fbdf5d7bceb54809704} 
+enum {\bfseries Flow\+Control\+Status\+\_\+type} \{ {\bfseries FC\+\_\+\+OVFLW} = 0
+, {\bfseries FC\+\_\+\+WAIT} = 1
+, {\bfseries FC\+\_\+\+CTS} = 2
+ \}
+\item 
+\Hypertarget{_can_tp_8h_ad4f8bb5e646e709aafeed7b8436ce725}\label{_can_tp_8h_ad4f8bb5e646e709aafeed7b8436ce725} 
+enum {\bfseries Timer\+State} \{ {\bfseries TIMER\+\_\+\+ENABLE}
+, {\bfseries TIMER\+\_\+\+DISABLE}
+ \}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{_can_tp_8h_a3dfe72ec51f271c2ad5c8f9569226920}{Can\+Tp\+\_\+\+Init}} (void)
+\begin{DoxyCompactList}\small\item\em Can\+Tp\+\_\+\+Init. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{_can_tp_8h_ada90d4609fd6248ee2c845368339dd62}{Can\+Tp\+\_\+\+Get\+Version\+Info}} (\mbox{\hyperlink{struct_std___version_info_type}{Std\+\_\+\+Version\+Info\+Type}} \texorpdfstring{$\ast$}{*}versioninfo)
+\begin{DoxyCompactList}\small\item\em Can\+Tp\+\_\+\+Get\+Version\+Info. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{_can_tp_8h_a2d4971d9e47654df28a65bd1c14a0d00}{Can\+Tp\+\_\+\+Shutdown}} (void)
+\begin{DoxyCompactList}\small\item\em Can\+Tp\+\_\+\+Shutdown. \end{DoxyCompactList}\item 
+\Hypertarget{_can_tp_8h_ab98661fa30a5912c26c1d622fa171104}\label{_can_tp_8h_ab98661fa30a5912c26c1d622fa171104} 
+Std\+\_\+\+Return\+Type {\bfseries Can\+Tp\+\_\+\+Transmit} (Pdu\+Id\+Type Tx\+Pdu\+Id, const \mbox{\hyperlink{struct_pdu_info_type}{Pdu\+Info\+Type}} \texorpdfstring{$\ast$}{*}Pdu\+Info\+Ptr)
+\begin{DoxyCompactList}\small\item\em Can\+Tp\+\_\+\+Transmit Funkcja żąda przesłania PDU (Protocal Data Unit) \mbox{[}SWS\+\_\+\+CANTP\+\_\+00212\mbox{]} Wypełnia\+: \mbox{[}SWS\+\_\+\+CANTP\+\_\+00231\mbox{]} \mbox{[}SWS\+\_\+\+CANTP\+\_\+00232\mbox{]} \mbox{[}SWS\+\_\+\+CANTP\+\_\+00204\mbox{]} \mbox{[}SWS\+\_\+\+CANTP\+\_\+00205\mbox{]} \mbox{[}SWS\+\_\+\+CANTP\+\_\+00206\mbox{]} \mbox{[}SWS\+\_\+\+CANTP\+\_\+00298\mbox{]} \mbox{[}SWS\+\_\+\+CANTP\+\_\+00299\mbox{]} \mbox{[}SWS\+\_\+\+CANTP\+\_\+00321\mbox{]} \mbox{[}SWS\+\_\+\+CANTP\+\_\+00354\mbox{]}. \end{DoxyCompactList}\item 
+Std\+\_\+\+Return\+Type \mbox{\hyperlink{_can_tp_8h_ab9bb0d37d8dcb66315fec58c79aa1fff}{Can\+Tp\+\_\+\+Cancel\+Transmit}} (Pdu\+Id\+Type Tx\+Pdu\+Id)
+\begin{DoxyCompactList}\small\item\em Can\+Tp\+\_\+\+Cancel\+Transmit. \end{DoxyCompactList}\item 
+Std\+\_\+\+Return\+Type \mbox{\hyperlink{_can_tp_8h_a4348d7c8d1f4372eac3652e5d22556c7}{Can\+Tp\+\_\+\+Cancel\+Receive}} (Pdu\+Id\+Type Rx\+Pdu\+Id)
+\begin{DoxyCompactList}\small\item\em Can\+Tp\+\_\+\+Cancel\+Receive. \end{DoxyCompactList}\item 
+Std\+\_\+\+Return\+Type \mbox{\hyperlink{_can_tp_8h_a801a48975f33fb07cac861602967b8d0}{Can\+Tp\+\_\+\+Change\+Parameter}} (Pdu\+Id\+Type id, TPParameter\+Type parameter, uint16 value)
+\begin{DoxyCompactList}\small\item\em Can\+Tp\+\_\+\+Change\+Parameter. \end{DoxyCompactList}\item 
+Std\+\_\+\+Return\+Type \mbox{\hyperlink{_can_tp_8h_a040a55bfce6f27335a218ab99622b037}{Can\+Tp\+\_\+\+Read\+Parameter}} (Pdu\+Id\+Type id, TPParameter\+Type parameter, uint16 \texorpdfstring{$\ast$}{*}value)
+\begin{DoxyCompactList}\small\item\em Can\+Tp\+\_\+\+Read\+Parameter. \end{DoxyCompactList}\item 
+\Hypertarget{_can_tp_8h_a28b31e1ad8e52490124ef883a8d69150}\label{_can_tp_8h_a28b31e1ad8e52490124ef883a8d69150} 
+void {\bfseries Can\+Tp\+\_\+\+Main\+Function} (void)
+\begin{DoxyCompactList}\small\item\em Can\+Tp\+\_\+\+Main\+Function Funkcja odpowiadająca za zarządzaniem modułem Can\+Tp \mbox{[}SWS\+\_\+\+CANTP\+\_\+00213\mbox{]} Wypełnia\+: \mbox{[}SWS\+\_\+\+CANTP\+\_\+00164\mbox{]} \mbox{[}SWS\+\_\+\+CANTP\+\_\+00300\mbox{]}. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{_can_tp_8h_a4c81c6399330bff84bdf2e0cd6254de9}{Can\+Tp\+\_\+\+Rx\+Indication}} (Pdu\+Id\+Type Rx\+Pdu\+Id, const \mbox{\hyperlink{struct_pdu_info_type}{Pdu\+Info\+Type}} \texorpdfstring{$\ast$}{*}Pdu\+Info\+Ptr)
+\begin{DoxyCompactList}\small\item\em Can\+Tp\+\_\+\+Rx\+Indication. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{_can_tp_8h_a371d9eb76ded3dfac596dfbcc63e758a}{Can\+Tp\+\_\+\+Tx\+Confirmation}} (Pdu\+Id\+Type Tx\+Pdu\+Id, Std\+\_\+\+Return\+Type result)
+\begin{DoxyCompactList}\small\item\em Can\+Tp\+\_\+\+Tx\+Confirmation. \end{DoxyCompactList}\item 
+\Hypertarget{_can_tp_8h_a36e809b3871fd6f5949e3ed395b4dc20}\label{_can_tp_8h_a36e809b3871fd6f5949e3ed395b4dc20} 
+void {\bfseries Can\+Tp\+\_\+\+Timer\+Start} (\mbox{\hyperlink{struct_can_tp___timer__type}{Can\+Tp\+\_\+\+Timer\+\_\+type}} \texorpdfstring{$\ast$}{*}p\+Timer)
+\begin{DoxyCompactList}\small\item\em Can\+Tp\+\_\+\+Timer\+Start. \end{DoxyCompactList}\item 
+\Hypertarget{_can_tp_8h_a9d97bacf210d61dd6e586abe50a62b47}\label{_can_tp_8h_a9d97bacf210d61dd6e586abe50a62b47} 
+void {\bfseries Can\+Tp\+\_\+\+Timer\+Reset} (\mbox{\hyperlink{struct_can_tp___timer__type}{Can\+Tp\+\_\+\+Timer\+\_\+type}} \texorpdfstring{$\ast$}{*}p\+Timer)
+\begin{DoxyCompactList}\small\item\em Can\+Tp\+\_\+\+Timer\+Reset. \end{DoxyCompactList}\item 
+\Hypertarget{_can_tp_8h_a4e05dc50d66ad5809d8a10d562ad17d7}\label{_can_tp_8h_a4e05dc50d66ad5809d8a10d562ad17d7} 
+Std\+\_\+\+Return\+Type {\bfseries Can\+Tp\+\_\+\+Timer\+Tick} (\mbox{\hyperlink{struct_can_tp___timer__type}{Can\+Tp\+\_\+\+Timer\+\_\+type}} \texorpdfstring{$\ast$}{*}p\+Timer)
+\begin{DoxyCompactList}\small\item\em Can\+Tp\+\_\+\+Timer\+Tick. \end{DoxyCompactList}\item 
+\Hypertarget{_can_tp_8h_ad6087c8d49ce4d7a0ca27ae3ab98763e}\label{_can_tp_8h_ad6087c8d49ce4d7a0ca27ae3ab98763e} 
+Std\+\_\+\+Return\+Type {\bfseries Can\+Tp\+\_\+\+Timer\+Timeout} (const \mbox{\hyperlink{struct_can_tp___timer__type}{Can\+Tp\+\_\+\+Timer\+\_\+type}} \texorpdfstring{$\ast$}{*}p\+Timer)
+\begin{DoxyCompactList}\small\item\em Can\+Tp\+\_\+\+Timer\+Timeout. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Can Transport Layer. 
+
+===================================================================================================================\texorpdfstring{$\ast$}{*}\textbackslash{}
+
+Implementation of Can Transport Layer
+
+\begin{DoxySeeAlso}{See also}
+Can\+\_\+\+Tp.\+pdf \texorpdfstring{$\ast$}{*}==================================================================================================================== 
+\end{DoxySeeAlso}
+
+
+\doxysubsection{Function Documentation}
+\Hypertarget{_can_tp_8h_a4348d7c8d1f4372eac3652e5d22556c7}\label{_can_tp_8h_a4348d7c8d1f4372eac3652e5d22556c7} 
+\index{CanTp.h@{CanTp.h}!CanTp\_CancelReceive@{CanTp\_CancelReceive}}
+\index{CanTp\_CancelReceive@{CanTp\_CancelReceive}!CanTp.h@{CanTp.h}}
+\doxysubsubsection{\texorpdfstring{CanTp\_CancelReceive()}{CanTp\_CancelReceive()}}
+{\footnotesize\ttfamily Std\+\_\+\+Return\+Type Can\+Tp\+\_\+\+Cancel\+Receive (\begin{DoxyParamCaption}\item[{Pdu\+Id\+Type}]{Rx\+Pdu\+Id }\end{DoxyParamCaption})}
+
+
+
+Can\+Tp\+\_\+\+Cancel\+Receive. 
+
+Przerwanie trwającego odbioru PDU \mbox{[}SWS\+\_\+\+CANTP\+\_\+00257\mbox{]} Wypełnia\+: \mbox{[}SWS\+\_\+\+CANTP\+\_\+00260\mbox{]} \mbox{[}SWS\+\_\+\+CANTP\+\_\+00261\mbox{]} \mbox{[}SWS\+\_\+\+CANTP\+\_\+00262\mbox{]} \mbox{[}SWS\+\_\+\+CANTP\+\_\+00263\mbox{]} \Hypertarget{_can_tp_8h_ab9bb0d37d8dcb66315fec58c79aa1fff}\label{_can_tp_8h_ab9bb0d37d8dcb66315fec58c79aa1fff} 
+\index{CanTp.h@{CanTp.h}!CanTp\_CancelTransmit@{CanTp\_CancelTransmit}}
+\index{CanTp\_CancelTransmit@{CanTp\_CancelTransmit}!CanTp.h@{CanTp.h}}
+\doxysubsubsection{\texorpdfstring{CanTp\_CancelTransmit()}{CanTp\_CancelTransmit()}}
+{\footnotesize\ttfamily Std\+\_\+\+Return\+Type Can\+Tp\+\_\+\+Cancel\+Transmit (\begin{DoxyParamCaption}\item[{Pdu\+Id\+Type}]{Tx\+Pdu\+Id }\end{DoxyParamCaption})}
+
+
+
+Can\+Tp\+\_\+\+Cancel\+Transmit. 
+
+Przerwanie trwającej transmisji PDU \mbox{[}SWS\+\_\+\+CANTP\+\_\+00246\mbox{]} Wypełnia\+: \mbox{[}SWS\+\_\+\+CANTP\+\_\+00254\mbox{]} \mbox{[}SWS\+\_\+\+CANTP\+\_\+00255\mbox{]} \mbox{[}SWS\+\_\+\+CANTP\+\_\+00256\mbox{]} \Hypertarget{_can_tp_8h_a801a48975f33fb07cac861602967b8d0}\label{_can_tp_8h_a801a48975f33fb07cac861602967b8d0} 
+\index{CanTp.h@{CanTp.h}!CanTp\_ChangeParameter@{CanTp\_ChangeParameter}}
+\index{CanTp\_ChangeParameter@{CanTp\_ChangeParameter}!CanTp.h@{CanTp.h}}
+\doxysubsubsection{\texorpdfstring{CanTp\_ChangeParameter()}{CanTp\_ChangeParameter()}}
+{\footnotesize\ttfamily Std\+\_\+\+Return\+Type Can\+Tp\+\_\+\+Change\+Parameter (\begin{DoxyParamCaption}\item[{Pdu\+Id\+Type}]{id,  }\item[{TPParameter\+Type}]{parameter,  }\item[{uint16}]{value }\end{DoxyParamCaption})}
+
+
+
+Can\+Tp\+\_\+\+Change\+Parameter. 
+
+Zadanie zmiany konkretnego parametru.\mbox{[}SWS\+\_\+\+CANTP\+\_\+00302\mbox{]} Wypełnia\+: \mbox{[}SWS\+\_\+\+CANTP\+\_\+00303\mbox{]} \mbox{[}SWS\+\_\+\+CANTP\+\_\+00304\mbox{]} \mbox{[}SWS\+\_\+\+CANTP\+\_\+00305\mbox{]} \mbox{[}SWS\+\_\+\+CANTP\+\_\+00338\mbox{]} \Hypertarget{_can_tp_8h_ada90d4609fd6248ee2c845368339dd62}\label{_can_tp_8h_ada90d4609fd6248ee2c845368339dd62} 
+\index{CanTp.h@{CanTp.h}!CanTp\_GetVersionInfo@{CanTp\_GetVersionInfo}}
+\index{CanTp\_GetVersionInfo@{CanTp\_GetVersionInfo}!CanTp.h@{CanTp.h}}
+\doxysubsubsection{\texorpdfstring{CanTp\_GetVersionInfo()}{CanTp\_GetVersionInfo()}}
+{\footnotesize\ttfamily void Can\+Tp\+\_\+\+Get\+Version\+Info (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{struct_std___version_info_type}{Std\+\_\+\+Version\+Info\+Type}} \texorpdfstring{$\ast$}{*}}]{versioninfo }\end{DoxyParamCaption})}
+
+
+
+Can\+Tp\+\_\+\+Get\+Version\+Info. 
+
+Funkcja zwracajaca informacje o wersji \mbox{[}SWS\+\_\+\+CANTP\+\_\+00210\mbox{]} \Hypertarget{_can_tp_8h_a3dfe72ec51f271c2ad5c8f9569226920}\label{_can_tp_8h_a3dfe72ec51f271c2ad5c8f9569226920} 
+\index{CanTp.h@{CanTp.h}!CanTp\_Init@{CanTp\_Init}}
+\index{CanTp\_Init@{CanTp\_Init}!CanTp.h@{CanTp.h}}
+\doxysubsubsection{\texorpdfstring{CanTp\_Init()}{CanTp\_Init()}}
+{\footnotesize\ttfamily void Can\+Tp\+\_\+\+Init (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+
+
+Can\+Tp\+\_\+\+Init. 
+
+Funkcja inicjalizuje moduł Can\+Tp \mbox{[}SWS\+\_\+\+CANTP\+\_\+00208\mbox{]} \Hypertarget{_can_tp_8h_a040a55bfce6f27335a218ab99622b037}\label{_can_tp_8h_a040a55bfce6f27335a218ab99622b037} 
+\index{CanTp.h@{CanTp.h}!CanTp\_ReadParameter@{CanTp\_ReadParameter}}
+\index{CanTp\_ReadParameter@{CanTp\_ReadParameter}!CanTp.h@{CanTp.h}}
+\doxysubsubsection{\texorpdfstring{CanTp\_ReadParameter()}{CanTp\_ReadParameter()}}
+{\footnotesize\ttfamily Std\+\_\+\+Return\+Type Can\+Tp\+\_\+\+Read\+Parameter (\begin{DoxyParamCaption}\item[{Pdu\+Id\+Type}]{id,  }\item[{TPParameter\+Type}]{parameter,  }\item[{uint16 \texorpdfstring{$\ast$}{*}}]{value }\end{DoxyParamCaption})}
+
+
+
+Can\+Tp\+\_\+\+Read\+Parameter. 
+
+Służy do odczytu aktualnych wartośći BS i STmin.\mbox{[}SWS\+\_\+\+CANTP\+\_\+00323\mbox{]} Wypełnia\+: \mbox{[}SWS\+\_\+\+CANTP\+\_\+00324\mbox{]} \Hypertarget{_can_tp_8h_a4c81c6399330bff84bdf2e0cd6254de9}\label{_can_tp_8h_a4c81c6399330bff84bdf2e0cd6254de9} 
+\index{CanTp.h@{CanTp.h}!CanTp\_RxIndication@{CanTp\_RxIndication}}
+\index{CanTp\_RxIndication@{CanTp\_RxIndication}!CanTp.h@{CanTp.h}}
+\doxysubsubsection{\texorpdfstring{CanTp\_RxIndication()}{CanTp\_RxIndication()}}
+{\footnotesize\ttfamily void Can\+Tp\+\_\+\+Rx\+Indication (\begin{DoxyParamCaption}\item[{Pdu\+Id\+Type}]{Rx\+Pdu\+Id,  }\item[{const \mbox{\hyperlink{struct_pdu_info_type}{Pdu\+Info\+Type}} \texorpdfstring{$\ast$}{*}}]{Pdu\+Info\+Ptr }\end{DoxyParamCaption})}
+
+
+
+Can\+Tp\+\_\+\+Rx\+Indication. 
+
+Wskazanie odebranej jednostki PDU \mbox{[}SWS\+\_\+\+CANTP\+\_\+00214\mbox{]} Wypełnia\+: \mbox{[}SWS\+\_\+\+CANTP\+\_\+00235\mbox{]} \mbox{[}SWS\+\_\+\+CANTP\+\_\+00322\mbox{]} \Hypertarget{_can_tp_8h_a2d4971d9e47654df28a65bd1c14a0d00}\label{_can_tp_8h_a2d4971d9e47654df28a65bd1c14a0d00} 
+\index{CanTp.h@{CanTp.h}!CanTp\_Shutdown@{CanTp\_Shutdown}}
+\index{CanTp\_Shutdown@{CanTp\_Shutdown}!CanTp.h@{CanTp.h}}
+\doxysubsubsection{\texorpdfstring{CanTp\_Shutdown()}{CanTp\_Shutdown()}}
+{\footnotesize\ttfamily void Can\+Tp\+\_\+\+Shutdown (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+
+
+Can\+Tp\+\_\+\+Shutdown. 
+
+Funkcja wywoływana w celu wyłączenia modułu Can\+Tp. \mbox{[}SWS\+\_\+\+CANTP\+\_\+00211\mbox{]}
+
+Wypełnia\+: \mbox{[}SWS\+\_\+\+CANTP\+\_\+00202\mbox{]} \mbox{[}SWS\+\_\+\+CANTP\+\_\+00200\mbox{]} \Hypertarget{_can_tp_8h_a371d9eb76ded3dfac596dfbcc63e758a}\label{_can_tp_8h_a371d9eb76ded3dfac596dfbcc63e758a} 
+\index{CanTp.h@{CanTp.h}!CanTp\_TxConfirmation@{CanTp\_TxConfirmation}}
+\index{CanTp\_TxConfirmation@{CanTp\_TxConfirmation}!CanTp.h@{CanTp.h}}
+\doxysubsubsection{\texorpdfstring{CanTp\_TxConfirmation()}{CanTp\_TxConfirmation()}}
+{\footnotesize\ttfamily void Can\+Tp\+\_\+\+Tx\+Confirmation (\begin{DoxyParamCaption}\item[{Pdu\+Id\+Type}]{Tx\+Pdu\+Id,  }\item[{Std\+\_\+\+Return\+Type}]{result }\end{DoxyParamCaption})}
+
+
+
+Can\+Tp\+\_\+\+Tx\+Confirmation. 
+
+Informacja o statusie transmisji PDU.\mbox{[}SWS\+\_\+\+CANTP\+\_\+00215\mbox{]} Wypełnia\+: \mbox{[}SWS\+\_\+\+CANTP\+\_\+00236\mbox{]} 
