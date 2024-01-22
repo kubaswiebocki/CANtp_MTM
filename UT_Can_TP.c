@@ -376,10 +376,13 @@ void Test_Of_CanTp_ChangeParameter(void){
 
   /*
                     TEST 1
-          Zmiana parametru TP_BS - zwracane E_OK
+          Zmiana parametru TP_BS, TP_STMIN - zwracane E_OK
   */
   Parameter = TP_BS;
   CanTp_State = CANTP_ON;
+  ret = CanTp_ChangeParameter(PduId, Parameter, 1);
+  TEST_CHECK(ret == E_OK);
+  Parameter = TP_STMIN;
   ret = CanTp_ChangeParameter(PduId, Parameter, 1);
   TEST_CHECK(ret == E_OK);
   /*
@@ -412,10 +415,15 @@ void Test_Of_CanTp_ReadParameter(void){
   uint16 puiReadValue;
   /*
                     TEST 1
-          Odczyt parametru TP_BS - zwracane E_OK
+          Odczyt parametru TP_BS i TP_STmin - zwracane E_OK
   */
   Parameter = TP_BS;
   CanTp_State = CANTP_ON;
+  ret = CanTp_ChangeParameter(PduId, Parameter, 1);
+  ret = CanTp_ReadParameter(PduId, Parameter, &puiReadValue);
+  TEST_CHECK(ret == E_OK);
+  TEST_CHECK(puiReadValue == 1);
+  Parameter = TP_STMIN;
   ret = CanTp_ChangeParameter(PduId, Parameter, 1);
   ret = CanTp_ReadParameter(PduId, Parameter, &puiReadValue);
   TEST_CHECK(ret == E_OK);
