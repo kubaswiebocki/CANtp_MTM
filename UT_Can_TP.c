@@ -539,8 +539,17 @@ void Test_Of_CanTp_ResetTX(void){
     TEST_CHECK(CanTp_VariablesTX.sent_bytes == 0);
 }
 
+void Test_Of_CanTp_Calc_Available_Blocks(void){
+  uint16 ret;
+  CanTp_VariablesRX.message_length = 8;
+  CanTp_VariablesRX.sended_bytes = 0;
+  TEST_CHECK(CanTp_Calc_Available_Blocks(10) == 2);
+  TEST_CHECK(CanTp_Calc_Available_Blocks(6) == 0);
+}
+
 
 TEST_LIST = {
+       { "Test of CanTp_Calc_Available_Blocks", Test_Of_CanTp_Calc_Available_Blocks },
     { "Test of CanTp_ResetTX", Test_Of_CanTp_ResetTX },
     { "Test of CanTp_ResetRX", Test_Of_CanTp_ResetRX },
     { "Test of CanTp_TxConfirmation", Test_Of_CanTp_TxConfirmation },

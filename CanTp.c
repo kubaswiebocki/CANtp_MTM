@@ -102,7 +102,7 @@ static Std_ReturnType CanTp_PrepareSegmenetedFrame(CanPCI_Type *CanPCI, PduInfoT
 static Std_ReturnType CanTp_SendSingleFrame(PduIdType id, uint8* payload, uint32 size);
 static Std_ReturnType CanTp_SendFirstFrame(PduIdType id, uint32 message_lenght);
 
-static uint16 CanTp_Calculate_Available_Blocks(uint16 buffer_size);
+static uint16 CanTp_Calc_Available_Blocks(uint16 buffer_size);
 
 static void CanTp_FirstFrameReception(PduIdType RxPduId, const PduInfoType *PduInfoPtr, CanPCI_Type *Can_PCI);
 static void CanTp_SingleFrameReception(PduIdType RxPduId, CanPCI_Type *Can_PCI, const PduInfoType* PduInfoPtr);
@@ -112,7 +112,6 @@ static void CanTp_FlowControlReception(PduIdType RxPduId, CanPCI_Type *Can_PCI);
 static Std_ReturnType CanTp_SendConsecutiveFrame(PduIdType id, uint8 SN, uint8* payload, uint32 size);
 static Std_ReturnType CanTp_SendFlowControl(PduIdType ID, uint8 BlockSize, FlowControlStatus_type FC_Status, uint8 SeparationTime );
 static void CanTp_SendNextCF(void);
-static void CanTp_set_blocks_to_next_cts(uint8 blocks);
 /*====================================================================================================================*\
     Kod funkcji
 \*====================================================================================================================*/
@@ -626,14 +625,14 @@ static void CanTp_FirstFrameReception(PduIdType RxPduId, const PduInfoType *PduI
     if(Buf_State == BUFREQ_OK){
         CanTp_VariablesRX.message_length = Can_PCI->frame_lenght;
         CanTp_VariablesRX.CanTp_Current_RxId = RxPduId;
-        current_block_size = CanTp_Calculate_Available_Blocks( buffer_size ); 
+        current_block_size = CanTp_Calc_Available_Blocks( buffer_size ); 
         if( current_block_size > 0){    
             CanTp_SendFlowControl(CanTp_VariablesRX.CanTp_Current_RxId, current_block_size, FC_CTS, DEFAULT_ST);   
-            CanTp_set_blocks_to_next_cts( current_block_size );
+            CanTp_VariablesRX.blocks_to_next_cts = current_block_size;
             CanTp_VariablesRX.CanTp_StateRX = CANTP_RX_PROCESSING;
         }
         else{
-            CanTp_set_blocks_to_next_cts( current_block_size );
+            CanTp_VariablesRX.blocks_to_next_cts = current_block_size;
             CanTp_SendFlowControl(CanTp_VariablesRX.CanTp_Current_RxId, current_block_size, FC_WAIT, DEFAULT_ST );   
             CanTp_VariablesRX.CanTp_StateRX = CANTP_RX_PROCESSING_SUSPEND;
            
@@ -693,11 +692,11 @@ static void CanTp_ConsecutiveFrameReception(PduIdType RxPduId, CanPCI_Type *Can_
                 else{ 
                     CanTp_VariablesRX.expected_CF_SN++;
                     CanTp_VariablesRX.expected_CF_SN%8;
-                    current_block_size = CanTp_Calculate_Available_Blocks( buffer_size);
+                    current_block_size = CanTp_Calc_Available_Blocks( buffer_size);
                     if(current_block_size > 0){
                         if(CanTp_VariablesRX.blocks_to_next_cts == 0 ){
                             CanTp_SendFlowControl(CanTp_VariablesRX.CanTp_Current_RxId, current_block_size, FC_CTS, DEFAULT_ST );
-                            CanTp_set_blocks_to_next_cts(current_block_size);
+                            CanTp_VariablesRX.blocks_to_next_cts = current_block_size;
                         }
                         CanTp_VariablesRX.CanTp_StateRX = CANTP_RX_PROCESSING;         
                     }
@@ -748,17 +747,17 @@ static void CanTp_FlowControlReception(PduIdType RxPduId, CanPCI_Type *Can_PCI){
     }
 }
 
-static uint16 CanTp_Calculate_Available_Blocks(uint16 buffer_size){
-    uint16 retval; 
+static uint16 CanTp_Calc_Available_Blocks(uint16 buffer_size){
+    uint16 ret; 
     uint16 remaining_bytes = CanTp_VariablesRX.message_length - CanTp_VariablesRX.sended_bytes;
     if(buffer_size >= remaining_bytes){
-        retval = remaining_bytes / 7;
-        if(CanTp_VariablesRX.message_length%7 > 0) retval++; 
+        ret = remaining_bytes / 7;
+        if(CanTp_VariablesRX.message_length%7 > 0) ret++; 
     }
     else{
-        retval = buffer_size / 7;
+        ret = buffer_size / 7;
     }
-    return retval;
+    return ret;
 } 
 
 static void CanTp_SendNextCF(void){
@@ -825,10 +824,6 @@ static Std_ReturnType CanTp_SendConsecutiveFrame(PduIdType id, uint8 SN, uint8* 
         ret = E_NOT_OK;
     }
     return ret;
-}
-
-static void CanTp_set_blocks_to_next_cts(uint8 blocks){
-    CanTp_VariablesRX.blocks_to_next_cts = blocks;
 }
 
 static Std_ReturnType CanTp_SendFlowControl(PduIdType ID, uint8 BlockSize, FlowControlStatus_type FC_Status, uint8 SeparationTime ){
