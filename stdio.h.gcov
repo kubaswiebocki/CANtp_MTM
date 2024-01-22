@@ -1,7 +1,7 @@
         -:    0:Source:c:/program files/mingw/x86_64-w64-mingw32/include/stdio.h
-        -:    0:Graph:UT_Can_TP.gcno
-        -:    0:Data:UT_Can_TP.gcda
-        -:    0:Runs:1
+        -:    0:Graph:UT_CAN_TP.gcno
+        -:    0:Data:UT_CAN_TP.gcda
+        -:    0:Runs:15
         -:    1:/**
         -:    2: * This file has no copyright assigned and is placed in the Public Domain.
         -:    3: * This file is part of the mingw-w64 runtime package.
@@ -369,13 +369,13 @@
         -:  365:
         -:  366:__mingw_ovr
         -:  367:__attribute__((__format__ (gnu_printf, 1, 2))) __MINGW_ATTRIB_NONNULL(1)
-        8:  368:int printf (const char *__format, ...)
+       86:  368:int printf (const char *__format, ...)
         -:  369:{
         -:  370:  int __retval;
-        8:  371:  __builtin_va_list __local_argv; __builtin_va_start( __local_argv, __format );
-        8:  372:  __retval = __mingw_vfprintf( stdout, __format, __local_argv );
-        8:  373:  __builtin_va_end( __local_argv );
-        8:  374:  return __retval;
+       86:  371:  __builtin_va_list __local_argv; __builtin_va_start( __local_argv, __format );
+       86:  372:  __retval = __mingw_vfprintf( stdout, __format, __local_argv );
+       86:  373:  __builtin_va_end( __local_argv );
+       86:  374:  return __retval;
         -:  375:}
         -:  376:
         -:  377:#if __MINGW_FORTIFY_VA_ARG
@@ -465,12 +465,12 @@
         -:  461:
         -:  462:__mingw_bos_ovr
         -:  463:__attribute__((__format__ (gnu_printf, 3, 0))) __MINGW_ATTRIB_NONNULL(3)
-        3:  464:int vsnprintf (char *__stream, size_t __n, const char *__format, __builtin_va_list __local_argv)
+       29:  464:int vsnprintf (char *__stream, size_t __n, const char *__format, __builtin_va_list __local_argv)
         -:  465:{
         -:  466:#if __MINGW_FORTIFY_LEVEL > 0
         -:  467:  __mingw_bos_ptr_chk_warn(__stream, __n, 1);
         -:  468:#endif
-        3:  469:  return __mingw_vsnprintf( __stream, __n, __format, __local_argv );
+       29:  469:  return __mingw_vsnprintf( __stream, __n, __format, __local_argv );
         -:  470:}
         -:  471:
         -:  472:/* Override __builtin_printf-routines ... Kludge for libstdc++ ...*/
