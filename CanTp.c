@@ -369,6 +369,42 @@ void CanTp_RxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr){
     }
 }
 
+/**
+  @brief CanTp_TxConfirmation
+
+  Informacja o statusie transmisji PDU.[SWS_CANTP_00215]
+  Wypełnia:
+   [SWS_CANTP_00236]
+*/
+void CanTp_TxConfirmation (PduIdType TxPduId, Std_ReturnType result){
+if( CanTp_State == CANTP_ON ){  
+    if(CanTp_VariablesRX.CanTp_Current_RxId == TxPduId){
+        if( (CanTp_VariablesRX.CanTp_StateRX == CANTP_RX_PROCESSING ) || (CanTp_VariablesRX.CanTp_StateRX == CANTP_RX_PROCESSING_SUSPEND)){
+            if(result == E_OK){}    
+            else{
+                PduR_CanTpRxIndication(CanTp_VariablesRX.CanTp_Current_RxId, E_NOT_OK);
+                CanTp_ResetRX();
+            }
+        }
+        else{} 
+    }
+    if(CanTp_VariablesTX.CanTp_Current_TxId == TxPduId ){
+        if(result == E_OK){
+            if(CanTp_VariablesTX.CanTp_StateTX == CANTP_TX_PROCESSING)
+            {
+               CanTp_SendNextCF();               
+            }
+            else{}
+        }
+        else{
+            PduR_CanTpTxConfirmation(CanTp_VariablesTX.CanTp_Current_TxId, E_NOT_OK);
+            CanTp_ResetTX();
+        }
+    }
+    else{}
+}
+}
+
 
 /*====================================================================================================================*\
     Definicja funkcji lokalnych
@@ -794,7 +830,6 @@ static Std_ReturnType CanTp_SendConsecutiveFrame(PduIdType id, uint8 SN, uint8* 
 static void CanTp_set_blocks_to_next_cts(uint8 blocks){
     CanTp_VariablesRX.blocks_to_next_cts = blocks;
 }
-
 
 static Std_ReturnType CanTp_SendFlowControl(PduIdType ID, uint8 BlockSize, FlowControlStatus_type FC_Status, uint8 SeparationTime ){
     Std_ReturnType ret = E_OK;
