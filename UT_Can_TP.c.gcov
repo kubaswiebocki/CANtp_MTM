@@ -422,411 +422,419 @@ CanIf_Transmit:
         -:  376:
         -:  377:  /*
         -:  378:                    TEST 1
-        -:  379:          Zmiana parametru TP_BS - zwracane E_OK
+        -:  379:          Zmiana parametru TP_BS, TP_STMIN - zwracane E_OK
         -:  380:  */
         1:  381:  Parameter = TP_BS;
         1:  382:  CanTp_State = CANTP_ON;
         1:  383:  ret = CanTp_ChangeParameter(PduId, Parameter, 1);
         1:  384:  TEST_CHECK(ret == E_OK);
-        -:  385:  /*
-        -:  386:                    TEST 2
-        -:  387:          Zmiana parametru TP_BC - zwracane E_NOT_OK
-        -:  388:  */
-        1:  389:  Parameter = TP_BC;
-        1:  390:  ret = CanTp_ChangeParameter(PduId, Parameter, 1);
-        1:  391:  TEST_CHECK(ret == E_NOT_OK);
-        -:  392:  /*
-        -:  393:                    TEST 3
-        -:  394:          Zmiana parametru TP_BS - zwracane E_NOT_OK bo State CANTP_OFF
-        -:  395:  */
-        1:  396:  Parameter = TP_BS;
-        1:  397:  CanTp_State = CANTP_OFF;
-        1:  398:  ret = CanTp_ChangeParameter(PduId, Parameter, 1);
-        1:  399:  TEST_CHECK(ret == E_NOT_OK);
-        1:  400:}
-        -:  401:
-        -:  402:/**
-        -:  403:  @brief Test odczytu wartosci parametru
+        1:  385:  Parameter = TP_STMIN;
+        1:  386:  ret = CanTp_ChangeParameter(PduId, Parameter, 1);
+        1:  387:  TEST_CHECK(ret == E_OK);
+        -:  388:  /*
+        -:  389:                    TEST 2
+        -:  390:          Zmiana parametru TP_BC - zwracane E_NOT_OK
+        -:  391:  */
+        1:  392:  Parameter = TP_BC;
+        1:  393:  ret = CanTp_ChangeParameter(PduId, Parameter, 1);
+        1:  394:  TEST_CHECK(ret == E_NOT_OK);
+        -:  395:  /*
+        -:  396:                    TEST 3
+        -:  397:          Zmiana parametru TP_BS - zwracane E_NOT_OK bo State CANTP_OFF
+        -:  398:  */
+        1:  399:  Parameter = TP_BS;
+        1:  400:  CanTp_State = CANTP_OFF;
+        1:  401:  ret = CanTp_ChangeParameter(PduId, Parameter, 1);
+        1:  402:  TEST_CHECK(ret == E_NOT_OK);
+        1:  403:}
         -:  404:
-        -:  405:  Funkcja testująca odczyt wartosci parametru.
-        -:  406:*/
+        -:  405:/**
+        -:  406:  @brief Test odczytu wartosci parametru
         -:  407:
-        1:  408:void Test_Of_CanTp_ReadParameter(void){
-        1:  409:  PduIdType PduId = 1;
-        -:  410:  TPParameterType Parameter;
-        -:  411:  Std_ReturnType ret; 
-        -:  412:  uint16 puiReadValue;
-        -:  413:  /*
-        -:  414:                    TEST 1
-        -:  415:          Odczyt parametru TP_BS - zwracane E_OK
-        -:  416:  */
-        1:  417:  Parameter = TP_BS;
-        1:  418:  CanTp_State = CANTP_ON;
-        1:  419:  ret = CanTp_ChangeParameter(PduId, Parameter, 1);
-        1:  420:  ret = CanTp_ReadParameter(PduId, Parameter, &puiReadValue);
-        1:  421:  TEST_CHECK(ret == E_OK);
-        1:  422:  TEST_CHECK(puiReadValue == 1);
-        -:  423:  /*
-        -:  424:                    TEST 2
-        -:  425:          Zmiana parametru TP_BC - zwracane E_NOT_OK
-        -:  426:  */
-        1:  427:  puiReadValue = 2;
-        1:  428:  Parameter = TP_BC;
-        1:  429:  ret = CanTp_ReadParameter(PduId, Parameter, &puiReadValue);
-        1:  430:  TEST_CHECK(ret == E_NOT_OK);
-        1:  431:  TEST_CHECK(puiReadValue == 2);
-        -:  432:  /*
-        -:  433:                    TEST 3
-        -:  434:          Zmiana parametru TP_BS - zwracane E_NOT_OK bo State CANTP_OFF
-        -:  435:  */
-        1:  436:  puiReadValue = 3;
-        1:  437:  Parameter = TP_BS;
-        1:  438:  CanTp_State = CANTP_OFF;
-        1:  439:  ret = CanTp_ReadParameter(PduId, Parameter, &puiReadValue);
-        1:  440:  TEST_CHECK(ret == E_NOT_OK);
-        1:  441:  TEST_CHECK(puiReadValue == 3);
-        1:  442:}
-        -:  443:
-        -:  444:/**
-        -:  445:  @brief Test zarządzania modułem
-        -:  446:
-        -:  447:  Funkcja testująca zarządzanie modułem CanTp.
-        -:  448:*/
-        -:  449:
-        1:  450:void Test_Of_CanTp_MainFunction(){
-        1:  451:    RESET_FAKE(PduR_CanTpRxIndication);
-        1:  452:    RESET_FAKE(CanIf_Transmit);
-        -:  453:      
-        1:  454:    Std_ReturnType retCanIf_Transmit[6] = {E_OK, E_OK, E_NOT_OK, E_NOT_OK, E_OK, E_NOT_OK};
-        1:  455:    SET_RETURN_SEQ(CanIf_Transmit, retCanIf_Transmit, 6);
-        1:  456:    PduLengthType BufferSizeArr[7] = {0,1,0,3,9,0,6};
-        1:  457:    PduR_CanTpCopyRxData_buffSize_array = BufferSizeArr;
-        -:  458:
-        1:  459:    BufReq_ReturnType BufferRetValues[7] = {BUFREQ_OK, BUFREQ_OVFL, BUFREQ_OK, BUFREQ_OK, BUFREQ_OK, BUFREQ_E_NOT_OK, BUFREQ_OK};
-        1:  460:    SET_RETURN_SEQ(PduR_CanTpCopyRxData, BufferRetValues, 7);
-        1:  461:    PduR_CanTpCopyRxData_fake.custom_fake = PduR_CanTpCopyRxData_FF;
-        -:  462:
-        1:  463:    CanTp_TimerReset(&N_Ar_timer);
-        1:  464:    CanTp_TimerReset(&N_Br_timer);
-        1:  465:    CanTp_TimerReset(&N_Cr_timer);
-        -:  466:    /*
-        -:  467:                  TEST 1
-        -:  468:      Test dla deaktywowanych timerów - brak zmian
-        -:  469:    */
-        1:  470:    CanTp_MainFunction();
-        1:  471:    CanTp_MainFunction();
-        1:  472:    CanTp_MainFunction();
-        -:  473:
-        1:  474:    TEST_CHECK(N_Ar_timer.eState == TIMER_DISABLE);
-        1:  475:    TEST_CHECK(N_Br_timer.eState == TIMER_DISABLE);
-        1:  476:    TEST_CHECK(N_Cr_timer.eState == TIMER_DISABLE);
-        1:  477:    TEST_CHECK(N_Ar_timer.uiCounter == 0);
-        1:  478:    TEST_CHECK(N_Br_timer.uiCounter == 0);
-        1:  479:    TEST_CHECK(N_Cr_timer.uiCounter == 0);
-        1:  480:    TEST_CHECK(PduR_CanTpCopyRxData_fake.call_count == 0); 
-        1:  481:    TEST_CHECK(PduR_CanTpRxIndication_fake.call_count == 0);
-        -:  482:
-        -:  483:    /*
-        -:  484:                TEST 2
-        -:  485:    Standardowa praca układu dla Timerów RX
-        -:  486:    */
-        1:  487:    CanTp_VariablesRX.uiMsgLen = 10;
-        1:  488:    CanTp_VariablesRX.uiTransmittedBytes = 0;
-        -:  489:
-        1:  490:    CanTp_TimerStart(&N_Ar_timer);
-        1:  491:    CanTp_TimerStart(&N_Br_timer);
-        1:  492:    CanTp_TimerStart(&N_Cr_timer);
-        -:  493:    
-        1:  494:    CanTp_MainFunction();
-        1:  495:    CanTp_MainFunction();
-        1:  496:    CanTp_MainFunction();
+        -:  408:  Funkcja testująca odczyt wartosci parametru.
+        -:  409:*/
+        -:  410:
+        1:  411:void Test_Of_CanTp_ReadParameter(void){
+        1:  412:  PduIdType PduId = 1;
+        -:  413:  TPParameterType Parameter;
+        -:  414:  Std_ReturnType ret; 
+        -:  415:  uint16 puiReadValue;
+        -:  416:  /*
+        -:  417:                    TEST 1
+        -:  418:          Odczyt parametru TP_BS i TP_STmin - zwracane E_OK
+        -:  419:  */
+        1:  420:  Parameter = TP_BS;
+        1:  421:  CanTp_State = CANTP_ON;
+        1:  422:  ret = CanTp_ChangeParameter(PduId, Parameter, 1);
+        1:  423:  ret = CanTp_ReadParameter(PduId, Parameter, &puiReadValue);
+        1:  424:  TEST_CHECK(ret == E_OK);
+        1:  425:  TEST_CHECK(puiReadValue == 1);
+        1:  426:  Parameter = TP_STMIN;
+        1:  427:  ret = CanTp_ChangeParameter(PduId, Parameter, 1);
+        1:  428:  ret = CanTp_ReadParameter(PduId, Parameter, &puiReadValue);
+        1:  429:  TEST_CHECK(ret == E_OK);
+        1:  430:  TEST_CHECK(puiReadValue == 1);
+        -:  431:  /*
+        -:  432:                    TEST 2
+        -:  433:          Zmiana parametru TP_BC - zwracane E_NOT_OK
+        -:  434:  */
+        1:  435:  puiReadValue = 2;
+        1:  436:  Parameter = TP_BC;
+        1:  437:  ret = CanTp_ReadParameter(PduId, Parameter, &puiReadValue);
+        1:  438:  TEST_CHECK(ret == E_NOT_OK);
+        1:  439:  TEST_CHECK(puiReadValue == 2);
+        -:  440:  /*
+        -:  441:                    TEST 3
+        -:  442:          Zmiana parametru TP_BS - zwracane E_NOT_OK bo State CANTP_OFF
+        -:  443:  */
+        1:  444:  puiReadValue = 3;
+        1:  445:  Parameter = TP_BS;
+        1:  446:  CanTp_State = CANTP_OFF;
+        1:  447:  ret = CanTp_ReadParameter(PduId, Parameter, &puiReadValue);
+        1:  448:  TEST_CHECK(ret == E_NOT_OK);
+        1:  449:  TEST_CHECK(puiReadValue == 3);
+        1:  450:}
+        -:  451:
+        -:  452:/**
+        -:  453:  @brief Test zarządzania modułem
+        -:  454:
+        -:  455:  Funkcja testująca zarządzanie modułem CanTp.
+        -:  456:*/
+        -:  457:
+        1:  458:void Test_Of_CanTp_MainFunction(){
+        1:  459:    RESET_FAKE(PduR_CanTpRxIndication);
+        1:  460:    RESET_FAKE(CanIf_Transmit);
+        -:  461:      
+        1:  462:    Std_ReturnType retCanIf_Transmit[6] = {E_OK, E_OK, E_NOT_OK, E_NOT_OK, E_OK, E_NOT_OK};
+        1:  463:    SET_RETURN_SEQ(CanIf_Transmit, retCanIf_Transmit, 6);
+        1:  464:    PduLengthType BufferSizeArr[7] = {0,1,0,3,9,0,6};
+        1:  465:    PduR_CanTpCopyRxData_buffSize_array = BufferSizeArr;
+        -:  466:
+        1:  467:    BufReq_ReturnType BufferRetValues[7] = {BUFREQ_OK, BUFREQ_OVFL, BUFREQ_OK, BUFREQ_OK, BUFREQ_OK, BUFREQ_E_NOT_OK, BUFREQ_OK};
+        1:  468:    SET_RETURN_SEQ(PduR_CanTpCopyRxData, BufferRetValues, 7);
+        1:  469:    PduR_CanTpCopyRxData_fake.custom_fake = PduR_CanTpCopyRxData_FF;
+        -:  470:
+        1:  471:    CanTp_TimerReset(&N_Ar_timer);
+        1:  472:    CanTp_TimerReset(&N_Br_timer);
+        1:  473:    CanTp_TimerReset(&N_Cr_timer);
+        -:  474:    /*
+        -:  475:                  TEST 1
+        -:  476:      Test dla deaktywowanych timerów - brak zmian
+        -:  477:    */
+        1:  478:    CanTp_MainFunction();
+        1:  479:    CanTp_MainFunction();
+        1:  480:    CanTp_MainFunction();
+        -:  481:
+        1:  482:    TEST_CHECK(N_Ar_timer.eState == TIMER_DISABLE);
+        1:  483:    TEST_CHECK(N_Br_timer.eState == TIMER_DISABLE);
+        1:  484:    TEST_CHECK(N_Cr_timer.eState == TIMER_DISABLE);
+        1:  485:    TEST_CHECK(N_Ar_timer.uiCounter == 0);
+        1:  486:    TEST_CHECK(N_Br_timer.uiCounter == 0);
+        1:  487:    TEST_CHECK(N_Cr_timer.uiCounter == 0);
+        1:  488:    TEST_CHECK(PduR_CanTpCopyRxData_fake.call_count == 0); 
+        1:  489:    TEST_CHECK(PduR_CanTpRxIndication_fake.call_count == 0);
+        -:  490:
+        -:  491:    /*
+        -:  492:                TEST 2
+        -:  493:    Standardowa praca układu dla Timerów RX
+        -:  494:    */
+        1:  495:    CanTp_VariablesRX.uiMsgLen = 10;
+        1:  496:    CanTp_VariablesRX.uiTransmittedBytes = 0;
         -:  497:
-        1:  498:    TEST_CHECK(N_Ar_timer.eState == TIMER_ENABLE);
-        1:  499:    TEST_CHECK(N_Br_timer.eState == TIMER_ENABLE);
-        1:  500:    TEST_CHECK(N_Cr_timer.eState == TIMER_ENABLE);
-        1:  501:    TEST_CHECK(N_Ar_timer.uiCounter == 3);
-        1:  502:    TEST_CHECK(N_Br_timer.uiCounter == 3);
-        1:  503:    TEST_CHECK(N_Cr_timer.uiCounter == 3);
-        1:  504:    TEST_CHECK(PduR_CanTpCopyRxData_fake.call_count == 3); 
-        1:  505:    TEST_CHECK(PduR_CanTpRxIndication_fake.call_count == 0);
-        -:  506:
-        1:  507:    CanTp_MainFunction();
-        -:  508:
-        1:  509:    TEST_CHECK(N_Ar_timer.eState == TIMER_ENABLE);
-        1:  510:    TEST_CHECK(N_Br_timer.eState == TIMER_ENABLE);
-        1:  511:    TEST_CHECK(N_Cr_timer.eState == TIMER_ENABLE);
-        1:  512:    TEST_CHECK(N_Ar_timer.uiCounter == 4);
-        1:  513:    TEST_CHECK(N_Br_timer.uiCounter == 4);
-        1:  514:    TEST_CHECK(N_Cr_timer.uiCounter == 4);
-        1:  515:    TEST_CHECK(PduR_CanTpCopyRxData_fake.call_count == 4); 
-        1:  516:    TEST_CHECK(PduR_CanTpRxIndication_fake.call_count == 0);
-        -:  517:
-        -:  518:    /*
-        -:  519:                TEST 3
-        -:  520:    Standardowa praca układu dla Timerów TX
-        -:  521:    */
-        1:  522:    CanTp_ResetRX();
-        1:  523:    CanTp_ResetTX();
-        -:  524:
-        1:  525:    CanTp_TimerStart(&N_Bs_timer);
-        1:  526:    CanTp_TimerStart(&N_Cs_timer);
-        1:  527:    CanTp_TimerStart(&N_As_timer);
-        -:  528:
-        1:  529:    CanTp_MainFunction();
-        1:  530:    CanTp_MainFunction();
-        1:  531:    CanTp_MainFunction();
-        1:  532:    CanTp_MainFunction();
-        -:  533:
-        1:  534:    TEST_CHECK(N_As_timer.uiCounter == 4);
-        1:  535:    TEST_CHECK(N_As_timer.eState == TIMER_ENABLE);
-        1:  536:    TEST_CHECK(N_Bs_timer.uiCounter == 4);
-        1:  537:    TEST_CHECK(N_Bs_timer.eState == TIMER_ENABLE);
-        1:  538:    TEST_CHECK(N_Cs_timer.uiCounter == 4);
-        1:  539:    TEST_CHECK(N_Cs_timer.eState == TIMER_ENABLE);
-        -:  540:
-        -:  541:    /*
-        -:  542:                TEST 4
-        -:  543:    Timeout dla Timera As TX
-        -:  544:    */
-        -:  545:
-        1:  546:    CanTp_ResetRX();
-        1:  547:    CanTp_ResetTX();
+        1:  498:    CanTp_TimerStart(&N_Ar_timer);
+        1:  499:    CanTp_TimerStart(&N_Br_timer);
+        1:  500:    CanTp_TimerStart(&N_Cr_timer);
+        -:  501:    
+        1:  502:    CanTp_MainFunction();
+        1:  503:    CanTp_MainFunction();
+        1:  504:    CanTp_MainFunction();
+        -:  505:
+        1:  506:    TEST_CHECK(N_Ar_timer.eState == TIMER_ENABLE);
+        1:  507:    TEST_CHECK(N_Br_timer.eState == TIMER_ENABLE);
+        1:  508:    TEST_CHECK(N_Cr_timer.eState == TIMER_ENABLE);
+        1:  509:    TEST_CHECK(N_Ar_timer.uiCounter == 3);
+        1:  510:    TEST_CHECK(N_Br_timer.uiCounter == 3);
+        1:  511:    TEST_CHECK(N_Cr_timer.uiCounter == 3);
+        1:  512:    TEST_CHECK(PduR_CanTpCopyRxData_fake.call_count == 3); 
+        1:  513:    TEST_CHECK(PduR_CanTpRxIndication_fake.call_count == 0);
+        -:  514:
+        1:  515:    CanTp_MainFunction();
+        -:  516:
+        1:  517:    TEST_CHECK(N_Ar_timer.eState == TIMER_ENABLE);
+        1:  518:    TEST_CHECK(N_Br_timer.eState == TIMER_ENABLE);
+        1:  519:    TEST_CHECK(N_Cr_timer.eState == TIMER_ENABLE);
+        1:  520:    TEST_CHECK(N_Ar_timer.uiCounter == 4);
+        1:  521:    TEST_CHECK(N_Br_timer.uiCounter == 4);
+        1:  522:    TEST_CHECK(N_Cr_timer.uiCounter == 4);
+        1:  523:    TEST_CHECK(PduR_CanTpCopyRxData_fake.call_count == 4); 
+        1:  524:    TEST_CHECK(PduR_CanTpRxIndication_fake.call_count == 0);
+        -:  525:
+        -:  526:    /*
+        -:  527:                TEST 3
+        -:  528:    Standardowa praca układu dla Timerów TX
+        -:  529:    */
+        1:  530:    CanTp_ResetRX();
+        1:  531:    CanTp_ResetTX();
+        -:  532:
+        1:  533:    CanTp_TimerStart(&N_Bs_timer);
+        1:  534:    CanTp_TimerStart(&N_Cs_timer);
+        1:  535:    CanTp_TimerStart(&N_As_timer);
+        -:  536:
+        1:  537:    CanTp_MainFunction();
+        1:  538:    CanTp_MainFunction();
+        1:  539:    CanTp_MainFunction();
+        1:  540:    CanTp_MainFunction();
+        -:  541:
+        1:  542:    TEST_CHECK(N_As_timer.uiCounter == 4);
+        1:  543:    TEST_CHECK(N_As_timer.eState == TIMER_ENABLE);
+        1:  544:    TEST_CHECK(N_Bs_timer.uiCounter == 4);
+        1:  545:    TEST_CHECK(N_Bs_timer.eState == TIMER_ENABLE);
+        1:  546:    TEST_CHECK(N_Cs_timer.uiCounter == 4);
+        1:  547:    TEST_CHECK(N_Cs_timer.eState == TIMER_ENABLE);
         -:  548:
-        1:  549:    N_As_timer.uiCounter = 90;
-        1:  550:    CanTp_TimerStart(&N_As_timer);
-        1:  551:    CanTp_MainFunction();
-        -:  552:
-        1:  553:    TEST_CHECK(N_As_timer.uiCounter == 91);
-        1:  554:    TEST_CHECK(N_As_timer.eState == TIMER_ENABLE);
-        1:  555:    TEST_CHECK(N_Bs_timer.uiCounter == 0);
-        1:  556:    TEST_CHECK(N_Bs_timer.eState == TIMER_DISABLE);
-        1:  557:    TEST_CHECK(N_Cs_timer.uiCounter == 0);
-        1:  558:    TEST_CHECK(N_Cs_timer.eState == TIMER_DISABLE);
-        -:  559:
-        1:  560:    TEST_CHECK(PduR_CanTpTxConfirmation_fake.call_count == 0);
-        -:  561:    
-        1:  562:    N_As_timer.uiCounter = 99;
-        1:  563:    CanTp_MainFunction();
-        -:  564:
-        1:  565:    TEST_CHECK(N_As_timer.uiCounter == 0);
-        1:  566:    TEST_CHECK(N_As_timer.eState == TIMER_DISABLE);
-        1:  567:    TEST_CHECK(N_Bs_timer.uiCounter == 0);
-        1:  568:    TEST_CHECK(N_Bs_timer.eState == TIMER_DISABLE);
-        1:  569:    TEST_CHECK(N_Cs_timer.uiCounter == 0);
-        1:  570:    TEST_CHECK(N_Cs_timer.eState == TIMER_DISABLE);
-        -:  571:
-        1:  572:    TEST_CHECK(PduR_CanTpTxConfirmation_fake.call_count == 1);
-        1:  573:}
-        -:  574:
-        -:  575:
-        -:  576:/**
-        -:  577:  @brief Test Potwierdzenia transmisji
-        -:  578:
-        -:  579:  Funkcja testującapotwierdzenie transmisji PDU.
-        -:  580:*/
-        1:  581:void Test_Of_CanTp_TxConfirmation(void){
-        -:  582:  PduInfoType PduInfo;
-        -:  583:  uint8 puiSduData[8];
-        -:  584:  uint8 *puiMetaData;
-        1:  585:  PduInfo.MetaDataPtr = puiMetaData;
-        1:  586:  PduInfo.SduDataPtr = puiSduData;
-        -:  587:  Std_ReturnType ret; 
-        -:  588:
-        1:  589:  PduLengthType pAvailableDataArr[10] = {1,2,3,4,5,6,7,8,9,0};
-        1:  590:  uint8 puiSduDataArr[4][4] = {"dupa", "dupa", "test", "dwa."};
-        -:  591:
-        -:  592:  PduLengthType availableData;
-        -:  593:  int i;
-        5:  594:  for( i = 0; i < 4; i++){
-        4:  595:      memcpy(PduR_CanTpCopyTxData_sdu_data[i], puiSduDataArr[i], sizeof(uint8)*7);
-        -:  596:  }
-        1:  597:  PduR_CanTpCopyTxData_availableDataPtr = pAvailableDataArr;
-        -:  598:
-        1:  599:  RESET_FAKE(PduR_CanTpCopyTxData);
-        1:  600:  RESET_FAKE(CanIf_Transmit);
-        1:  601:  RESET_FAKE(PduR_CanTpTxConfirmation);
-        -:  602:
-        1:  603:  PduR_CanTpCopyTxData_fake.custom_fake = PduR_CanTpCopyTxData_FF;
-        -:  604:
-        1:  605:  Std_ReturnType retCanIf_Transmit[7] = {E_OK, E_OK, E_NOT_OK, E_OK, E_NOT_OK, E_NOT_OK, E_NOT_OK};
-        1:  606:  SET_RETURN_SEQ(CanIf_Transmit, retCanIf_Transmit, 7);
-        -:  607:
-        1:  608:  BufReq_ReturnType retPduR_CanTpCopyTxData[9] = {BUFREQ_OK, BUFREQ_OK, BUFREQ_OK, BUFREQ_E_NOT_OK , BUFREQ_BUSY, BUFREQ_BUSY, BUFREQ_E_NOT_OK, BUFREQ_BUSY, BUFREQ_OK};
-        1:  609:  SET_RETURN_SEQ(PduR_CanTpCopyTxData, retPduR_CanTpCopyTxData, 9);
+        -:  549:    /*
+        -:  550:                TEST 4
+        -:  551:    Timeout dla Timera As TX
+        -:  552:    */
+        -:  553:
+        1:  554:    CanTp_ResetRX();
+        1:  555:    CanTp_ResetTX();
+        -:  556:
+        1:  557:    N_As_timer.uiCounter = 90;
+        1:  558:    CanTp_TimerStart(&N_As_timer);
+        1:  559:    CanTp_MainFunction();
+        -:  560:
+        1:  561:    TEST_CHECK(N_As_timer.uiCounter == 91);
+        1:  562:    TEST_CHECK(N_As_timer.eState == TIMER_ENABLE);
+        1:  563:    TEST_CHECK(N_Bs_timer.uiCounter == 0);
+        1:  564:    TEST_CHECK(N_Bs_timer.eState == TIMER_DISABLE);
+        1:  565:    TEST_CHECK(N_Cs_timer.uiCounter == 0);
+        1:  566:    TEST_CHECK(N_Cs_timer.eState == TIMER_DISABLE);
+        -:  567:
+        1:  568:    TEST_CHECK(PduR_CanTpTxConfirmation_fake.call_count == 0);
+        -:  569:    
+        1:  570:    N_As_timer.uiCounter = 99;
+        1:  571:    CanTp_MainFunction();
+        -:  572:
+        1:  573:    TEST_CHECK(N_As_timer.uiCounter == 0);
+        1:  574:    TEST_CHECK(N_As_timer.eState == TIMER_DISABLE);
+        1:  575:    TEST_CHECK(N_Bs_timer.uiCounter == 0);
+        1:  576:    TEST_CHECK(N_Bs_timer.eState == TIMER_DISABLE);
+        1:  577:    TEST_CHECK(N_Cs_timer.uiCounter == 0);
+        1:  578:    TEST_CHECK(N_Cs_timer.eState == TIMER_DISABLE);
+        -:  579:
+        1:  580:    TEST_CHECK(PduR_CanTpTxConfirmation_fake.call_count == 1);
+        1:  581:}
+        -:  582:
+        -:  583:
+        -:  584:/**
+        -:  585:  @brief Test Potwierdzenia transmisji
+        -:  586:
+        -:  587:  Funkcja testującapotwierdzenie transmisji PDU.
+        -:  588:*/
+        1:  589:void Test_Of_CanTp_TxConfirmation(void){
+        -:  590:  PduInfoType PduInfo;
+        -:  591:  uint8 puiSduData[8];
+        -:  592:  uint8 *puiMetaData;
+        1:  593:  PduInfo.MetaDataPtr = puiMetaData;
+        1:  594:  PduInfo.SduDataPtr = puiSduData;
+        -:  595:  Std_ReturnType ret; 
+        -:  596:
+        1:  597:  PduLengthType pAvailableDataArr[10] = {1,2,3,4,5,6,7,8,9,0};
+        1:  598:  uint8 puiSduDataArr[4][4] = {"dupa", "dupa", "test", "dwa."};
+        -:  599:
+        -:  600:  PduLengthType availableData;
+        -:  601:  int i;
+        5:  602:  for( i = 0; i < 4; i++){
+        4:  603:      memcpy(PduR_CanTpCopyTxData_sdu_data[i], puiSduDataArr[i], sizeof(uint8)*7);
+        -:  604:  }
+        1:  605:  PduR_CanTpCopyTxData_availableDataPtr = pAvailableDataArr;
+        -:  606:
+        1:  607:  RESET_FAKE(PduR_CanTpCopyTxData);
+        1:  608:  RESET_FAKE(CanIf_Transmit);
+        1:  609:  RESET_FAKE(PduR_CanTpTxConfirmation);
         -:  610:
-        1:  611:  CanTp_State = CANTP_ON;
-        -:  612:/*
-        -:  613:          TEST 1
-        -:  614:  Transmisja poprawna
-        -:  615:*/
-        1:  616:  CanTp_VariablesTX.eCanTp_StateTX = CANTP_TX_PROCESSING;
-        1:  617:  CanTp_VariablesTX.uiFrameNrFC = 1;
-        1:  618:  CanTp_VariablesTX.CanTp_Current_TxId = 1;
-        1:  619:  CanTp_VariablesTX.uiMsgLen = 80;
-        1:  620:  CanTp_VariablesTX.uiTransmittedBytes = 75;
-        1:  621:  CanTp_VariablesTX.uiNxtSN = 0;
-        -:  622:
-        1:  623:  CanTp_TxConfirmation(1, E_OK);
-        -:  624: 
-        1:  625:  TEST_CHECK(PduR_CanTpCopyTxData_fake.call_count == 1);
-        1:  626:  TEST_CHECK(PduR_CanTpCopyTxData_fake.arg0_val == 1);
-        1:  627:  TEST_CHECK(PduR_CanTpCopyTxData_fake.arg1_val->SduLength == 5);
-        1:  628:  TEST_CHECK(PduR_CanTpCopyTxData_fake.arg2_val == NULL);
-        -:  629:
-        1:  630:  TEST_CHECK(CanIf_Transmit_fake.call_count == 1 );
-        -:  631:
-        1:  632:  TEST_CHECK(CanIf_Transmit_fake.arg0_val == 1 ); 
-        1:  633:  TEST_CHECK(CanIf_Transmit_fake.arg1_val->SduDataPtr[0] == 0x20 );
-        1:  634:  TEST_CHECK(CanIf_Transmit_fake.arg1_val->SduDataPtr[1] == 'd' );
-        1:  635:  TEST_CHECK(CanIf_Transmit_fake.arg1_val->SduDataPtr[2] == 'u' );
-        1:  636:  TEST_CHECK(CanIf_Transmit_fake.arg1_val->SduDataPtr[3] == 'p' );
-        1:  637:  TEST_CHECK(CanIf_Transmit_fake.arg1_val->SduDataPtr[4] == 'a' );
-        -:  638:
-        1:  639:  TEST_CHECK(CanTp_VariablesTX.eCanTp_StateTX == CANTP_TX_PROCESSING);
-        1:  640:  TEST_CHECK(CanTp_VariablesTX.CanTp_Current_TxId == 1); 
-        1:  641:  TEST_CHECK(CanTp_VariablesTX.uiFrameNrFC == 0);
-        1:  642:  TEST_CHECK(CanTp_VariablesTX.uiMsgLen == 80);
-        1:  643:  TEST_CHECK(CanTp_VariablesTX.uiTransmittedBytes == 80);
-        -:  644:
-        1:  645:  CanTp_ResetRX();
-        1:  646:  CanTp_ResetTX();
-        -:  647:
-        -:  648:  /*
-        -:  649:            TEST 2
-        -:  650:    RETURN E_NOT_OK
-        -:  651:  */
+        1:  611:  PduR_CanTpCopyTxData_fake.custom_fake = PduR_CanTpCopyTxData_FF;
+        -:  612:
+        1:  613:  Std_ReturnType retCanIf_Transmit[7] = {E_OK, E_OK, E_NOT_OK, E_OK, E_NOT_OK, E_NOT_OK, E_NOT_OK};
+        1:  614:  SET_RETURN_SEQ(CanIf_Transmit, retCanIf_Transmit, 7);
+        -:  615:
+        1:  616:  BufReq_ReturnType retPduR_CanTpCopyTxData[9] = {BUFREQ_OK, BUFREQ_OK, BUFREQ_OK, BUFREQ_E_NOT_OK , BUFREQ_BUSY, BUFREQ_BUSY, BUFREQ_E_NOT_OK, BUFREQ_BUSY, BUFREQ_OK};
+        1:  617:  SET_RETURN_SEQ(PduR_CanTpCopyTxData, retPduR_CanTpCopyTxData, 9);
+        -:  618:
+        1:  619:  CanTp_State = CANTP_ON;
+        -:  620:/*
+        -:  621:          TEST 1
+        -:  622:  Transmisja poprawna
+        -:  623:*/
+        1:  624:  CanTp_VariablesTX.eCanTp_StateTX = CANTP_TX_PROCESSING;
+        1:  625:  CanTp_VariablesTX.uiFrameNrFC = 1;
+        1:  626:  CanTp_VariablesTX.CanTp_Current_TxId = 1;
+        1:  627:  CanTp_VariablesTX.uiMsgLen = 80;
+        1:  628:  CanTp_VariablesTX.uiTransmittedBytes = 75;
+        1:  629:  CanTp_VariablesTX.uiNxtSN = 0;
+        -:  630:
+        1:  631:  CanTp_TxConfirmation(1, E_OK);
+        -:  632: 
+        1:  633:  TEST_CHECK(PduR_CanTpCopyTxData_fake.call_count == 1);
+        1:  634:  TEST_CHECK(PduR_CanTpCopyTxData_fake.arg0_val == 1);
+        1:  635:  TEST_CHECK(PduR_CanTpCopyTxData_fake.arg1_val->SduLength == 5);
+        1:  636:  TEST_CHECK(PduR_CanTpCopyTxData_fake.arg2_val == NULL);
+        -:  637:
+        1:  638:  TEST_CHECK(CanIf_Transmit_fake.call_count == 1 );
+        -:  639:
+        1:  640:  TEST_CHECK(CanIf_Transmit_fake.arg0_val == 1 ); 
+        1:  641:  TEST_CHECK(CanIf_Transmit_fake.arg1_val->SduDataPtr[0] == 0x20 );
+        1:  642:  TEST_CHECK(CanIf_Transmit_fake.arg1_val->SduDataPtr[1] == 'd' );
+        1:  643:  TEST_CHECK(CanIf_Transmit_fake.arg1_val->SduDataPtr[2] == 'u' );
+        1:  644:  TEST_CHECK(CanIf_Transmit_fake.arg1_val->SduDataPtr[3] == 'p' );
+        1:  645:  TEST_CHECK(CanIf_Transmit_fake.arg1_val->SduDataPtr[4] == 'a' );
+        -:  646:
+        1:  647:  TEST_CHECK(CanTp_VariablesTX.eCanTp_StateTX == CANTP_TX_PROCESSING);
+        1:  648:  TEST_CHECK(CanTp_VariablesTX.CanTp_Current_TxId == 1); 
+        1:  649:  TEST_CHECK(CanTp_VariablesTX.uiFrameNrFC == 0);
+        1:  650:  TEST_CHECK(CanTp_VariablesTX.uiMsgLen == 80);
+        1:  651:  TEST_CHECK(CanTp_VariablesTX.uiTransmittedBytes == 80);
         -:  652:
-        1:  653:  CanTp_VariablesTX.eCanTp_StateTX = CANTP_TX_PROCESSING;
-        1:  654:  CanTp_VariablesTX.uiFrameNrFC = 3;
-        1:  655:  CanTp_VariablesTX.CanTp_Current_TxId = 1;
-        1:  656:  CanTp_VariablesTX.uiMsgLen = 80;
-        1:  657:  CanTp_VariablesTX.uiTransmittedBytes = 75;
-        1:  658:  CanTp_VariablesTX.uiNxtSN = 2;
-        -:  659:
-        1:  660:  CanTp_TxConfirmation (1, E_NOT_OK );
-        -:  661: 
-        1:  662:  TEST_CHECK(PduR_CanTpCopyTxData_fake.call_count == 1);
-        -:  663:  
-        1:  664:  TEST_CHECK( PduR_CanTpTxConfirmation_fake.call_count == 1 );
-        1:  665:  TEST_CHECK( PduR_CanTpTxConfirmation_fake.arg0_val == 1 );
-        1:  666:  TEST_CHECK( PduR_CanTpTxConfirmation_fake.arg1_val == E_NOT_OK );
+        1:  653:  CanTp_ResetRX();
+        1:  654:  CanTp_ResetTX();
+        -:  655:
+        -:  656:  /*
+        -:  657:            TEST 2
+        -:  658:    RETURN E_NOT_OK
+        -:  659:  */
+        -:  660:
+        1:  661:  CanTp_VariablesTX.eCanTp_StateTX = CANTP_TX_PROCESSING;
+        1:  662:  CanTp_VariablesTX.uiFrameNrFC = 3;
+        1:  663:  CanTp_VariablesTX.CanTp_Current_TxId = 1;
+        1:  664:  CanTp_VariablesTX.uiMsgLen = 80;
+        1:  665:  CanTp_VariablesTX.uiTransmittedBytes = 75;
+        1:  666:  CanTp_VariablesTX.uiNxtSN = 2;
         -:  667:
-        1:  668:  TEST_CHECK(CanTp_VariablesTX.eCanTp_StateTX == CANTP_TX_WAIT);
-        1:  669:  TEST_CHECK(CanTp_VariablesTX.CanTp_Current_TxId == 0);
-        1:  670:  TEST_CHECK(CanIf_Transmit_fake.call_count == 1 );
-        1:  671:  TEST_CHECK(CanTp_VariablesTX.uiFrameNrFC == 0);
-        1:  672:  TEST_CHECK(CanTp_VariablesTX.uiMsgLen == 0);
-        1:  673:  TEST_CHECK(CanTp_VariablesTX.uiTransmittedBytes == 0);
-        -:  674:
-        1:  675:  CanTp_ResetRX();
-        1:  676:  CanTp_ResetTX();
-        -:  677:
-        -:  678:  /*
-        -:  679:      TEST 3 
-        -:  680:    UNKNOWN ID
-        -:  681:  */
+        1:  668:  CanTp_TxConfirmation (1, E_NOT_OK );
+        -:  669: 
+        1:  670:  TEST_CHECK(PduR_CanTpCopyTxData_fake.call_count == 1);
+        -:  671:  
+        1:  672:  TEST_CHECK( PduR_CanTpTxConfirmation_fake.call_count == 1 );
+        1:  673:  TEST_CHECK( PduR_CanTpTxConfirmation_fake.arg0_val == 1 );
+        1:  674:  TEST_CHECK( PduR_CanTpTxConfirmation_fake.arg1_val == E_NOT_OK );
+        -:  675:
+        1:  676:  TEST_CHECK(CanTp_VariablesTX.eCanTp_StateTX == CANTP_TX_WAIT);
+        1:  677:  TEST_CHECK(CanTp_VariablesTX.CanTp_Current_TxId == 0);
+        1:  678:  TEST_CHECK(CanIf_Transmit_fake.call_count == 1 );
+        1:  679:  TEST_CHECK(CanTp_VariablesTX.uiFrameNrFC == 0);
+        1:  680:  TEST_CHECK(CanTp_VariablesTX.uiMsgLen == 0);
+        1:  681:  TEST_CHECK(CanTp_VariablesTX.uiTransmittedBytes == 0);
         -:  682:
-        1:  683:  CanTp_VariablesTX.eCanTp_StateTX = CANTP_TX_PROCESSING;
-        1:  684:  CanTp_VariablesTX.uiFrameNrFC = 2;
-        1:  685:  CanTp_VariablesTX.CanTp_Current_TxId = 3;
-        1:  686:  CanTp_VariablesTX.uiMsgLen = 80;
-        1:  687:  CanTp_VariablesTX.uiTransmittedBytes = 75;
-        1:  688:  CanTp_VariablesTX.uiNxtSN = 0;
-        -:  689:
-        1:  690:  CanTp_TxConfirmation(2, E_NOT_OK);
-        -:  691:
-        1:  692:  TEST_CHECK(PduR_CanTpCopyTxData_fake.call_count == 1);
-        1:  693:  TEST_CHECK( PduR_CanTpTxConfirmation_fake.call_count == 1 );
-        -:  694:
-        1:  695:  TEST_CHECK(CanIf_Transmit_fake.call_count == 1 );
-        -:  696:
-        1:  697:  TEST_CHECK(CanTp_VariablesTX.eCanTp_StateTX == CANTP_TX_PROCESSING);
-        1:  698:  TEST_CHECK(CanTp_VariablesTX.CanTp_Current_TxId == 3);
-        1:  699:  TEST_CHECK(CanTp_VariablesTX.uiFrameNrFC == 2);
-        1:  700:  TEST_CHECK(CanTp_VariablesTX.uiMsgLen == 80);
-        1:  701:  TEST_CHECK(CanTp_VariablesTX.uiTransmittedBytes == 75);
+        1:  683:  CanTp_ResetRX();
+        1:  684:  CanTp_ResetTX();
+        -:  685:
+        -:  686:  /*
+        -:  687:      TEST 3 
+        -:  688:    UNKNOWN ID
+        -:  689:  */
+        -:  690:
+        1:  691:  CanTp_VariablesTX.eCanTp_StateTX = CANTP_TX_PROCESSING;
+        1:  692:  CanTp_VariablesTX.uiFrameNrFC = 2;
+        1:  693:  CanTp_VariablesTX.CanTp_Current_TxId = 3;
+        1:  694:  CanTp_VariablesTX.uiMsgLen = 80;
+        1:  695:  CanTp_VariablesTX.uiTransmittedBytes = 75;
+        1:  696:  CanTp_VariablesTX.uiNxtSN = 0;
+        -:  697:
+        1:  698:  CanTp_TxConfirmation(2, E_NOT_OK);
+        -:  699:
+        1:  700:  TEST_CHECK(PduR_CanTpCopyTxData_fake.call_count == 1);
+        1:  701:  TEST_CHECK( PduR_CanTpTxConfirmation_fake.call_count == 1 );
         -:  702:
-        1:  703:  CanTp_ResetRX();
-        1:  704:  CanTp_ResetTX();
-        1:  705:}
-        -:  706:
-        -:  707:/** ==================================================================================================================*\
-        -:  708:                                TESTY FUNKCJI POMOCNICZYCH
-        -:  709:\*====================================================================================================================*/
+        1:  703:  TEST_CHECK(CanIf_Transmit_fake.call_count == 1 );
+        -:  704:
+        1:  705:  TEST_CHECK(CanTp_VariablesTX.eCanTp_StateTX == CANTP_TX_PROCESSING);
+        1:  706:  TEST_CHECK(CanTp_VariablesTX.CanTp_Current_TxId == 3);
+        1:  707:  TEST_CHECK(CanTp_VariablesTX.uiFrameNrFC == 2);
+        1:  708:  TEST_CHECK(CanTp_VariablesTX.uiMsgLen == 80);
+        1:  709:  TEST_CHECK(CanTp_VariablesTX.uiTransmittedBytes == 75);
         -:  710:
-        1:  711:void Test_Of_CanTp_ResetRX(){     
-        1:  712:  CanTp_VariablesRX.eCanTp_StateRX == CANTP_RX_PROCESSING;
-        1:  713:  CanTp_VariablesRX.uiExpected_CF_SN == 1;
-        1:  714:  CanTp_VariablesRX.uiMsgLen == 5;
-        1:  715:  CanTp_VariablesRX.uiTransmittedBytes == 4;
-        1:  716:  CanTp_VariablesRX.uiBlocksNxtCts == 2;
-        1:  717:  CanTp_VariablesRX.CanTp_Current_RxId == 2;
-        1:  718:  CanTp_ResetRX();
-        1:  719:  TEST_CHECK(CanTp_VariablesRX.eCanTp_StateRX == CANTP_RX_WAIT);
-        1:  720:  TEST_CHECK(CanTp_VariablesRX.uiExpected_CF_SN == 0);
-        1:  721:  TEST_CHECK(CanTp_VariablesRX.uiMsgLen == 0);
-        1:  722:  TEST_CHECK(CanTp_VariablesRX.uiTransmittedBytes == 0);
-        1:  723:  TEST_CHECK(CanTp_VariablesRX.uiBlocksNxtCts == 0);
-        1:  724:  TEST_CHECK(CanTp_VariablesRX.CanTp_Current_RxId == 0);
-        1:  725:}
-        -:  726:
-        1:  727:void Test_Of_CanTp_ResetTX(void){
-        1:  728:  CanTp_VariablesTX.eCanTp_StateTX = CANTP_TX_PROCESSING;
-        1:  729:  CanTp_VariablesTX.uiFrameNrFC = 2;
-        1:  730:  CanTp_VariablesTX.CanTp_Current_TxId = 3;
-        1:  731:  CanTp_VariablesTX.uiMsgLen = 4;
-        1:  732:  CanTp_VariablesTX.uiTransmittedBytes = 5;
-        1:  733:  CanTp_ResetTX();
-        1:  734:  TEST_CHECK(CanTp_VariablesTX.eCanTp_StateTX == CANTP_TX_WAIT);
-        1:  735:  TEST_CHECK(CanTp_VariablesTX.uiFrameNrFC == 0);
-        1:  736:  TEST_CHECK(CanTp_VariablesTX.CanTp_Current_TxId == 0);
-        1:  737:  TEST_CHECK(CanTp_VariablesTX.uiMsgLen == 0);
-        1:  738:  TEST_CHECK(CanTp_VariablesTX.uiTransmittedBytes == 0);
-        1:  739:}
-        -:  740:
-        1:  741:void Test_Of_CanTp_CalcBlocksSize(void){
-        1:  742:  CanTp_VariablesRX.uiMsgLen = 8;
-        1:  743:  CanTp_VariablesRX.uiTransmittedBytes = 0;
-        1:  744:  TEST_CHECK(CanTp_CalcBlocksSize(10) == 2);
-        1:  745:  TEST_CHECK(CanTp_CalcBlocksSize(6) == 0);
-        1:  746:}
-        -:  747:
-        1:  748:void Test_Of_CanTp_FrameCheckType(void){
-        -:  749:    uint8 puiSduData[7];
-        -:  750:    CanPCI_Type CanFrameInfo;
-        -:  751:    PduInfoType CanData;
-        1:  752:    CanData.SduDataPtr = puiSduData;
-        1:  753:    CanData.SduLength = 7;
-        -:  754:
-        -:  755:    // SF - Single Frame Type check
-        1:  756:    CanData.SduDataPtr[0] = 0x0F; 
-        1:  757:    CanData.SduDataPtr[1] = 0;
-        1:  758:    CanData.SduDataPtr[2] = 0;
-        -:  759:
-        1:  760:    TEST_CHECK(CanTp_GetPCI(&CanData, &CanFrameInfo) == E_OK);
-        1:  761:    TEST_CHECK(CanFrameInfo.eFrameType == CAN_SF);
-        1:  762:    TEST_CHECK(CanFrameInfo.uiFrameLenght == 0xF);
-        1:  763:    TEST_CHECK(CanFrameInfo.uiBlockSize == 0);
-        1:  764:    TEST_CHECK(CanFrameInfo.uiFlowStatus == 0);
-        1:  765:    TEST_CHECK(CanFrameInfo.uiSeparationTime == 0);
-        1:  766:    TEST_CHECK(CanFrameInfo.uiSeparationTime == 0);
-        1:  767:}
-        -:  768:
-        -:  769:
-        -:  770:TEST_LIST = {
-        -:  771:    { "Test of CanTp_MainFunction", Test_Of_CanTp_MainFunction },
-        -:  772:    { "Test of CanTp_ReadParameter", Test_Of_CanTp_ReadParameter },
-        -:  773:    { "Test of CanTp_ChangeParameter", Test_Of_CanTp_ChangeParameter },
-        -:  774:    { "Test of CanTp_FrameCheckType", Test_Of_CanTp_FrameCheckType },
-        -:  775:    { "Test of CanTp_CalcBlocksSize", Test_Of_CanTp_CalcBlocksSize },
-        -:  776:    { "Test of CanTp_ResetTX", Test_Of_CanTp_ResetTX },
-        -:  777:    { "Test of CanTp_ResetRX", Test_Of_CanTp_ResetRX },
-        -:  778:    { "Test of CanTp_TxConfirmation", Test_Of_CanTp_TxConfirmation },
-        -:  779:    { "Test of CanTp_CancelReceive", Test_Of_CanTp_CancelReceive },
-        -:  780:    { "Test of CanTp_CancelTransmit", Test_Of_CanTp_CancelTransmit },
-        -:  781:    { "Test of CanTp_Transmit", TestOf_CanTp_Transmit },
-        -:  782:    { "Test of CanTp_Init", Test_Of_CanTp_Init },
-        -:  783:    { "Test of CanTp_Shutdown", Test_Of_CanTp_Shutdown },
-        -:  784:	  { "Test of CanTp_GetVersionInfo", Test_Of_CanTp_GetVersionInfo },
-        -:  785:    { NULL, NULL }                           
-        -:  786:};
+        1:  711:  CanTp_ResetRX();
+        1:  712:  CanTp_ResetTX();
+        1:  713:}
+        -:  714:
+        -:  715:/** ==================================================================================================================*\
+        -:  716:                                TESTY FUNKCJI POMOCNICZYCH
+        -:  717:\*====================================================================================================================*/
+        -:  718:
+        1:  719:void Test_Of_CanTp_ResetRX(){     
+        1:  720:  CanTp_VariablesRX.eCanTp_StateRX == CANTP_RX_PROCESSING;
+        1:  721:  CanTp_VariablesRX.uiExpected_CF_SN == 1;
+        1:  722:  CanTp_VariablesRX.uiMsgLen == 5;
+        1:  723:  CanTp_VariablesRX.uiTransmittedBytes == 4;
+        1:  724:  CanTp_VariablesRX.uiBlocksNxtCts == 2;
+        1:  725:  CanTp_VariablesRX.CanTp_Current_RxId == 2;
+        1:  726:  CanTp_ResetRX();
+        1:  727:  TEST_CHECK(CanTp_VariablesRX.eCanTp_StateRX == CANTP_RX_WAIT);
+        1:  728:  TEST_CHECK(CanTp_VariablesRX.uiExpected_CF_SN == 0);
+        1:  729:  TEST_CHECK(CanTp_VariablesRX.uiMsgLen == 0);
+        1:  730:  TEST_CHECK(CanTp_VariablesRX.uiTransmittedBytes == 0);
+        1:  731:  TEST_CHECK(CanTp_VariablesRX.uiBlocksNxtCts == 0);
+        1:  732:  TEST_CHECK(CanTp_VariablesRX.CanTp_Current_RxId == 0);
+        1:  733:}
+        -:  734:
+        1:  735:void Test_Of_CanTp_ResetTX(void){
+        1:  736:  CanTp_VariablesTX.eCanTp_StateTX = CANTP_TX_PROCESSING;
+        1:  737:  CanTp_VariablesTX.uiFrameNrFC = 2;
+        1:  738:  CanTp_VariablesTX.CanTp_Current_TxId = 3;
+        1:  739:  CanTp_VariablesTX.uiMsgLen = 4;
+        1:  740:  CanTp_VariablesTX.uiTransmittedBytes = 5;
+        1:  741:  CanTp_ResetTX();
+        1:  742:  TEST_CHECK(CanTp_VariablesTX.eCanTp_StateTX == CANTP_TX_WAIT);
+        1:  743:  TEST_CHECK(CanTp_VariablesTX.uiFrameNrFC == 0);
+        1:  744:  TEST_CHECK(CanTp_VariablesTX.CanTp_Current_TxId == 0);
+        1:  745:  TEST_CHECK(CanTp_VariablesTX.uiMsgLen == 0);
+        1:  746:  TEST_CHECK(CanTp_VariablesTX.uiTransmittedBytes == 0);
+        1:  747:}
+        -:  748:
+        1:  749:void Test_Of_CanTp_CalcBlocksSize(void){
+        1:  750:  CanTp_VariablesRX.uiMsgLen = 8;
+        1:  751:  CanTp_VariablesRX.uiTransmittedBytes = 0;
+        1:  752:  TEST_CHECK(CanTp_CalcBlocksSize(10) == 2);
+        1:  753:  TEST_CHECK(CanTp_CalcBlocksSize(6) == 0);
+        1:  754:}
+        -:  755:
+        1:  756:void Test_Of_CanTp_FrameCheckType(void){
+        -:  757:    uint8 puiSduData[7];
+        -:  758:    CanPCI_Type CanFrameInfo;
+        -:  759:    PduInfoType CanData;
+        1:  760:    CanData.SduDataPtr = puiSduData;
+        1:  761:    CanData.SduLength = 7;
+        -:  762:
+        -:  763:    // SF - Single Frame Type check
+        1:  764:    CanData.SduDataPtr[0] = 0x0F; 
+        1:  765:    CanData.SduDataPtr[1] = 0;
+        1:  766:    CanData.SduDataPtr[2] = 0;
+        -:  767:
+        1:  768:    TEST_CHECK(CanTp_GetPCI(&CanData, &CanFrameInfo) == E_OK);
+        1:  769:    TEST_CHECK(CanFrameInfo.eFrameType == CAN_SF);
+        1:  770:    TEST_CHECK(CanFrameInfo.uiFrameLenght == 0xF);
+        1:  771:    TEST_CHECK(CanFrameInfo.uiBlockSize == 0);
+        1:  772:    TEST_CHECK(CanFrameInfo.uiFlowStatus == 0);
+        1:  773:    TEST_CHECK(CanFrameInfo.uiSeparationTime == 0);
+        1:  774:    TEST_CHECK(CanFrameInfo.uiSeparationTime == 0);
+        1:  775:}
+        -:  776:
+        -:  777:
+        -:  778:TEST_LIST = {
+        -:  779:    { "Test of CanTp_MainFunction", Test_Of_CanTp_MainFunction },
+        -:  780:    { "Test of CanTp_ReadParameter", Test_Of_CanTp_ReadParameter },
+        -:  781:    { "Test of CanTp_ChangeParameter", Test_Of_CanTp_ChangeParameter },
+        -:  782:    { "Test of CanTp_FrameCheckType", Test_Of_CanTp_FrameCheckType },
+        -:  783:    { "Test of CanTp_CalcBlocksSize", Test_Of_CanTp_CalcBlocksSize },
+        -:  784:    { "Test of CanTp_ResetTX", Test_Of_CanTp_ResetTX },
+        -:  785:    { "Test of CanTp_ResetRX", Test_Of_CanTp_ResetRX },
+        -:  786:    { "Test of CanTp_TxConfirmation", Test_Of_CanTp_TxConfirmation },
+        -:  787:    { "Test of CanTp_CancelReceive", Test_Of_CanTp_CancelReceive },
+        -:  788:    { "Test of CanTp_CancelTransmit", Test_Of_CanTp_CancelTransmit },
+        -:  789:    { "Test of CanTp_Transmit", TestOf_CanTp_Transmit },
+        -:  790:    { "Test of CanTp_Init", Test_Of_CanTp_Init },
+        -:  791:    { "Test of CanTp_Shutdown", Test_Of_CanTp_Shutdown },
+        -:  792:	  { "Test of CanTp_GetVersionInfo", Test_Of_CanTp_GetVersionInfo },
+        -:  793:    { NULL, NULL }                           
+        -:  794:};

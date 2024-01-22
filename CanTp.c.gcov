@@ -237,13 +237,13 @@
         -:  233:   [SWS_CANTP_00305]
         -:  234:   [SWS_CANTP_00338]
         -:  235:*/
-        4:  236:Std_ReturnType CanTp_ChangeParameter(PduIdType id, TPParameterType parameter, uint16 value){
-        4:  237:    Std_ReturnType ret = E_NOT_OK;
-        4:  238:    if (CanTp_State == CANTP_ON){
-        3:  239:        switch(parameter){
-    #####:  240:            case TP_STMIN:
-    #####:  241:                ret = E_OK;
-    #####:  242:                break;
+        6:  236:Std_ReturnType CanTp_ChangeParameter(PduIdType id, TPParameterType parameter, uint16 value){
+        6:  237:    Std_ReturnType ret = E_NOT_OK;
+        6:  238:    if (CanTp_State == CANTP_ON){
+        5:  239:        switch(parameter){
+        2:  240:            case TP_STMIN:
+        2:  241:                ret = E_OK;
+        2:  242:                break;
         2:  243:            case TP_BS:
         2:  244:                ret = E_OK;
         2:  245:                break;
@@ -253,7 +253,7 @@
     #####:  249:                break;
         -:  250:        }
         -:  251:    }
-        4:  252:    return ret;
+        6:  252:    return ret;
         -:  253:}
         -:  254:/**
         -:  255:  @brief CanTp_ReadParameter
@@ -262,15 +262,15 @@
         -:  258:  Wypełnia:
         -:  259:   [SWS_CANTP_00324]
         -:  260:*/
-        3:  261:Std_ReturnType CanTp_ReadParameter(PduIdType id, TPParameterType parameter, uint16* value){
-        3:  262:    Std_ReturnType ret = E_NOT_OK;
-        3:  263:    if (CanTp_State == CANTP_ON){
+        4:  261:Std_ReturnType CanTp_ReadParameter(PduIdType id, TPParameterType parameter, uint16* value){
+        4:  262:    Std_ReturnType ret = E_NOT_OK;
+        4:  263:    if (CanTp_State == CANTP_ON){
         -:  264:        uint16 readVal;
-        2:  265:        switch (parameter) {
-    #####:  266:            case TP_STMIN:
-    #####:  267:                readVal = 1;
-    #####:  268:                ret = E_OK;
-    #####:  269:                break;
+        3:  265:        switch (parameter) {
+        1:  266:            case TP_STMIN:
+        1:  267:                readVal = 1;
+        1:  268:                ret = E_OK;
+        1:  269:                break;
         1:  270:            case TP_BS:
         1:  271:                readVal = 1;
         1:  272:                ret = E_OK;
@@ -279,13 +279,13 @@
         -:  275:            default:
         1:  276:                break;
         -:  277:        }
-        2:  278:        if ((ret == E_OK) && (readVal <= 0xff)) {
-        1:  279:            *value = readVal;
+        3:  278:        if ((ret == E_OK) && (readVal <= 0xff)) {
+        2:  279:            *value = readVal;
         -:  280:        } else {
         1:  281:            ret = E_NOT_OK;
         -:  282:        }
         -:  283:    }
-        3:  284:    return ret;
+        4:  284:    return ret;
         -:  285:}
         -:  286:
         -:  287:/**
