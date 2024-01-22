@@ -431,6 +431,9 @@ if( CanTp_State == CANTP_ON ){
 \*====================================================================================================================*/
 
 /*====================================================================================================================*/
+/**
+  @brief CanTp_ResetRX
+*/
 static void CanTp_ResetRX(void){
     CanTp_VariablesRX.eCanTp_StateRX = CANTP_RX_WAIT;
     CanTp_VariablesRX.uiMsgLen = 0;
@@ -442,7 +445,9 @@ static void CanTp_ResetRX(void){
     CanTp_TimerReset(&N_Br_timer);
     CanTp_TimerReset(&N_Cr_timer);
 }
-
+/**
+  @brief CanTp_ResetTX
+*/
 static void CanTp_ResetTX(void){
     CanTp_VariablesTX.eCanTp_StateTX = CANTP_TX_WAIT;
     CanTp_VariablesTX.uiMsgLen = 0;
@@ -454,6 +459,9 @@ static void CanTp_ResetTX(void){
     CanTp_TimerReset(&N_Cs_timer);
 }
 
+/**
+  @brief CanTp_PrepareSegmenetedFrame
+*/
 static Std_ReturnType CanTp_PrepareSegmenetedFrame(CanPCI_Type *CanPCI, PduInfoType *CanPdu_Info, uint8_t *puiCanPayload){
 
     Std_ReturnType ret = E_OK;
@@ -537,7 +545,9 @@ static Std_ReturnType CanTp_PrepareSegmenetedFrame(CanPCI_Type *CanPCI, PduInfoT
     }
     return ret;
 }
-
+/**
+  @brief CanTp_SendSingleFrame
+*/
 static Std_ReturnType CanTp_SendSingleFrame(PduIdType id, uint8* puiPayload, uint32 uiSize){
     PduInfoType PduInfo;
     uint8 puiSduData[8];
@@ -559,7 +569,9 @@ static Std_ReturnType CanTp_SendSingleFrame(PduIdType id, uint8* puiPayload, uin
     }
     return ret;
 }
-
+/**
+  @brief CanTp_SendFirstFrame
+*/
 static Std_ReturnType CanTp_SendFirstFrame(PduIdType id, uint32 uiMsgLen){
     PduInfoType PduInfo;
     uint8 puiSduData[8];
@@ -583,7 +595,9 @@ static Std_ReturnType CanTp_SendFirstFrame(PduIdType id, uint32 uiMsgLen){
     }
     return ret;
 }
-
+/**
+  @brief CanTp_GetPCI
+*/
 static Std_ReturnType CanTp_GetPCI(const PduInfoType* CanData, CanPCI_Type* CanFrameInfo){
     Std_ReturnType ret = E_OK;
 
@@ -634,7 +648,9 @@ static Std_ReturnType CanTp_GetPCI(const PduInfoType* CanData, CanPCI_Type* CanF
     }
     return ret;
 }
-
+/**
+  @brief CanTp_FirstFrameReception
+*/
 static void CanTp_FirstFrameReception(PduIdType RxPduId, const PduInfoType *PduInfoPtr, CanPCI_Type *CanPCI){  
     PduLengthType BufferSize; 
     BufReq_ReturnType BufferState; 
@@ -665,7 +681,9 @@ static void CanTp_FirstFrameReception(PduIdType RxPduId, const PduInfoType *PduI
         CanTp_ResetRX();
     }
 }
-
+/**
+  @brief CanTp_SingleFrameReception
+*/
 static void CanTp_SingleFrameReception(PduIdType RxPduId, CanPCI_Type *CanPCI, const PduInfoType* PduInfoPtr){
     PduLengthType BufferSize; 
     BufReq_ReturnType BufferState;  
@@ -686,7 +704,9 @@ static void CanTp_SingleFrameReception(PduIdType RxPduId, CanPCI_Type *CanPCI, c
     }
     else{}
 }
-
+/**
+  @brief CanTp_ConsecutiveFrameReception
+*/
 static void CanTp_ConsecutiveFrameReception(PduIdType RxPduId, CanPCI_Type *CanPCI, const PduInfoType* PduInfoPtr){
     PduLengthType BufferSize;      
     BufReq_ReturnType BufferState;   
@@ -740,7 +760,9 @@ static void CanTp_ConsecutiveFrameReception(PduIdType RxPduId, CanPCI_Type *CanP
         CanTp_ResetRX();
     }
 }
-
+/**
+  @brief CanTp_FlowControlReception
+*/
 static void CanTp_FlowControlReception(PduIdType RxPduId, CanPCI_Type *CanPCI){
     if( CanTp_VariablesTX.eCanTp_StateTX == CANTP_TX_PROCESSING_SUSPENDED ){
         if(CanTp_VariablesTX.CanTp_Current_TxId == RxPduId ){
@@ -765,7 +787,9 @@ static void CanTp_FlowControlReception(PduIdType RxPduId, CanPCI_Type *CanPCI){
     }
     else{}
 }
-
+/**
+  @brief CanTp_CalcBlocksSize
+*/
 static uint16 CanTp_CalcBlocksSize(uint16 uiBufferSize){
     uint16 ret; 
     uint16 uiBytesLeft = CanTp_VariablesRX.uiMsgLen - CanTp_VariablesRX.uiTransmittedBytes;
@@ -778,7 +802,9 @@ static uint16 CanTp_CalcBlocksSize(uint16 uiBufferSize){
     }
     return ret;
 } 
-
+/**
+  @brief CanTp_SendNextCF
+*/
 static void CanTp_SendNextCF(void){
     BufReq_ReturnType BufReqState;
     PduInfoType PduInfoPtr;
@@ -823,7 +849,9 @@ static void CanTp_SendNextCF(void){
     }
 }
 
-
+/**
+  @brief CanTp_SendConsecutiveFrame
+*/
 static Std_ReturnType CanTp_SendConsecutiveFrame(PduIdType id, uint8 uiSequenceNumber, uint8* uiPayload, uint32 uiSize){
     PduInfoType PduInfo;
     uint8 puiSduData[8];
@@ -849,6 +877,9 @@ static Std_ReturnType CanTp_SendConsecutiveFrame(PduIdType id, uint8 uiSequenceN
     return ret;
 }
 
+/**
+  @brief CanTp_SendFlowControl
+*/
 static Std_ReturnType CanTp_SendFlowControl(PduIdType ID, uint8 uiBlockSize, FlowControlStatus_type FC_Status, uint8 uiSeparationTime ){
     Std_ReturnType ret = E_OK;
     PduInfoType PduInfoPtr;
@@ -897,15 +928,24 @@ static Std_ReturnType CanTp_SendFlowControl(PduIdType ID, uint8 uiBlockSize, Flo
 
 /*====================================================================================================================*/
 
+/**
+  @brief CanTp_TimerStart
+*/
 void CanTp_TimerStart(CanTp_Timer_type *pTimer){
     pTimer->eState = TIMER_ENABLE;
 }
 
+/**
+  @brief CanTp_TimerReset
+*/
 void CanTp_TimerReset(CanTp_Timer_type *pTimer){
     pTimer->eState = TIMER_DISABLE;
     pTimer->uiCounter = 0;
 }
 
+/**
+  @brief CanTp_TimerTick
+*/
 Std_ReturnType CanTp_TimerTick(CanTp_Timer_type *pTimer){
     Std_ReturnType ret = E_OK;   
     if(pTimer->eState == TIMER_ENABLE){
@@ -919,6 +959,9 @@ Std_ReturnType CanTp_TimerTick(CanTp_Timer_type *pTimer){
     return ret;
 }
 
+/**
+  @brief CanTp_TimerTimeout
+*/
 Std_ReturnType CanTp_TimerTimeout(const CanTp_Timer_type *pTimer){
     if(pTimer->uiCounter >= pTimer->uiTimeout){
         return E_NOT_OK;
