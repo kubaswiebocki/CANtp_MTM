@@ -547,9 +547,36 @@ void Test_Of_CanTp_Calc_Available_Blocks(void){
   TEST_CHECK(CanTp_Calc_Available_Blocks(6) == 0);
 }
 
+void Test_Of_CanTp_FrameCheckType(void)
+{
+    sint32 result;
+    Std_ReturnType ret;
+    uint8 sdu_data[8];
+    CanPCI_Type CanFrameInfo;
+    PduInfoType can_data;
+    can_data.SduDataPtr = sdu_data;
+    can_data.SduLength = 8;
+
+    // SF - Single Frame Type check
+    can_data.SduDataPtr[0] = 0x0F; 
+    can_data.SduDataPtr[1] = 0;
+    can_data.SduDataPtr[2] = 0;
+
+    ret = CanTp_GetPCI(&can_data, &CanFrameInfo);
+    TEST_CHECK(ret == E_OK);
+    TEST_CHECK(CanFrameInfo.frame_type == SF);
+    TEST_CHECK(CanFrameInfo.frame_lenght == 0xF);
+    TEST_CHECK(CanFrameInfo.BS == 0);
+    TEST_CHECK(CanFrameInfo.FS == 0);
+    TEST_CHECK(CanFrameInfo.SN == 0);
+    TEST_CHECK(CanFrameInfo.ST == 0);
+}
+
+
 
 TEST_LIST = {
-       { "Test of CanTp_Calc_Available_Blocks", Test_Of_CanTp_Calc_Available_Blocks },
+    { "Test of CanTp_FrameCheckType", Test_Of_CanTp_FrameCheckType },
+    { "Test of CanTp_Calc_Available_Blocks", Test_Of_CanTp_Calc_Available_Blocks },
     { "Test of CanTp_ResetTX", Test_Of_CanTp_ResetTX },
     { "Test of CanTp_ResetRX", Test_Of_CanTp_ResetRX },
     { "Test of CanTp_TxConfirmation", Test_Of_CanTp_TxConfirmation },
