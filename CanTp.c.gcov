@@ -1,0 +1,1037 @@
+        -:    0:Source:CanTp.c
+        -:    0:Graph:UT_Can_TP.gcno
+        -:    0:Data:UT_Can_TP.gcda
+        -:    0:Runs:1
+        -:    1:/**===================================================================================================================*\
+        -:    2:  @file CanTp.c
+        -:    3:
+        -:    4:  @brief Can Transport Layer
+        -:    5:  
+        -:    6:    Implementacja Can Transport Layer
+        -:    7:\*====================================================================================================================*/
+        -:    8:
+        -:    9:/*====================================================================================================================*\
+        -:   10:    Załączenie nagłówków
+        -:   11:\*====================================================================================================================*/
+        -:   12:#include "CanTp.h"
+        -:   13:#include "CanIf.h"
+        -:   14:#include "PduR.h"
+        -:   15:
+        -:   16:/*====================================================================================================================*\
+        -:   17:    Zmienne globalne
+        -:   18:\*====================================================================================================================*/
+        -:   19:CanTpState_type CanTp_State; 
+        -:   20:
+        -:   21:CanTp_VariablesTX_type CanTp_VariablesTX;
+        -:   22:
+        -:   23:CanTp_VariablesRX_type CanTp_VariablesRX;
+        -:   24:
+        -:   25:CanTp_Timer_type N_Ar_timer =   {TIMER_DISABLE, 0, N_AR_TIMEOUT_VAL};
+        -:   26:CanTp_Timer_type N_Br_timer =   {TIMER_DISABLE, 0, N_BR_TIMEOUT_VAL};
+        -:   27:CanTp_Timer_type N_Cr_timer =   {TIMER_DISABLE, 0, N_CR_TIMEOUT_VAL};
+        -:   28:CanTp_Timer_type N_As_timer =   {TIMER_DISABLE, 0, N_AS_TIMEOUT_VAL};
+        -:   29:CanTp_Timer_type N_Bs_timer =   {TIMER_DISABLE, 0, N_BS_TIMEOUT_VAL};
+        -:   30:CanTp_Timer_type N_Cs_timer =   {TIMER_DISABLE, 0, N_CS_TIMEOUT_VAL};
+        -:   31:CanTp_Timer_type STMmin_timer = {TIMER_DISABLE, 0, STMmin_TIMEOUT_VAL};
+        -:   32:uint32 FC_Wait_frame_ctr;
+        -:   33:/*====================================================================================================================*\
+        -:   34:    Deklaracje funkcji lokalnych
+        -:   35:\*====================================================================================================================*/
+        -:   36:static void CanTp_ResetRX(void);
+        -:   37:static void CanTp_ResetTX(void);
+        -:   38:static void CanTp_SendNextCF(void);
+        -:   39:static void CanTp_FlowControlReception(PduIdType RxPduId, CanPCI_Type *CanPCI);
+        -:   40:static void CanTp_FirstFrameReception(PduIdType RxPduId, const PduInfoType *PduInfoPtr, CanPCI_Type *CanPCI);
+        -:   41:static void CanTp_SingleFrameReception(PduIdType RxPduId, CanPCI_Type *CanPCI, const PduInfoType* PduInfoPtr);
+        -:   42:static void CanTp_ConsecutiveFrameReception(PduIdType RxPduId, CanPCI_Type *CanPCI, const PduInfoType* PduInfoPtr);
+        -:   43:
+        -:   44:static uint16 CanTp_CalcBlocksSize(uint16 uiBufferSize);
+        -:   45:
+        -:   46:static Std_ReturnType CanTp_GetPCI(const PduInfoType* CanData, CanPCI_Type* CanFrameInfo);
+        -:   47:static Std_ReturnType CanTp_SendFlowControl(PduIdType ID, uint8 uiBlockSize, FlowControlStatus_type FC_Status, uint8 uiSeparationTime);
+        -:   48:static Std_ReturnType CanTp_SendConsecutiveFrame(PduIdType id, uint8 uiSequenceNumber, uint8* puiPayload, uint32 uiSize);
+        -:   49:static Std_ReturnType CanTp_SendSingleFrame(PduIdType id, uint8* puiPayload, uint32 uiSize);
+        -:   50:static Std_ReturnType CanTp_SendFirstFrame(PduIdType id, uint32 uiMsgLen);
+        -:   51:static Std_ReturnType CanTp_PrepareSegmenetedFrame(CanPCI_Type *CanPCI, PduInfoType *CanPdu_Info, uint8_t *puiCanPayload);
+        -:   52:/*====================================================================================================================*\
+        -:   53:    Kod funkcji
+        -:   54:\*====================================================================================================================*/
+        -:   55:
+        -:   56:/*====================================================================================================================*/
+        -:   57:/**
+        -:   58:  @brief CanTp_Init
+        -:   59:
+        -:   60: Funkcja inicjalizuje moduł CanTp [SWS_CANTP_00208]
+        -:   61:*/
+        -:   62:/*====================================================================================================================*/
+    #####:   63:void CanTp_Init (void){
+    #####:   64:    CanTp_ResetRX();
+    #####:   65:    CanTp_ResetTX();
+    #####:   66:    CanTp_State = CANTP_ON;
+    #####:   67:}
+        -:   68:/*====================================================================================================================*/
+        -:   69:/**
+        -:   70:  @brief CanTp_GetVersionInfo
+        -:   71:
+        -:   72: Funkcja zwracajaca informacje o wersji [SWS_CANTP_00210]
+        -:   73:*/
+        -:   74:/*====================================================================================================================*/
+    #####:   75:void CanTp_GetVersionInfo(Std_VersionInfoType *versioninfo) {
+    #####:   76:    if (versioninfo != NULL_PTR) {
+    #####:   77:    	versioninfo->sw_major_version = CANTP_SW_MAJOR_V;
+    #####:   78:    	versioninfo->sw_minor_version = CANTP_SW_MINOR_V;
+    #####:   79:    	versioninfo->sw_patch_version = CANTP_SW_PATCH_V;
+    #####:   80:    	versioninfo->moduleID = (uint16)CANTP_MODULE_ID;
+    #####:   81:    	versioninfo->vendorID = 0x00u;
+        -:   82:    }
+    #####:   83:}
+        -:   84:/*====================================================================================================================*/
+        -:   85:/**
+        -:   86:  @brief CanTp_Shutdown
+        -:   87:
+        -:   88:  Funkcja wywoływana w celu wyłączenia modułu CanTp. [SWS_CANTP_00211]
+        -:   89:
+        -:   90:  Wypełnia:
+        -:   91:   [SWS_CANTP_00202]
+        -:   92:   [SWS_CANTP_00200]
+        -:   93:*/
+        -:   94:/*====================================================================================================================*/
+    #####:   95:void CanTp_Shutdown(void){
+        -:   96:    /* Wypełnia [SWS_CANTP_00202]*/
+    #####:   97:    CanTp_ResetRX();
+    #####:   98:    CanTp_ResetTX();
+        -:   99:    /* Wypełnia [SWS_CANTP_00200]*/
+    #####:  100:    CanTp_State = CANTP_OFF;
+    #####:  101:}
+        -:  102:/*====================================================================================================================*/
+        -:  103:/**
+        -:  104:  @brief CanTp_Transmit
+        -:  105:  Funkcja żąda przesłania PDU (Protocal Data Unit)  [SWS_CANTP_00212]
+        -:  106:  Wypełnia:
+        -:  107:   [SWS_CANTP_00231]
+        -:  108:   [SWS_CANTP_00232]
+        -:  109:   [SWS_CANTP_00204]
+        -:  110:   [SWS_CANTP_00205]
+        -:  111:   [SWS_CANTP_00206]
+        -:  112:   [SWS_CANTP_00298]
+        -:  113:   [SWS_CANTP_00299]
+        -:  114:   [SWS_CANTP_00321]
+        -:  115:   [SWS_CANTP_00354]
+        -:  116:*/
+        -:  117:/*====================================================================================================================*/
+    #####:  118:Std_ReturnType CanTp_Transmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr){
+        -:  119:    BufReq_ReturnType BufReqState;
+        -:  120:    PduLengthType PduLen;
+    #####:  121:    Std_ReturnType ret = E_OK;
+        -:  122:    PduInfoType PduTmp;
+        -:  123:    uint8_t uiPayload[8];
+    #####:  124:    PduTmp.SduDataPtr = uiPayload;
+    #####:  125:    PduTmp.MetaDataPtr = NULL;  
+    #####:  126:    if(CanTp_State == CANTP_ON){
+    #####:  127:        if( CanTp_VariablesTX.eCanTp_StateTX == CANTP_TX_WAIT){
+    #####:  128:            if(PduInfoPtr->SduLength < 8){
+    #####:  129:                PduTmp.SduLength = PduInfoPtr->SduLength;
+    #####:  130:                BufReqState = PduR_CanTpCopyTxData(TxPduId, &PduTmp, NULL, &PduLen);
+    #####:  131:                if(BufReqState == BUFREQ_OK){
+        -:  132:                     /* Wypełnia [SWS_CANTP_00231]*/
+        -:  133:                     /* Wypełnia [SWS_CANTP_00354]*/
+    #####:  134:                    ret = CanTp_SendSingleFrame(TxPduId, PduTmp.SduDataPtr, PduInfoPtr->SduLength );
+        -:  135:                }
+        -:  136:                /* Wypełnia [SWS_CANTP_00298]*/
+    #####:  137:                else if(BufReqState == BUFREQ_E_NOT_OK){
+    #####:  138:                    CanTp_ResetTX();  
+        -:  139:                    /* Wypełnia [SWS_CANTP_00205]*/
+    #####:  140:                    PduR_CanTpTxConfirmation(TxPduId, E_NOT_OK);
+    #####:  141:                    ret = E_NOT_OK;
+        -:  142:                }
+        -:  143:                else {
+        -:  144:                    /* Wypełnia [SWS_CANTP_00204]*/
+        -:  145:                    // PduR_CanTpTxConfirmation(TxPduId, E_OK);
+    #####:  146:                    CanTp_TimerStart(&N_Cs_timer);
+    #####:  147:                    ret = E_OK;
+        -:  148:                }
+        -:  149:            }
+        -:  150:            else{
+    #####:  151:                if(CanTp_SendFirstFrame(TxPduId, PduInfoPtr->SduLength) == E_OK){
+    #####:  152:                    CanTp_VariablesTX.eCanTp_StateTX = TxPduId;
+    #####:  153:                    CanTp_VariablesTX.eCanTp_StateTX = CANTP_TX_PROCESSING_SUSPENDED;
+    #####:  154:                    CanTp_VariablesTX.uiMsgLen = PduInfoPtr->SduLength;
+    #####:  155:                    CanTp_VariablesTX.uiTransmittedBytes = 0;
+    #####:  156:                    ret = E_OK;
+        -:  157:                }
+        -:  158:                else{
+    #####:  159:                    ret = E_NOT_OK;
+        -:  160:                }
+        -:  161:            }
+        -:  162:        }
+        -:  163:        else{
+    #####:  164:            ret = E_NOT_OK;
+        -:  165:        }
+        -:  166:    }   
+        -:  167:    else{ 
+    #####:  168:        ret = E_NOT_OK;
+        -:  169:    }
+    #####:  170:    return ret;
+        -:  171:}
+        -:  172:
+        -:  173:/**
+        -:  174:  @brief CanTp_CancelTransmit
+        -:  175:
+        -:  176:  Przerwanie trwającej transmisji PDU [SWS_CANTP_00246]
+        -:  177:  Wypełnia:
+        -:  178:   [SWS_CANTP_00254]
+        -:  179:   [SWS_CANTP_00255]
+        -:  180:   [SWS_CANTP_00256]
+        -:  181:*/
+    #####:  182:Std_ReturnType CanTp_CancelTransmit(PduIdType TxPduId){
+        -:  183:    Std_ReturnType ret;             
+    #####:  184:    if(CanTp_VariablesTX.CanTp_Current_TxId == TxPduId ){
+        -:  185:        /* Wypełnia [SWS_CANTP_00255]*/
+    #####:  186:        PduR_CanTpTxConfirmation(CanTp_VariablesTX.CanTp_Current_TxId, E_NOT_OK);
+    #####:  187:        CanTp_ResetTX();
+        -:  188:        /* Wypełnia [SWS_CANTP_00256]*/
+    #####:  189:        ret = E_OK;
+        -:  190:    }
+        -:  191:    else{
+        -:  192:        /* Wypełnia [SWS_CANTP_00254]*/
+    #####:  193:        ret = E_NOT_OK;
+        -:  194:    }
+    #####:  195:    return ret;
+        -:  196:}
+        -:  197:
+        -:  198:/**
+        -:  199:  @brief CanTp_CancelReceive
+        -:  200:
+        -:  201:  Przerwanie trwającego odbioru PDU [SWS_CANTP_00257]
+        -:  202:  Wypełnia:
+        -:  203:   [SWS_CANTP_00260]
+        -:  204:   [SWS_CANTP_00261]
+        -:  205:   [SWS_CANTP_00262]
+        -:  206:   [SWS_CANTP_00263]
+        -:  207:*/
+        -:  208:
+    #####:  209:Std_ReturnType CanTp_CancelReceive(PduIdType RxPduId){
+        -:  210:    Std_ReturnType ret;             
+    #####:  211:    if( CanTp_VariablesRX.CanTp_Current_RxId == RxPduId ){
+        -:  212:        /* Wypełnia [SWS_CANTP_00263]*/
+    #####:  213:        PduR_CanTpRxIndication(CanTp_VariablesRX.CanTp_Current_RxId, E_NOT_OK);
+    #####:  214:        CanTp_ResetRX();
+        -:  215:        /* Wypełnia [SWS_CANTP_00261]*/
+    #####:  216:        ret = E_OK;
+        -:  217:    }
+        -:  218:    else{
+        -:  219:        /* Wypełnia [SWS_CANTP_00260]*/
+        -:  220:        /* Wypełnia [SWS_CANTP_00262]*/
+    #####:  221:        ret = E_NOT_OK;
+        -:  222:    }
+    #####:  223:    return ret;
+        -:  224:}
+        -:  225:
+        -:  226:/**
+        -:  227:  @brief CanTp_ChangeParameter
+        -:  228:
+        -:  229:  Zadanie zmiany konkretnego parametru.[SWS_CANTP_00302]
+        -:  230:  Wypełnia:
+        -:  231:   [SWS_CANTP_00303]
+        -:  232:   [SWS_CANTP_00304]
+        -:  233:   [SWS_CANTP_00305]
+        -:  234:   [SWS_CANTP_00338]
+        -:  235:*/
+        1:  236:Std_ReturnType CanTp_ChangeParameter(PduIdType id, TPParameterType parameter, uint16 value){
+        1:  237:    Std_ReturnType ret = E_NOT_OK;
+        1:  238:    if (CanTp_State == CANTP_ON){
+        1:  239:        switch(parameter){
+    #####:  240:            case TP_STMIN:
+    #####:  241:                ret = E_OK;
+    #####:  242:                break;
+        1:  243:            case TP_BS:
+        1:  244:                ret = E_OK;
+        1:  245:                break;
+    #####:  246:            case TP_BC:
+    #####:  247:                break;
+    #####:  248:            default:
+    #####:  249:                break;
+        -:  250:        }
+        -:  251:    }
+        1:  252:    return ret;
+        -:  253:}
+        -:  254:/**
+        -:  255:  @brief CanTp_ReadParameter
+        -:  256:
+        -:  257:  Służy do odczytu aktualnych wartośći BS i STmin.[SWS_CANTP_00323]
+        -:  258:  Wypełnia:
+        -:  259:   [SWS_CANTP_00324]
+        -:  260:*/
+        3:  261:Std_ReturnType CanTp_ReadParameter(PduIdType id, TPParameterType parameter, uint16* value){
+        3:  262:    Std_ReturnType ret = E_NOT_OK;
+        3:  263:    if (CanTp_State == CANTP_ON){
+        -:  264:        uint16 readVal;
+        2:  265:        switch (parameter) {
+    #####:  266:            case TP_STMIN:
+    #####:  267:                readVal = 1;
+    #####:  268:                ret = E_OK;
+    #####:  269:                break;
+        1:  270:            case TP_BS:
+        1:  271:                readVal = 1;
+        1:  272:                ret = E_OK;
+        1:  273:                break;
+        1:  274:            case TP_BC:
+        -:  275:            default:
+        1:  276:                break;
+        -:  277:        }
+        2:  278:        if ((ret == E_OK) && (readVal <= 0xff)) {
+        1:  279:            *value = readVal;
+        -:  280:        } else {
+        1:  281:            ret = E_NOT_OK;
+        -:  282:        }
+        -:  283:    }
+        3:  284:    return ret;
+        -:  285:}
+        -:  286:
+        -:  287:/**
+        -:  288:  @brief CanTp_MainFunction
+        -:  289:  Funkcja odpowiadająca za zarządzaniem modułem CanTp [SWS_CANTP_00213]
+        -:  290:  Wypełnia:
+        -:  291:   [SWS_CANTP_00164]
+        -:  292:   [SWS_CANTP_00300]
+        -:  293:*/
+    #####:  294:void CanTp_MainFunction(void){
+        -:  295:    /* Wypełnia [SWS_CANTP_00164]*/
+        -:  296:    static boolean N_Ar_timeout, N_Br_timeout, N_Cr_timeout, N_As_timeout, N_Bs_timeout, N_Cs_timeout, STMmin_timeout;
+        -:  297:    static PduLengthType PduLen;
+        -:  298:    static const PduInfoType PduInfoConst = {NULL, NULL, 0};
+        -:  299:    uint16 uiBlockSize;
+        -:  300:    uint8 uiSeparationTime;
+        -:  301:    BufReq_ReturnType BufReqState; 
+        -:  302:
+    #####:  303:    CanTp_TimerTick(&N_Ar_timer);
+    #####:  304:    CanTp_TimerTick(&N_Br_timer);
+    #####:  305:    CanTp_TimerTick(&N_Cr_timer);
+        -:  306:
+    #####:  307:    CanTp_TimerTick(&N_As_timer);
+    #####:  308:    CanTp_TimerTick(&N_Bs_timer);
+    #####:  309:    CanTp_TimerTick(&N_Cs_timer);
+        -:  310:
+    #####:  311:   if(N_Br_timer.eState == TIMER_ENABLE){
+    #####:  312:       BufReqState = PduR_CanTpCopyRxData(CanTp_VariablesRX.CanTp_Current_RxId, &PduInfoConst, &PduLen);
+    #####:  313:       if(BufReqState == BUFREQ_E_NOT_OK){
+    #####:  314:           PduR_CanTpRxIndication(CanTp_VariablesRX.CanTp_Current_RxId, E_NOT_OK);
+        -:  315:       }
+        -:  316:       else{
+    #####:  317:            uiBlockSize = CanTp_CalcBlocksSize(PduLen);
+    #####:  318:            if(uiBlockSize > 0){
+    #####:  319:                CanTp_VariablesRX.uiBlocksNxtCts = uiBlockSize;
+    #####:  320:                CanTp_VariablesRX.eCanTp_StateRX = CANTP_RX_PROCESSING;
+    #####:  321:                if(CanTp_SendFlowControl(CanTp_VariablesRX.CanTp_Current_RxId, uiBlockSize, FC_CTS, uiSeparationTime) == E_NOT_OK){            
+    #####:  322:                    CanTp_ResetRX();
+        -:  323:                }
+        -:  324:                else{
+    #####:  325:                    CanTp_TimerReset(&N_Br_timer); 
+        -:  326:                }  
+        -:  327:            }
+    #####:  328:            if(CanTp_TimerTimeout(&N_Br_timer)){
+    #####:  329:                FC_Wait_frame_ctr++;
+    #####:  330:                N_Br_timer.uiCounter = 0;
+    #####:  331:                if(FC_Wait_frame_ctr >= FC_WAIT_FRAME_CTR_MAX){
+    #####:  332:                    PduR_CanTpRxIndication (CanTp_VariablesRX.CanTp_Current_RxId, E_NOT_OK);
+    #####:  333:                    CanTp_ResetRX();         
+    #####:  334:                    FC_Wait_frame_ctr = 0;
+        -:  335:                }
+        -:  336:                else{
+    #####:  337:                    if(CanTp_SendFlowControl(CanTp_VariablesRX.CanTp_Current_RxId, uiBlockSize, FC_WAIT, uiSeparationTime) == E_NOT_OK){
+    #####:  338:                        CanTp_ResetRX();
+        -:  339:                    }
+        -:  340:                }
+        -:  341:            }
+        -:  342:        }
+        -:  343:   }
+    #####:  344:   if(N_Cr_timer.eState == TIMER_ENABLE){
+    #####:  345:       if(CanTp_TimerTimeout(&N_Cr_timer) == E_NOT_OK){
+    #####:  346:            PduR_CanTpRxIndication(CanTp_VariablesRX.CanTp_Current_RxId, E_NOT_OK);
+    #####:  347:            CanTp_ResetRX();
+        -:  348:       }
+        -:  349:   }
+    #####:  350:   if(N_Ar_timer.eState == TIMER_ENABLE){
+    #####:  351:       if(CanTp_TimerTimeout(&N_Ar_timer) == E_NOT_OK){
+    #####:  352:            PduR_CanTpRxIndication(CanTp_VariablesRX.CanTp_Current_RxId, E_NOT_OK);
+    #####:  353:            CanTp_ResetRX();
+        -:  354:       }
+        -:  355:   }
+    #####:  356:    if(N_Cs_timer.eState == TIMER_ENABLE){
+    #####:  357:       if(CanTp_TimerTimeout(&N_Cs_timer) == E_NOT_OK){
+    #####:  358:            PduR_CanTpTxConfirmation(CanTp_VariablesTX.CanTp_Current_TxId, E_NOT_OK);
+    #####:  359:            CanTp_ResetTX();
+        -:  360:       }
+        -:  361:   }
+    #####:  362:    if(N_As_timer.eState == TIMER_ENABLE){
+    #####:  363:       if(CanTp_TimerTimeout(&N_As_timer) == E_NOT_OK){
+    #####:  364:            PduR_CanTpTxConfirmation(CanTp_VariablesTX.CanTp_Current_TxId, E_NOT_OK);
+    #####:  365:            CanTp_ResetTX();
+        -:  366:       }
+        -:  367:   }
+    #####:  368:    if(N_Bs_timer.eState == TIMER_ENABLE){
+    #####:  369:       if(CanTp_TimerTimeout(&N_Bs_timer) == E_NOT_OK){
+    #####:  370:            PduR_CanTpTxConfirmation(CanTp_VariablesTX.CanTp_Current_TxId, E_NOT_OK);
+    #####:  371:            CanTp_ResetTX();
+        -:  372:       }
+        -:  373:   }
+    #####:  374:} 
+        -:  375:
+        -:  376:/**
+        -:  377:  @brief CanTp_RxIndication
+        -:  378:
+        -:  379:  Wskazanie odebranej jednostki PDU [SWS_CANTP_00214]
+        -:  380:  Wypełnia:
+        -:  381:   [SWS_CANTP_00235]
+        -:  382:   [SWS_CANTP_00322]
+        -:  383:*/
+        -:  384:
+    #####:  385:void CanTp_RxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr){
+        -:  386:    
+        -:  387:    CanPCI_Type CanPCI;    
+        -:  388:
+    #####:  389:    if(CanTp_State == CANTP_ON){
+    #####:  390:        if(CanTp_VariablesRX.eCanTp_StateRX == CANTP_RX_WAIT){
+        -:  391:        
+    #####:  392:            CanTp_GetPCI(PduInfoPtr, &CanPCI);
+        -:  393:
+    #####:  394:            if(CanPCI.eFrameType == CAN_FF){
+    #####:  395:                CanTp_FirstFrameReception(RxPduId, PduInfoPtr, &CanPCI);
+        -:  396:            }
+    #####:  397:            else if(CanPCI.eFrameType == CAN_SF){
+    #####:  398:                CanTp_SingleFrameReception(RxPduId, &CanPCI, PduInfoPtr);           
+        -:  399:            } 
+    #####:  400:            else if(CanPCI.eFrameType == CAN_FC){
+    #####:  401:                CanTp_FlowControlReception(RxPduId, &CanPCI);
+        -:  402:            }
+        -:  403:            else
+        -:  404:            {
+    #####:  405:                CanTp_VariablesRX.eCanTp_StateRX = CANTP_RX_WAIT; 
+        -:  406:            } 
+        -:  407:        }
+    #####:  408:        else if(CanTp_VariablesRX.eCanTp_StateRX == CANTP_RX_PROCESSING){
+    #####:  409:             CanTp_GetPCI(PduInfoPtr, &CanPCI);
+    #####:  410:             if(CanPCI.eFrameType == CAN_CF){
+    #####:  411:                CanTp_ConsecutiveFrameReception(RxPduId, &CanPCI, PduInfoPtr);
+        -:  412:            }
+    #####:  413:            else if(CanPCI.eFrameType == CAN_FC){
+    #####:  414:                CanTp_FlowControlReception(RxPduId, &CanPCI);
+        -:  415:            }
+    #####:  416:            else if(CanPCI.eFrameType == CAN_FF){            
+    #####:  417:                PduR_CanTpRxIndication (CanTp_VariablesRX.CanTp_Current_RxId, E_NOT_OK);
+    #####:  418:                CanTp_ResetRX();
+    #####:  419:                CanTp_FirstFrameReception(RxPduId, PduInfoPtr, &CanPCI);
+        -:  420:            }
+    #####:  421:            else if(CanPCI.eFrameType == CAN_SF){            
+    #####:  422:                PduR_CanTpRxIndication (CanTp_VariablesRX.CanTp_Current_RxId, E_NOT_OK);
+    #####:  423:                CanTp_ResetRX();
+    #####:  424:                CanTp_SingleFrameReception(RxPduId, &CanPCI, PduInfoPtr);
+        -:  425:            }
+        -:  426:            else{
+        -:  427:            }
+        -:  428:        }
+        -:  429:        else {    
+    #####:  430:            CanTp_GetPCI(PduInfoPtr, &CanPCI);
+    #####:  431:            if(CanPCI.eFrameType == CAN_FC){
+    #####:  432:                CanTp_FlowControlReception(RxPduId, &CanPCI);
+        -:  433:            }
+    #####:  434:            else if(CanPCI.eFrameType == CAN_FF) {            
+    #####:  435:                PduR_CanTpRxIndication (CanTp_VariablesRX.CanTp_Current_RxId, E_NOT_OK);
+    #####:  436:                CanTp_ResetRX();
+    #####:  437:                CanTp_FirstFrameReception(RxPduId, PduInfoPtr, &CanPCI);
+        -:  438:            }
+    #####:  439:            else if(CanPCI.eFrameType == CAN_SF) {            
+    #####:  440:                PduR_CanTpRxIndication (CanTp_VariablesRX.CanTp_Current_RxId, E_NOT_OK);
+    #####:  441:                CanTp_ResetRX();
+    #####:  442:                CanTp_SingleFrameReception(RxPduId, &CanPCI, PduInfoPtr);
+        -:  443:            }
+        -:  444:            else {
+    #####:  445:                PduR_CanTpRxIndication (CanTp_VariablesRX.CanTp_Current_RxId, E_NOT_OK);
+    #####:  446:                CanTp_ResetRX();
+        -:  447:            }
+        -:  448:        }
+        -:  449:    }
+    #####:  450:}
+        -:  451:
+        -:  452:/**
+        -:  453:  @brief CanTp_TxConfirmation
+        -:  454:
+        -:  455:  Informacja o statusie transmisji PDU.[SWS_CANTP_00215]
+        -:  456:  Wypełnia:
+        -:  457:   [SWS_CANTP_00236]
+        -:  458:*/
+    #####:  459:void CanTp_TxConfirmation(PduIdType TxPduId, Std_ReturnType result){
+    #####:  460:if( CanTp_State == CANTP_ON ){  
+    #####:  461:    if(CanTp_VariablesRX.CanTp_Current_RxId == TxPduId){
+    #####:  462:        if( (CanTp_VariablesRX.eCanTp_StateRX == CANTP_RX_PROCESSING ) || (CanTp_VariablesRX.eCanTp_StateRX == CANTP_RX_PROCESSING_SUSPEND)){
+    #####:  463:            if(result == E_OK){
+    #####:  464:                CanTp_TimerReset(&N_Ar_timer);   
+        -:  465:            }    
+        -:  466:            else{
+    #####:  467:                PduR_CanTpRxIndication(CanTp_VariablesRX.CanTp_Current_RxId, E_NOT_OK);
+    #####:  468:                CanTp_ResetRX();
+        -:  469:            }
+        -:  470:        }
+        -:  471:        else{} 
+        -:  472:    }
+    #####:  473:    if(CanTp_VariablesTX.CanTp_Current_TxId == TxPduId ){
+    #####:  474:        if(result == E_OK){
+    #####:  475:            if(CanTp_VariablesTX.eCanTp_StateTX == CANTP_TX_PROCESSING)
+        -:  476:            {
+    #####:  477:               CanTp_SendNextCF();               
+        -:  478:            }
+        -:  479:            else{}
+        -:  480:        }
+        -:  481:        else{
+    #####:  482:            PduR_CanTpTxConfirmation(CanTp_VariablesTX.CanTp_Current_TxId, E_NOT_OK);
+    #####:  483:            CanTp_ResetTX();
+        -:  484:        }
+        -:  485:    }
+        -:  486:    else{}
+        -:  487:}
+    #####:  488:}
+        -:  489:
+        -:  490:/*====================================================================================================================*\
+        -:  491:    Definicja funkcji lokalnych
+        -:  492:\*====================================================================================================================*/
+        -:  493:
+        -:  494:/*====================================================================================================================*/
+        -:  495:/**
+        -:  496:  @brief CanTp_ResetRX
+        -:  497:*/
+    #####:  498:static void CanTp_ResetRX(void){
+    #####:  499:    CanTp_VariablesRX.eCanTp_StateRX = CANTP_RX_WAIT;
+    #####:  500:    CanTp_VariablesRX.uiMsgLen = 0;
+    #####:  501:    CanTp_VariablesRX.uiTransmittedBytes = 0;
+    #####:  502:    CanTp_VariablesRX.uiExpected_CF_SN = 0;
+    #####:  503:    CanTp_VariablesRX.uiBlocksNxtCts = 0;
+    #####:  504:    CanTp_VariablesRX.CanTp_Current_RxId = 0;
+    #####:  505:    CanTp_TimerReset(&N_Ar_timer);
+    #####:  506:    CanTp_TimerReset(&N_Br_timer);
+    #####:  507:    CanTp_TimerReset(&N_Cr_timer);
+    #####:  508:}
+        -:  509:/**
+        -:  510:  @brief CanTp_ResetTX
+        -:  511:*/
+    #####:  512:static void CanTp_ResetTX(void){
+    #####:  513:    CanTp_VariablesTX.eCanTp_StateTX = CANTP_TX_WAIT;
+    #####:  514:    CanTp_VariablesTX.uiMsgLen = 0;
+    #####:  515:    CanTp_VariablesTX.uiTransmittedBytes = 0;
+    #####:  516:    CanTp_VariablesTX.uiFrameNrFC = 0;
+    #####:  517:    CanTp_VariablesTX.CanTp_Current_TxId = 0;
+    #####:  518:    CanTp_TimerReset(&N_As_timer);
+    #####:  519:    CanTp_TimerReset(&N_Bs_timer);
+    #####:  520:    CanTp_TimerReset(&N_Cs_timer);
+    #####:  521:}
+        -:  522:
+        -:  523:/**
+        -:  524:  @brief CanTp_PrepareSegmenetedFrame
+        -:  525:*/
+    #####:  526:static Std_ReturnType CanTp_PrepareSegmenetedFrame(CanPCI_Type *CanPCI, PduInfoType *CanPdu_Info, uint8_t *puiCanPayload){
+        -:  527:
+    #####:  528:    Std_ReturnType ret = E_OK;
+        -:  529:
+    #####:  530:    if(NE_NULL_PTR(CanPCI) && NE_NULL_PTR(CanPdu_Info) && NE_NULL_PTR(puiCanPayload)){  
+        -:  531:        
+    #####:  532:        switch(CanPCI->eFrameType){
+    #####:  533:            case CAN_SF:
+    #####:  534:                *(CanPdu_Info->SduDataPtr) = 0;
+    #####:  535:                *(CanPdu_Info->SduDataPtr) = CAN_SF << 4;
+        -:  536:        
+    #####:  537:                if(CanPCI->uiFrameLenght <= 7){
+    #####:  538:                    *(CanPdu_Info->SduDataPtr) = 0x0F & CanPCI->uiFrameLenght; 
+    #####:  539:                    for(uint8_t i = 0; i < CanPCI->uiFrameLenght; i++){
+    #####:  540:                        *(CanPdu_Info->SduDataPtr + (i + 1)) = *(puiCanPayload + i);
+        -:  541:                    }  
+        -:  542:                }
+        -:  543:                else{
+    #####:  544:                    ret = E_NOT_OK;
+        -:  545:                }
+    #####:  546:            break;
+    #####:  547:            case CAN_CF: 
+    #####:  548:                *(CanPdu_Info->SduDataPtr) = 0;
+    #####:  549:                *(CanPdu_Info->SduDataPtr) = CAN_CF << 4;
+    #####:  550:                if(CanPCI->uiSequenceNumber < 7){
+    #####:  551:                    *(CanPdu_Info->SduDataPtr) |= (0x0F & CanPCI->uiSequenceNumber);
+    #####:  552:                    *(CanPdu_Info->SduDataPtr + 1) = *(puiCanPayload);
+    #####:  553:                    *(CanPdu_Info->SduDataPtr + 2) = *(puiCanPayload + 1);
+    #####:  554:                    *(CanPdu_Info->SduDataPtr + 3) = *(puiCanPayload + 2);
+    #####:  555:                    *(CanPdu_Info->SduDataPtr + 4) = *(puiCanPayload + 3);
+    #####:  556:                    *(CanPdu_Info->SduDataPtr + 5) = *(puiCanPayload + 4);
+    #####:  557:                    *(CanPdu_Info->SduDataPtr + 6) = *(puiCanPayload + 5);
+    #####:  558:                    *(CanPdu_Info->SduDataPtr + 7) = *(puiCanPayload + 6);
+        -:  559:                }
+        -:  560:                else{
+    #####:  561:                    ret = E_NOT_OK; 
+        -:  562:                }
+    #####:  563:            break;
+    #####:  564:            case CAN_FF:    
+    #####:  565:                *(CanPdu_Info->SduDataPtr) = 0;
+    #####:  566:                *(CanPdu_Info->SduDataPtr) = CAN_FF << 4;
+    #####:  567:                if(CanPCI->uiFrameLenght <= 4095){
+    #####:  568:                    *(CanPdu_Info->SduDataPtr) |= (0x0F & (CanPCI->uiFrameLenght >> 8));
+    #####:  569:                    *(CanPdu_Info->SduDataPtr + 1) = (0xFF & (CanPCI->uiFrameLenght));
+    #####:  570:                    *(CanPdu_Info->SduDataPtr + 2) = *(puiCanPayload);
+    #####:  571:                    *(CanPdu_Info->SduDataPtr + 3) = *(puiCanPayload + 1);
+    #####:  572:                    *(CanPdu_Info->SduDataPtr + 4) = *(puiCanPayload + 2);
+    #####:  573:                    *(CanPdu_Info->SduDataPtr + 5) = *(puiCanPayload + 3);
+    #####:  574:                    *(CanPdu_Info->SduDataPtr + 6) = *(puiCanPayload + 4);
+    #####:  575:                    *(CanPdu_Info->SduDataPtr + 7) = *(puiCanPayload + 5);
+        -:  576:                }
+        -:  577:                else{
+    #####:  578:                    *(CanPdu_Info->SduDataPtr + 1) = 0;
+    #####:  579:                    *(CanPdu_Info->SduDataPtr + 2) = (CanPCI->uiFrameLenght >> 24) & 0xFF;
+    #####:  580:                    *(CanPdu_Info->SduDataPtr + 3) = (CanPCI->uiFrameLenght >> 16) & 0xFF;
+    #####:  581:                    *(CanPdu_Info->SduDataPtr + 4) = (CanPCI->uiFrameLenght >> 8) & 0xFF;
+    #####:  582:                    *(CanPdu_Info->SduDataPtr + 5) = (CanPCI->uiFrameLenght >> 0) & 0xFF;
+    #####:  583:                    *(CanPdu_Info->SduDataPtr + 6) = *(puiCanPayload);
+    #####:  584:                    *(CanPdu_Info->SduDataPtr + 7) = *(puiCanPayload + 1);
+        -:  585:                }
+    #####:  586:            break;
+    #####:  587:            case CAN_FC:
+    #####:  588:                *(CanPdu_Info->SduDataPtr) = 0;
+    #####:  589:                *(CanPdu_Info->SduDataPtr) = CAN_FC << 4;
+    #####:  590:                if(CanPCI->uiFlowStatus < 7){
+    #####:  591:                    *(CanPdu_Info->SduDataPtr) |= (0x0F & CanPCI->uiFlowStatus);
+    #####:  592:                    *(CanPdu_Info->SduDataPtr + 1) = CanPCI->uiBlockSize;
+    #####:  593:                    *(CanPdu_Info->SduDataPtr + 2) = CanPCI->uiSeparationTime;
+        -:  594:                }
+        -:  595:                else{
+    #####:  596:                    ret = E_NOT_OK;
+        -:  597:                }
+    #####:  598:            break;
+    #####:  599:            default:
+    #####:  600:                ret = E_NOT_OK;
+    #####:  601:            break;
+        -:  602:        }
+        -:  603:    }
+        -:  604:    else{
+    #####:  605:        ret = E_NOT_OK;
+        -:  606:    }
+    #####:  607:    return ret;
+        -:  608:}
+        -:  609:/**
+        -:  610:  @brief CanTp_SendSingleFrame
+        -:  611:*/
+    #####:  612:static Std_ReturnType CanTp_SendSingleFrame(PduIdType id, uint8* puiPayload, uint32 uiSize){
+        -:  613:    PduInfoType PduInfo;
+        -:  614:    uint8 puiSduData[8];
+        -:  615:    uint8 *puiMetaData;
+    #####:  616:    PduInfo.MetaDataPtr = puiMetaData;
+    #####:  617:    PduInfo.SduDataPtr = puiSduData;
+        -:  618:
+    #####:  619:    CanPCI_Type CanPCI = {CANTP_N_PCI_TYPE_SF, uiSize, 0, 0, 0, 0};
+    #####:  620:    Std_ReturnType ret = E_OK;
+    #####:  621:    ret = E_OK;
+    #####:  622:    CanTp_PrepareSegmenetedFrame(&CanPCI, &PduInfo, puiPayload);
+        -:  623:    
+    #####:  624:    if(CanIf_Transmit(id, &PduInfo) == E_OK ){
+    #####:  625:        CanTp_TimerStart(&N_As_timer);
+        -:  626:    }
+        -:  627:    else{
+    #####:  628:        PduR_CanTpTxConfirmation(id, E_NOT_OK);
+    #####:  629:        ret = E_NOT_OK;
+        -:  630:    }
+    #####:  631:    return ret;
+        -:  632:}
+        -:  633:/**
+        -:  634:  @brief CanTp_SendFirstFrame
+        -:  635:*/
+    #####:  636:static Std_ReturnType CanTp_SendFirstFrame(PduIdType id, uint32 uiMsgLen){
+        -:  637:    PduInfoType PduInfo;
+        -:  638:    uint8 puiSduData[8];
+        -:  639:    uint8 *puiMetaData;
+    #####:  640:    PduInfo.MetaDataPtr = puiMetaData;
+    #####:  641:    PduInfo.SduDataPtr = puiSduData;
+        -:  642:
+    #####:  643:    CanPCI_Type CanPCI = {CANTP_N_PCI_TYPE_FF, uiMsgLen, 0, 0, 0, 0}; 
+    #####:  644:    uint8 uiPayload[8] = {0,0,0,0,0,0,0,0};
+    #####:  645:    Std_ReturnType ret = E_OK;
+        -:  646:
+    #####:  647:    CanTp_PrepareSegmenetedFrame(&CanPCI, &PduInfo, uiPayload);
+        -:  648:
+    #####:  649:    if(CanIf_Transmit(id, &PduInfo) == E_OK ){
+    #####:  650:        CanTp_TimerStart(&N_As_timer);
+    #####:  651:        CanTp_TimerStart(&N_Bs_timer);
+        -:  652:    }
+        -:  653:    else{
+    #####:  654:        PduR_CanTpTxConfirmation(id, E_NOT_OK);
+    #####:  655:        ret = E_NOT_OK;
+        -:  656:    }
+    #####:  657:    return ret;
+        -:  658:}
+        -:  659:/**
+        -:  660:  @brief CanTp_GetPCI
+        -:  661:*/
+    #####:  662:static Std_ReturnType CanTp_GetPCI(const PduInfoType* CanData, CanPCI_Type* CanFrameInfo){
+    #####:  663:    Std_ReturnType ret = E_OK;
+        -:  664:
+    #####:  665:    if(NE_NULL_PTR(CanData) && NE_NULL_PTR(CanFrameInfo) && (NE_NULL_PTR(CanData->SduDataPtr))){
+    #####:  666:        CanFrameInfo->eFrameType = DEFAULT;
+    #####:  667:        CanFrameInfo->uiFrameLenght = 0;
+    #####:  668:        CanFrameInfo->uiBlockSize = 0;
+    #####:  669:        CanFrameInfo->uiFlowStatus = 0;
+    #####:  670:        CanFrameInfo->uiSeparationTime = 0;
+    #####:  671:        CanFrameInfo->uiSequenceNumber = 0;
+        -:  672:
+    #####:  673:        switch((CanData->SduDataPtr[0]) >> 4){
+    #####:  674:            case CANTP_N_PCI_TYPE_SF:
+    #####:  675:                CanFrameInfo->eFrameType = CAN_SF;
+    #####:  676:                CanFrameInfo->uiFrameLenght = CanData->SduDataPtr[0];
+    #####:  677:            break;
+    #####:  678:            case CANTP_N_PCI_TYPE_FF:
+    #####:  679:                CanFrameInfo->eFrameType = CAN_FF;
+    #####:  680:                if( (CanData->SduDataPtr[0] & 0x0F) | CanData->SduDataPtr[1] ) {
+    #####:  681:                    CanFrameInfo->uiFrameLenght =  CanData->SduDataPtr[0] & 0x0F;
+    #####:  682:                    CanFrameInfo->uiFrameLenght =  (CanFrameInfo->uiFrameLenght << 8) | CanData->SduDataPtr[1]; 
+        -:  683:                }
+        -:  684:                else{
+    #####:  685:                    CanFrameInfo->uiFrameLenght =  CanData->SduDataPtr[2];
+    #####:  686:                    CanFrameInfo->uiFrameLenght =  (CanFrameInfo->uiFrameLenght << 8) | CanData->SduDataPtr[3]; 
+    #####:  687:                    CanFrameInfo->uiFrameLenght =  (CanFrameInfo->uiFrameLenght << 8) | CanData->SduDataPtr[4];
+    #####:  688:                    CanFrameInfo->uiFrameLenght =  (CanFrameInfo->uiFrameLenght << 8) | CanData->SduDataPtr[5];
+        -:  689:                }
+    #####:  690:            break;
+    #####:  691:            case CANTP_N_PCI_TYPE_CF:
+    #####:  692:                CanFrameInfo->eFrameType = CAN_CF;
+    #####:  693:                CanFrameInfo->uiSequenceNumber= (CanData->SduDataPtr[0] & 0x0F );
+    #####:  694:            break;
+    #####:  695:            case CANTP_N_PCI_TYPE_FC:
+    #####:  696:                CanFrameInfo->eFrameType = CAN_FC;
+    #####:  697:                CanFrameInfo->uiFlowStatus = CanData->SduDataPtr[0] & 0x0F; 
+    #####:  698:                CanFrameInfo->uiBlockSize = CanData->SduDataPtr[1]; 
+    #####:  699:                CanFrameInfo->uiSeparationTime = CanData->SduDataPtr[2]; 
+    #####:  700:            break;
+    #####:  701:            default:
+    #####:  702:                CanFrameInfo->eFrameType = DEFAULT;
+    #####:  703:                ret = E_NOT_OK;
+    #####:  704:            break;
+        -:  705:        }
+        -:  706:    }
+        -:  707:    else{
+    #####:  708:        ret = E_NOT_OK;
+        -:  709:    }
+    #####:  710:    return ret;
+        -:  711:}
+        -:  712:/**
+        -:  713:  @brief CanTp_FirstFrameReception
+        -:  714:*/
+    #####:  715:static void CanTp_FirstFrameReception(PduIdType RxPduId, const PduInfoType *PduInfoPtr, CanPCI_Type *CanPCI){  
+        -:  716:    PduLengthType BufferSize; 
+        -:  717:    BufReq_ReturnType BufferState; 
+        -:  718:    uint16 uiCurrentBlockSize;
+    #####:  719:    BufferState = PduR_CanTpStartOfReception( RxPduId, PduInfoPtr, CanPCI->uiFrameLenght, &BufferSize);
+    #####:  720:    if(BufferState == BUFREQ_OK){
+    #####:  721:        CanTp_VariablesRX.uiMsgLen = CanPCI->uiFrameLenght;
+    #####:  722:        CanTp_VariablesRX.CanTp_Current_RxId = RxPduId;
+    #####:  723:        uiCurrentBlockSize = CanTp_CalcBlocksSize(BufferSize); 
+    #####:  724:        if( uiCurrentBlockSize > 0){    
+    #####:  725:            CanTp_SendFlowControl(CanTp_VariablesRX.CanTp_Current_RxId, uiCurrentBlockSize, FC_CTS, DEFAULT_ST);   
+    #####:  726:            CanTp_VariablesRX.uiBlocksNxtCts = uiCurrentBlockSize;
+    #####:  727:            CanTp_VariablesRX.eCanTp_StateRX = CANTP_RX_PROCESSING;
+        -:  728:        }
+        -:  729:        else{
+    #####:  730:            CanTp_VariablesRX.uiBlocksNxtCts = uiCurrentBlockSize;
+    #####:  731:            CanTp_SendFlowControl(CanTp_VariablesRX.CanTp_Current_RxId, uiCurrentBlockSize, FC_WAIT, DEFAULT_ST );   
+    #####:  732:            CanTp_VariablesRX.eCanTp_StateRX = CANTP_RX_PROCESSING_SUSPEND;
+        -:  733:        }
+    #####:  734:        CanTp_VariablesRX.uiExpected_CF_SN = 1; 
+        -:  735:    } 
+    #####:  736:    else if (BufferState == BUFREQ_OVFL){
+    #####:  737:        CanTp_SendFlowControl(CanTp_VariablesRX.CanTp_Current_RxId, uiCurrentBlockSize, FC_OVFLW, DEFAULT_ST );
+    #####:  738:        CanTp_ResetRX();
+    #####:  739:        CanTp_VariablesRX.eCanTp_StateRX = CANTP_RX_WAIT;
+        -:  740:    }
+        -:  741:    else {
+    #####:  742:        CanTp_ResetRX();
+        -:  743:    }
+    #####:  744:}
+        -:  745:/**
+        -:  746:  @brief CanTp_SingleFrameReception
+        -:  747:*/
+    #####:  748:static void CanTp_SingleFrameReception(PduIdType RxPduId, CanPCI_Type *CanPCI, const PduInfoType* PduInfoPtr){
+        -:  749:    PduLengthType BufferSize; 
+        -:  750:    BufReq_ReturnType BufferState;  
+        -:  751:    PduInfoType ExtractedData;
+    #####:  752:    CanTp_VariablesRX.eCanTp_StateRX = CANTP_RX_WAIT;
+    #####:  753:    BufferState = PduR_CanTpStartOfReception( RxPduId, PduInfoPtr, CanPCI->uiFrameLenght, &BufferSize);
+        -:  754:
+    #####:  755:    if((BufferState == BUFREQ_OK)){             
+    #####:  756:        if(BufferSize >= CanPCI->uiFrameLenght){
+    #####:  757:            ExtractedData.SduLength = CanPCI->uiFrameLenght;
+    #####:  758:            ExtractedData.SduDataPtr = (PduInfoPtr->SduDataPtr+1);
+    #####:  759:            BufferState = PduR_CanTpCopyRxData(RxPduId,  &ExtractedData, &BufferSize);
+    #####:  760:            PduR_CanTpRxIndication(RxPduId, BufferState);        
+        -:  761:        }
+        -:  762:        else{
+    #####:  763:            PduR_CanTpRxIndication(RxPduId, E_NOT_OK);
+        -:  764:        }
+        -:  765:    }
+        -:  766:    else{}
+    #####:  767:}
+        -:  768:/**
+        -:  769:  @brief CanTp_ConsecutiveFrameReception
+        -:  770:*/
+    #####:  771:static void CanTp_ConsecutiveFrameReception(PduIdType RxPduId, CanPCI_Type *CanPCI, const PduInfoType* PduInfoPtr){
+        -:  772:    PduLengthType BufferSize;      
+        -:  773:    BufReq_ReturnType BufferState;   
+        -:  774:    PduInfoType ExtractedData;
+        -:  775:    uint16 uiCurrentBlockSize;
+        -:  776:
+    #####:  777:    CanTp_TimerReset(&N_Cr_timer);
+        -:  778:
+    #####:  779:    if(CanTp_VariablesRX.CanTp_Current_RxId ==  RxPduId){
+    #####:  780:        if(CanTp_VariablesRX.uiExpected_CF_SN == CanPCI->uiSequenceNumber){
+    #####:  781:            ExtractedData.SduLength = CanPCI->uiFrameLenght;
+    #####:  782:            ExtractedData.SduDataPtr = (PduInfoPtr->SduDataPtr+1);
+    #####:  783:            BufferState = PduR_CanTpCopyRxData(RxPduId,  &ExtractedData, &BufferSize);
+    #####:  784:            if(BufferState == BUFREQ_OK){
+    #####:  785:                CanTp_VariablesRX.uiTransmittedBytes += PduInfoPtr->SduLength;
+    #####:  786:                CanTp_VariablesRX.uiBlocksNxtCts--;
+    #####:  787:                if( CanTp_VariablesRX.uiTransmittedBytes == CanTp_VariablesRX.uiMsgLen){
+    #####:  788:                    PduR_CanTpRxIndication(CanTp_VariablesRX.CanTp_Current_RxId, E_OK);
+    #####:  789:                    CanTp_ResetRX();
+        -:  790:                }     
+        -:  791:                else{ 
+    #####:  792:                    CanTp_VariablesRX.uiExpected_CF_SN++;
+    #####:  793:                    CanTp_VariablesRX.uiExpected_CF_SN%8;
+    #####:  794:                    uiCurrentBlockSize = CanTp_CalcBlocksSize(BufferSize);
+    #####:  795:                    if(uiCurrentBlockSize > 0){
+    #####:  796:                        CanTp_TimerStart(&N_Cr_timer);
+    #####:  797:                        if(CanTp_VariablesRX.uiBlocksNxtCts == 0 ){
+    #####:  798:                            CanTp_SendFlowControl(CanTp_VariablesRX.CanTp_Current_RxId, uiCurrentBlockSize, FC_CTS, DEFAULT_ST );
+    #####:  799:                            CanTp_VariablesRX.uiBlocksNxtCts = uiCurrentBlockSize;
+        -:  800:                        }
+    #####:  801:                        CanTp_VariablesRX.eCanTp_StateRX = CANTP_RX_PROCESSING;         
+        -:  802:                    }
+        -:  803:                    else{
+    #####:  804:                        CanTp_VariablesRX.eCanTp_StateRX = CANTP_RX_PROCESSING_SUSPEND;
+    #####:  805:                        CanTp_SendFlowControl(CanTp_VariablesRX.CanTp_Current_RxId, uiCurrentBlockSize, FC_WAIT, DEFAULT_ST ); 
+        -:  806:                    }
+        -:  807:                }
+        -:  808:            }
+        -:  809:            else{ 
+    #####:  810:                PduR_CanTpRxIndication(CanTp_VariablesRX.CanTp_Current_RxId, E_NOT_OK);
+    #####:  811:                CanTp_ResetRX();
+        -:  812:            }
+        -:  813:        }
+        -:  814:        else{ 
+    #####:  815:            PduR_CanTpRxIndication(CanTp_VariablesRX.CanTp_Current_RxId, E_NOT_OK);
+    #####:  816:            CanTp_ResetRX();
+        -:  817:        }
+        -:  818:    }
+        -:  819:    else {
+    #####:  820:        PduR_CanTpRxIndication(CanTp_VariablesRX.CanTp_Current_RxId, E_NOT_OK);
+    #####:  821:        CanTp_ResetRX();
+        -:  822:    }
+    #####:  823:}
+        -:  824:/**
+        -:  825:  @brief CanTp_FlowControlReception
+        -:  826:*/
+    #####:  827:static void CanTp_FlowControlReception(PduIdType RxPduId, CanPCI_Type *CanPCI){
+    #####:  828:    if( CanTp_VariablesTX.eCanTp_StateTX == CANTP_TX_PROCESSING_SUSPENDED ){
+    #####:  829:        if(CanTp_VariablesTX.CanTp_Current_TxId == RxPduId ){
+    #####:  830:            if(CanPCI->uiFlowStatus == FC_CTS){
+    #####:  831:                CanTp_VariablesTX.uiFrameNrFC = CanPCI->uiBlockSize; 
+    #####:  832:                CanTp_SendNextCF();
+        -:  833:            }   
+    #####:  834:            else if(CanPCI->uiFlowStatus == FC_WAIT){
+    #####:  835:                CanTp_TimerReset(&N_Bs_timer);
+    #####:  836:                CanTp_TimerStart(&N_Bs_timer);
+        -:  837:            }
+    #####:  838:            else if(CanPCI->uiFlowStatus == FC_OVFLW){
+    #####:  839:                PduR_CanTpTxConfirmation(CanTp_VariablesTX.CanTp_Current_TxId, E_NOT_OK);
+    #####:  840:                CanTp_ResetTX();
+        -:  841:            }
+        -:  842:            else{
+    #####:  843:                PduR_CanTpTxConfirmation(CanTp_VariablesTX.CanTp_Current_TxId, E_NOT_OK);
+    #####:  844:                CanTp_ResetTX();
+        -:  845:            }
+        -:  846:        }
+        -:  847:        else{}
+        -:  848:    }
+        -:  849:    else{}
+    #####:  850:}
+        -:  851:/**
+        -:  852:  @brief CanTp_CalcBlocksSize
+        -:  853:*/
+    #####:  854:static uint16 CanTp_CalcBlocksSize(uint16 uiBufferSize){
+        -:  855:    uint16 ret; 
+    #####:  856:    uint16 uiBytesLeft = CanTp_VariablesRX.uiMsgLen - CanTp_VariablesRX.uiTransmittedBytes;
+    #####:  857:    if(uiBufferSize >= uiBytesLeft){
+    #####:  858:        ret = uiBytesLeft/7;
+    #####:  859:        if(CanTp_VariablesRX.uiMsgLen%7 > 0) ret++; 
+        -:  860:    }
+        -:  861:    else{
+    #####:  862:        ret = uiBufferSize/7;
+        -:  863:    }
+    #####:  864:    return ret;
+        -:  865:} 
+        -:  866:/**
+        -:  867:  @brief CanTp_SendNextCF
+        -:  868:*/
+    #####:  869:static void CanTp_SendNextCF(void){
+        -:  870:    BufReq_ReturnType BufReqState;
+        -:  871:    PduInfoType PduInfoPtr;
+        -:  872:    PduLengthType PduLen;
+        -:  873:    Std_ReturnType ret;
+        -:  874:    uint8 uiBytesToSend;
+        -:  875:    uint8_t uiPayload[8];
+        -:  876:
+    #####:  877:    PduInfoPtr.SduDataPtr = uiPayload;
+    #####:  878:    PduInfoPtr.MetaDataPtr = NULL;
+        -:  879:    
+    #####:  880:    if(CanTp_VariablesTX.uiTransmittedBytes == CanTp_VariablesTX.uiMsgLen){
+    #####:  881:        PduR_CanTpTxConfirmation(CanTp_VariablesTX.CanTp_Current_TxId, E_OK);
+    #####:  882:        CanTp_ResetTX();
+        -:  883:    }
+        -:  884:    else{
+    #####:  885:        if(CanTp_VariablesTX.uiMsgLen - CanTp_VariablesTX.uiTransmittedBytes < 7) uiBytesToSend = CanTp_VariablesTX.uiMsgLen - CanTp_VariablesTX.uiTransmittedBytes;
+    #####:  886:        else uiBytesToSend = 7;
+    #####:  887:        PduInfoPtr.SduLength = uiBytesToSend;
+    #####:  888:        BufReqState = PduR_CanTpCopyTxData(CanTp_VariablesTX.CanTp_Current_TxId, &PduInfoPtr, NULL, &PduLen);
+    #####:  889:        if(BufReqState == BUFREQ_OK){
+    #####:  890:            ret = CanTp_SendConsecutiveFrame(CanTp_VariablesTX.CanTp_Current_TxId, CanTp_VariablesTX.uiNxtSN, PduInfoPtr.SduDataPtr, uiBytesToSend);
+    #####:  891:            if( ret == E_OK ){
+    #####:  892:                CanTp_VariablesTX.uiTransmittedBytes = CanTp_VariablesTX.uiTransmittedBytes + uiBytesToSend;
+    #####:  893:                CanTp_VariablesTX.uiFrameNrFC--;
+    #####:  894:                CanTp_VariablesTX.uiNxtSN = (CanTp_VariablesTX.uiNxtSN + 1)%8;
+    #####:  895:                if((CanTp_VariablesTX.uiFrameNrFC == 0) && (CanTp_VariablesTX.uiTransmittedBytes != CanTp_VariablesTX.uiMsgLen))CanTp_VariablesTX.eCanTp_StateTX = CANTP_TX_PROCESSING_SUSPENDED;
+    #####:  896:                else CanTp_VariablesTX.eCanTp_StateTX = CANTP_TX_PROCESSING;        
+        -:  897:            }
+        -:  898:            else{
+    #####:  899:                CanTp_ResetTX();
+        -:  900:            }
+        -:  901:        }
+    #####:  902:        else if(BufReqState == BUFREQ_E_NOT_OK){
+    #####:  903:            PduR_CanTpTxConfirmation(CanTp_VariablesTX.CanTp_Current_TxId, E_NOT_OK);
+    #####:  904:            CanTp_ResetTX();         
+        -:  905:        }
+        -:  906:        else {
+    #####:  907:            CanTp_TimerStart(&N_Cs_timer);
+    #####:  908:            CanTp_VariablesTX.eCanTp_StateTX = CANTP_TX_PROCESSING_SUSPENDED;
+        -:  909:        }
+        -:  910:    }
+    #####:  911:}
+        -:  912:
+        -:  913:/**
+        -:  914:  @brief CanTp_SendConsecutiveFrame
+        -:  915:*/
+    #####:  916:static Std_ReturnType CanTp_SendConsecutiveFrame(PduIdType id, uint8 uiSequenceNumber, uint8* uiPayload, uint32 uiSize){
+        -:  917:    PduInfoType PduInfo;
+        -:  918:    uint8 puiSduData[8];
+        -:  919:    uint8 *puiMetaData;
+    #####:  920:    PduInfo.MetaDataPtr = puiMetaData;
+    #####:  921:    PduInfo.SduDataPtr = puiSduData;
+    #####:  922:    PduInfo.SduLength = uiSize;
+        -:  923:    CanPCI_Type CanPCI;
+        -:  924:
+    #####:  925:    CanPCI.eFrameType = CAN_CF;
+    #####:  926:    CanPCI.uiSequenceNumber = uiSequenceNumber;
+        -:  927:
+    #####:  928:    Std_ReturnType ret = E_OK;
+    #####:  929:    CanTp_PrepareSegmenetedFrame(&CanPCI, &PduInfo, uiPayload);
+    #####:  930:    if(CanIf_Transmit(id , &PduInfo) == E_OK){
+    #####:  931:        CanTp_TimerStart(&N_As_timer);
+    #####:  932:        CanTp_TimerStart(&N_Bs_timer);
+        -:  933:    }
+        -:  934:    else{
+    #####:  935:        PduR_CanTpTxConfirmation(id, E_NOT_OK);
+    #####:  936:        ret = E_NOT_OK;
+        -:  937:    }
+    #####:  938:    return ret;
+        -:  939:}
+        -:  940:
+        -:  941:/**
+        -:  942:  @brief CanTp_SendFlowControl
+        -:  943:*/
+    #####:  944:static Std_ReturnType CanTp_SendFlowControl(PduIdType ID, uint8 uiBlockSize, FlowControlStatus_type FC_Status, uint8 uiSeparationTime ){
+    #####:  945:    Std_ReturnType ret = E_OK;
+        -:  946:    PduInfoType PduInfoPtr;
+        -:  947:    CanPCI_Type CanPCI;
+        -:  948:    uint8 uiPayload[8];
+        -:  949:    uint8 *puiMetaData;
+        -:  950:    uint8 puiSduData[8];
+    #####:  951:    CanPCI.eFrameType = CAN_FC;
+    #####:  952:    CanPCI.uiFlowStatus = FC_Status;
+    #####:  953:    CanPCI.uiBlockSize = uiBlockSize;
+    #####:  954:    CanPCI.uiSeparationTime = uiSeparationTime;
+    #####:  955:    PduInfoPtr.SduLength = 0;
+    #####:  956:    PduInfoPtr.MetaDataPtr = puiMetaData;
+    #####:  957:    PduInfoPtr.SduDataPtr = puiSduData;
+        -:  958:
+    #####:  959:   if(( FC_Status == FC_OVFLW )||
+    #####:  960:      ( FC_Status == FC_WAIT  )||
+        -:  961:      ( FC_Status == FC_CTS   ))
+        -:  962:    {
+    #####:  963:       CanTp_PrepareSegmenetedFrame(&CanPCI, &PduInfoPtr, uiPayload);
+    #####:  964:        ret = CanIf_Transmit(ID, &PduInfoPtr);
+    #####:  965:        if( ret == E_NOT_OK ){
+    #####:  966:            CanTp_ResetRX();
+    #####:  967:            PduR_CanTpRxIndication(ID, E_NOT_OK);
+        -:  968:        }
+        -:  969:        else{
+    #####:  970:            CanTp_TimerStart(&N_Ar_timer);
+    #####:  971:            if(FC_Status == FC_CTS){
+    #####:  972:                CanTp_TimerStart(&N_Cr_timer);
+        -:  973:            }
+    #####:  974:            else if(FC_Status == FC_WAIT){
+    #####:  975:                CanTp_TimerStart(&N_Br_timer);
+        -:  976:            }
+        -:  977:        } 
+        -:  978:    }
+        -:  979:    else{
+    #####:  980:       ret = E_NOT_OK; 
+        -:  981:    }
+    #####:  982:    return ret;
+        -:  983:}
+        -:  984:
+        -:  985:
+        -:  986:/*====================================================================================================================*\
+        -:  987:    Definicje funkcji Timera
+        -:  988:\*====================================================================================================================*/
+        -:  989:
+        -:  990:/*====================================================================================================================*/
+        -:  991:
+        -:  992:/**
+        -:  993:  @brief CanTp_TimerStart
+        -:  994:*/
+    #####:  995:void CanTp_TimerStart(CanTp_Timer_type *pTimer){
+    #####:  996:    pTimer->eState = TIMER_ENABLE;
+    #####:  997:}
+        -:  998:
+        -:  999:/**
+        -: 1000:  @brief CanTp_TimerReset
+        -: 1001:*/
+    #####: 1002:void CanTp_TimerReset(CanTp_Timer_type *pTimer){
+    #####: 1003:    pTimer->eState = TIMER_DISABLE;
+    #####: 1004:    pTimer->uiCounter = 0;
+    #####: 1005:}
+        -: 1006:
+        -: 1007:/**
+        -: 1008:  @brief CanTp_TimerTick
+        -: 1009:*/
+    #####: 1010:Std_ReturnType CanTp_TimerTick(CanTp_Timer_type *pTimer){
+    #####: 1011:    Std_ReturnType ret = E_OK;   
+    #####: 1012:    if(pTimer->eState == TIMER_ENABLE){
+    #####: 1013:        if(pTimer->uiCounter < UINT32_MAX){
+    #####: 1014:            pTimer->uiCounter++;
+        -: 1015:        }
+        -: 1016:        else{
+    #####: 1017:            ret = E_NOT_OK;
+        -: 1018:        }
+        -: 1019:    }
+    #####: 1020:    return ret;
+        -: 1021:}
+        -: 1022:
+        -: 1023:/**
+        -: 1024:  @brief CanTp_TimerTimeout
+        -: 1025:*/
+    #####: 1026:Std_ReturnType CanTp_TimerTimeout(const CanTp_Timer_type *pTimer){
+    #####: 1027:    if(pTimer->uiCounter >= pTimer->uiTimeout){
+    #####: 1028:        return E_NOT_OK;
+        -: 1029:    }
+        -: 1030:    else{
+    #####: 1031:        return E_OK;
+        -: 1032:    }
+        -: 1033:}

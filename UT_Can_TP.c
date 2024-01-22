@@ -311,7 +311,6 @@ void Test_Of_CanTp_CancelTransmit(void){
     TEST_CHECK(CanTp_VariablesTX.CanTp_Current_TxId == 3); 
     TEST_CHECK(CanTp_VariablesTX.uiFrameNrFC == 3);
     TEST_CHECK(CanTp_VariablesTX.uiMsgLen == 87);
-    TEST_CHECK(CanTp_VariablesTX.uiNxtSN = 0);
     TEST_CHECK(CanTp_VariablesTX.uiTransmittedBytes == 45);
     TEST_CHECK(ret == E_NOT_OK);
 
@@ -769,19 +768,19 @@ void Test_Of_CanTp_FrameCheckType(void){
 
 
 TEST_LIST = {
-    // { "Test of CanTp_MainFunction", Test_Of_CanTp_MainFunction },
+    { "Test of CanTp_MainFunction", Test_Of_CanTp_MainFunction },
     { "Test of CanTp_ReadParameter", Test_Of_CanTp_ReadParameter },
-    // { "Test of CanTp_ChangeParameter", Test_Of_CanTp_ChangeParameter },
-    // { "Test of CanTp_FrameCheckType", Test_Of_CanTp_FrameCheckType },
-    // { "Test of CanTp_CalcBlocksSize", Test_Of_CanTp_CalcBlocksSize },
-    // { "Test of CanTp_ResetTX", Test_Of_CanTp_ResetTX },
-    // { "Test of CanTp_ResetRX", Test_Of_CanTp_ResetRX },
-    // { "Test of CanTp_TxConfirmation", Test_Of_CanTp_TxConfirmation },
-    // { "Test of CanTp_CancelReceive", Test_Of_CanTp_CancelReceive },
-    // { "Test of CanTp_CancelTransmit", Test_Of_CanTp_CancelTransmit },
-    // { "Test of CanTp_Transmit", TestOf_CanTp_Transmit },
-    // { "Test of CanTp_Init", Test_Of_CanTp_Init },
-    // { "Test of CanTp_Shutdown", Test_Of_CanTp_Shutdown },
-	  // { "Test of CanTp_GetVersionInfo", Test_Of_CanTp_GetVersionInfo },
+    { "Test of CanTp_ChangeParameter", Test_Of_CanTp_ChangeParameter },
+    { "Test of CanTp_FrameCheckType", Test_Of_CanTp_FrameCheckType },
+    { "Test of CanTp_CalcBlocksSize", Test_Of_CanTp_CalcBlocksSize },
+    { "Test of CanTp_ResetTX", Test_Of_CanTp_ResetTX },
+    { "Test of CanTp_ResetRX", Test_Of_CanTp_ResetRX },
+    { "Test of CanTp_TxConfirmation", Test_Of_CanTp_TxConfirmation },
+    { "Test of CanTp_CancelReceive", Test_Of_CanTp_CancelReceive },
+    { "Test of CanTp_CancelTransmit", Test_Of_CanTp_CancelTransmit },
+    { "Test of CanTp_Transmit", TestOf_CanTp_Transmit },
+    { "Test of CanTp_Init", Test_Of_CanTp_Init },
+    { "Test of CanTp_Shutdown", Test_Of_CanTp_Shutdown },
+	  { "Test of CanTp_GetVersionInfo", Test_Of_CanTp_GetVersionInfo },
     { NULL, NULL }                           
 };
