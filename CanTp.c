@@ -88,8 +88,14 @@ CanTp_VariablesTX_type CanTp_VariablesTX;
 
 CanTp_VariablesRX_type CanTp_VariablesRX;
 
-
-
+CanTp_Timer_type N_Ar_timer =   {TIMER_NOT_ACTIVE, 0, N_AR_TIMEOUT_VAL};
+CanTp_Timer_type N_Br_timer =   {TIMER_NOT_ACTIVE, 0, N_BR_TIMEOUT_VAL};
+CanTp_Timer_type N_Cr_timer =   {TIMER_NOT_ACTIVE, 0, N_CR_TIMEOUT_VAL};
+CanTp_Timer_type N_As_timer =   {TIMER_NOT_ACTIVE, 0, N_AS_TIMEOUT_VAL};
+CanTp_Timer_type N_Bs_timer =   {TIMER_NOT_ACTIVE, 0, N_BS_TIMEOUT_VAL};
+CanTp_Timer_type N_Cs_timer =   {TIMER_NOT_ACTIVE, 0, N_CS_TIMEOUT_VAL};
+CanTp_Timer_type STMmin_timer = {TIMER_NOT_ACTIVE, 0, STMmin_TIMEOUT_VAL};
+uint32 FC_Wait_frame_ctr;
 /*====================================================================================================================*\
     Deklaracje funkcji lokalnych
 \*====================================================================================================================*/
@@ -209,6 +215,7 @@ Std_ReturnType CanTp_Transmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr){
                 else {
                     /* Wypełnia [SWS_CANTP_00204]*/
                     // PduR_CanTpTxConfirmation(TxPduId, E_OK);
+                    CanTp_TimerStart(&N_Cs_timer);
                     ret = E_OK;
                 }
             }
@@ -289,6 +296,94 @@ Std_ReturnType CanTp_CancelReceive(PduIdType RxPduId){
     return ret;
 }
 
+/**
+  @brief CanTp_MainFunction
+  Funkcja odpowiadająca za zarządzaniem modułem CanTp [SWS_CANTP_00213]
+  Wypełnia:
+   [SWS_CANTP_00164]
+   [SWS_CANTP_00300]
+*/
+void CanTp_MainFunction(void){
+    /* Wypełnia [SWS_CANTP_00164]*/
+    static boolean N_Ar_timeout, N_Br_timeout, N_Cr_timeout, N_As_timeout, N_Bs_timeout, N_Cs_timeout, STMmin_timeout;
+    static PduLengthType PduLenght;
+    static const PduInfoType   PduInfoConst = {NULL, NULL, 0};
+    uint16 block_size;
+    uint8 separation_time;
+    BufReq_ReturnType BufReq_State; 
+
+    CanTp_TimerTick(&N_Ar_timer);
+    CanTp_TimerTick(&N_Br_timer);
+    CanTp_TimerTick(&N_Cr_timer);
+
+    CanTp_TimerTick(&N_As_timer);
+    CanTp_TimerTick(&N_Bs_timer);
+    CanTp_TimerTick(&N_Cs_timer);
+
+   if(N_Br_timer.eState == TIMER_ACTIVE){
+       BufReq_State = PduR_CanTpCopyRxData(CanTp_VariablesRX.CanTp_Current_RxId, &PduInfoConst, &PduLenght);
+       if(BufReq_State == BUFREQ_E_NOT_OK){
+           PduR_CanTpRxIndication(CanTp_VariablesRX.CanTp_Current_RxId, E_NOT_OK);
+       }
+       else{
+            block_size = CanTp_Calc_Available_Blocks(PduLenght);
+            if(block_size > 0){
+                CanTp_VariablesRX.blocks_to_next_cts = block_size;
+                CanTp_VariablesRX.CanTp_StateRX = CANTP_RX_PROCESSING;
+                if(CanTp_SendFlowControl(CanTp_VariablesRX.CanTp_Current_RxId, block_size, FC_CTS, separation_time) == E_NOT_OK){            
+                    CanTp_ResetRX();
+                }
+                else{
+                    CanTp_TimerReset(&N_Br_timer); 
+                }  
+            }
+            if(CanTp_TimerTimeout(&N_Br_timer)){
+                FC_Wait_frame_ctr++;
+                N_Br_timer.counter = 0;
+                if(FC_Wait_frame_ctr >= FC_WAIT_FRAME_CTR_MAX){
+                    PduR_CanTpRxIndication (CanTp_VariablesRX.CanTp_Current_RxId, E_NOT_OK);
+                    CanTp_ResetRX();         
+                    FC_Wait_frame_ctr = 0;
+                }
+                else{
+                    if(CanTp_SendFlowControl(CanTp_VariablesRX.CanTp_Current_RxId, block_size, FC_WAIT, separation_time) == E_NOT_OK){
+                        CanTp_ResetRX();
+                    }
+                }
+            }
+        }
+   }
+   if(N_Cr_timer.eState == TIMER_ACTIVE){
+       if(CanTp_TimerTimeout(&N_Cr_timer) == E_NOT_OK){
+            PduR_CanTpRxIndication(CanTp_VariablesRX.CanTp_Current_RxId, E_NOT_OK);
+            CanTp_ResetRX();
+       }
+   }
+   if(N_Ar_timer.eState == TIMER_ACTIVE){
+       if(CanTp_TimerTimeout(&N_Ar_timer) == E_NOT_OK){
+            PduR_CanTpRxIndication(CanTp_VariablesRX.CanTp_Current_RxId, E_NOT_OK);
+            CanTp_ResetRX();
+       }
+   }
+    if(N_Cs_timer.eState == TIMER_ACTIVE){
+       if(CanTp_TimerTimeout(&N_Cs_timer) == E_NOT_OK){
+            PduR_CanTpTxConfirmation(CanTp_VariablesTX.CanTp_Current_TxId, E_NOT_OK);
+            CanTp_ResetTX();
+       }
+   }
+    if(N_As_timer.eState == TIMER_ACTIVE){
+       if(CanTp_TimerTimeout(&N_As_timer) == E_NOT_OK){
+            PduR_CanTpTxConfirmation(CanTp_VariablesTX.CanTp_Current_TxId, E_NOT_OK);
+            CanTp_ResetTX();
+       }
+   }
+    if(N_Bs_timer.eState == TIMER_ACTIVE){
+       if(CanTp_TimerTimeout(&N_Bs_timer) == E_NOT_OK){
+            PduR_CanTpTxConfirmation(CanTp_VariablesTX.CanTp_Current_TxId, E_NOT_OK);
+            CanTp_ResetTX();
+       }
+   }
+} 
 
 /**
   @brief CanTp_RxIndication
@@ -379,7 +474,9 @@ void CanTp_TxConfirmation(PduIdType TxPduId, Std_ReturnType result){
 if( CanTp_State == CANTP_ON ){  
     if(CanTp_VariablesRX.CanTp_Current_RxId == TxPduId){
         if( (CanTp_VariablesRX.CanTp_StateRX == CANTP_RX_PROCESSING ) || (CanTp_VariablesRX.CanTp_StateRX == CANTP_RX_PROCESSING_SUSPEND)){
-            if(result == E_OK){}    
+            if(result == E_OK){
+                CanTp_TimerReset(&N_Ar_timer);   
+            }    
             else{
                 PduR_CanTpRxIndication(CanTp_VariablesRX.CanTp_Current_RxId, E_NOT_OK);
                 CanTp_ResetRX();
@@ -417,6 +514,10 @@ static void CanTp_ResetRX(void){
     CanTp_VariablesRX.sended_bytes = 0;
     CanTp_VariablesRX.blocks_to_next_cts = 0;
     CanTp_VariablesRX.CanTp_Current_RxId = 0;
+
+    CanTp_TimerReset(&N_Ar_timer);
+    CanTp_TimerReset(&N_Br_timer);
+    CanTp_TimerReset(&N_Cr_timer);
 }
 
 static void CanTp_ResetTX(void){
@@ -425,6 +526,10 @@ static void CanTp_ResetTX(void){
     CanTp_VariablesTX.CanTp_StateTX = CANTP_TX_WAIT;
     CanTp_VariablesTX.frame_nr_FC = 0;
     CanTp_VariablesTX.CanTp_Current_TxId = 0;
+
+    CanTp_TimerReset(&N_As_timer);
+    CanTp_TimerReset(&N_Bs_timer);
+    CanTp_TimerReset(&N_Cs_timer);
 }
 
 static Std_ReturnType CanTp_PrepareSegmenetedFrame(CanPCI_Type *CanPCI, PduInfoType *CanPdu_Info, uint8_t *Can_payload){
@@ -531,6 +636,7 @@ static Std_ReturnType CanTp_SendSingleFrame(PduIdType id, uint8* payload, uint32
     CanTp_PrepareSegmenetedFrame(&CanPCI, &PduInfo, payload);
     
     if(CanIf_Transmit(id , &PduInfo) == E_OK ){
+        CanTp_TimerStart(&N_As_timer);
     }
     else{
         PduR_CanTpTxConfirmation(id, E_NOT_OK);
@@ -552,7 +658,10 @@ static Std_ReturnType CanTp_SendFirstFrame(PduIdType id, uint32 message_lenght){
 
     CanTp_PrepareSegmenetedFrame(&CanPCI, &PduInfo, payload);
 
-    if(CanIf_Transmit(id, &PduInfo) == E_OK ){}
+    if(CanIf_Transmit(id, &PduInfo) == E_OK ){
+        CanTp_TimerStart(&N_As_timer);
+        CanTp_TimerStart(&N_Bs_timer);
+    }
     else{
         PduR_CanTpTxConfirmation(id, E_NOT_OK);
         ret = E_NOT_OK;
@@ -677,6 +786,8 @@ static void CanTp_ConsecutiveFrameReception(PduIdType RxPduId, CanPCI_Type *Can_
     PduInfoType Extracted_Data;
     uint16 current_block_size;
 
+    CanTp_TimerReset(&N_Cr_timer);
+
     if(CanTp_VariablesRX.CanTp_Current_RxId ==  RxPduId){
         if(CanTp_VariablesRX.expected_CF_SN == Can_PCI->SN){
             Extracted_Data.SduLength = Can_PCI->frame_lenght;
@@ -694,6 +805,7 @@ static void CanTp_ConsecutiveFrameReception(PduIdType RxPduId, CanPCI_Type *Can_
                     CanTp_VariablesRX.expected_CF_SN%8;
                     current_block_size = CanTp_Calc_Available_Blocks( buffer_size);
                     if(current_block_size > 0){
+                        CanTp_TimerStart(&N_Cr_timer);
                         if(CanTp_VariablesRX.blocks_to_next_cts == 0 ){
                             CanTp_SendFlowControl(CanTp_VariablesRX.CanTp_Current_RxId, current_block_size, FC_CTS, DEFAULT_ST );
                             CanTp_VariablesRX.blocks_to_next_cts = current_block_size;
@@ -730,6 +842,8 @@ static void CanTp_FlowControlReception(PduIdType RxPduId, CanPCI_Type *Can_PCI){
                 CanTp_SendNextCF();
             }   
             else if( Can_PCI->FS == FC_WAIT ){
+                CanTp_TimerReset(&N_Bs_timer);
+                CanTp_TimerStart(&N_Bs_timer);
             }
             else if( Can_PCI->FS == FC_OVFLW){
                 PduR_CanTpTxConfirmation(CanTp_VariablesTX.CanTp_Current_TxId, E_NOT_OK);
@@ -798,6 +912,7 @@ static void CanTp_SendNextCF(void){
             CanTp_ResetTX();         
         }
         else {
+            CanTp_TimerStart(&N_Cs_timer);
             CanTp_VariablesTX.CanTp_StateTX = CANTP_TX_PROCESSING_SUSPENDED;
         }
     }
@@ -818,7 +933,10 @@ static Std_ReturnType CanTp_SendConsecutiveFrame(PduIdType id, uint8 SN, uint8* 
 
     Std_ReturnType ret = E_OK;
     CanTp_PrepareSegmenetedFrame(&CanPCI, &PduInfo, payload);
-    if(CanIf_Transmit(id , &PduInfo) == E_OK){}
+    if(CanIf_Transmit(id , &PduInfo) == E_OK){
+        CanTp_TimerStart(&N_As_timer);
+        CanTp_TimerStart(&N_Bs_timer);
+    }
     else{
         PduR_CanTpTxConfirmation(id, E_NOT_OK);
         ret = E_NOT_OK;
@@ -852,12 +970,55 @@ static Std_ReturnType CanTp_SendFlowControl(PduIdType ID, uint8 BlockSize, FlowC
             PduR_CanTpRxIndication(ID, E_NOT_OK);
         }
         else{
-            if(FC_Status == FC_CTS){}
-            else if(FC_Status == FC_WAIT){}
+            CanTp_TimerStart(&N_Ar_timer);
+            if(FC_Status == FC_CTS){
+                CanTp_TimerStart(&N_Cr_timer);
+            }
+            else if(FC_Status == FC_WAIT){
+                CanTp_TimerStart(&N_Br_timer);
+            }
         } 
     }
     else{
        ret = E_NOT_OK; 
     }
     return ret;
+}
+
+
+/*====================================================================================================================*\
+    Definicje funkcji Timera
+\*====================================================================================================================*/
+
+/*====================================================================================================================*/
+
+void CanTp_TimerStart(CanTp_Timer_type *timer){
+    timer->eState = TIMER_ACTIVE;
+}
+
+void CanTp_TimerReset(CanTp_Timer_type *timer){
+    timer->eState = TIMER_NOT_ACTIVE;
+    timer->counter = 0;
+}
+
+Std_ReturnType CanTp_TimerTick(CanTp_Timer_type *timer){
+    Std_ReturnType ret = E_OK;   
+    if(timer->eState == TIMER_ACTIVE){
+        if(timer->counter < UINT32_MAX){
+            timer->counter++;
+        }
+        else{
+            ret = E_NOT_OK;
+        }
+    }
+    return ret;
+}
+
+Std_ReturnType CanTp_TimerTimeout(const CanTp_Timer_type *timer){
+    if(timer->counter >= timer->timeout){
+        return E_NOT_OK;
+    }
+    else{
+        return E_OK;
+    }
 }
