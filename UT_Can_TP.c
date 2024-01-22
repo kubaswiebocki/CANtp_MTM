@@ -716,6 +716,11 @@ void Test_Of_CanTp_TxConfirmation(void){
                                 TESTY FUNKCJI POMOCNICZYCH
 \*====================================================================================================================*/
 
+/**
+  @brief Test Resetu odbiornika
+
+  Funkcja testująca reset odbiornika.
+*/
 void Test_Of_CanTp_ResetRX(){     
   CanTp_VariablesRX.eCanTp_StateRX == CANTP_RX_PROCESSING;
   CanTp_VariablesRX.uiExpected_CF_SN == 1;
@@ -732,6 +737,11 @@ void Test_Of_CanTp_ResetRX(){
   TEST_CHECK(CanTp_VariablesRX.CanTp_Current_RxId == 0);
 }
 
+/**
+  @brief Test Resetu nadajnika
+
+  Funkcja testująca reset nadajnika.
+*/
 void Test_Of_CanTp_ResetTX(void){
   CanTp_VariablesTX.eCanTp_StateTX = CANTP_TX_PROCESSING;
   CanTp_VariablesTX.uiFrameNrFC = 2;
@@ -746,6 +756,11 @@ void Test_Of_CanTp_ResetTX(void){
   TEST_CHECK(CanTp_VariablesTX.uiTransmittedBytes == 0);
 }
 
+/**
+  @brief Test Wyliczania rozmiarów Blocków
+
+  Funkcja testująca obliczanie rozmiaru blocków.
+*/
 void Test_Of_CanTp_CalcBlocksSize(void){
   CanTp_VariablesRX.uiMsgLen = 8;
   CanTp_VariablesRX.uiTransmittedBytes = 0;
@@ -753,6 +768,11 @@ void Test_Of_CanTp_CalcBlocksSize(void){
   TEST_CHECK(CanTp_CalcBlocksSize(6) == 0);
 }
 
+/**
+  @brief Test sprawdzania typu ramki
+
+  Funkcja testująca sprawdzanie typu ramki
+*/
 void Test_Of_CanTp_FrameCheckType(void){
     uint8 puiSduData[7];
     CanPCI_Type CanFrameInfo;
