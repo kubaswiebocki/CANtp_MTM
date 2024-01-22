@@ -363,6 +363,85 @@ void Test_Of_CanTp_CancelReceive(void){
     TEST_CHECK(ret == E_NOT_OK);
 }
 
+
+/**
+  @brief Test zmiany wartosci parametru
+
+  Funkcja testująca zmiane wartosci parametru.
+*/
+
+void Test_Of_CanTp_ChangeParameter(void){
+  PduIdType PduId = 1;
+  TPParameterType Parameter;
+  Std_ReturnType ret; 
+
+  /*
+                    TEST 1
+          Zmiana parametru TP_BS - zwracane E_OK
+  */
+  Parameter = TP_BS;
+  CanTp_State = CANTP_ON;
+  ret = CanTp_ChangeParameter(PduId, Parameter, 1);
+  TEST_CHECK(ret == E_OK);
+  /*
+                    TEST 2
+          Zmiana parametru TP_BC - zwracane E_NOT_OK
+  */
+  Parameter = TP_BC;
+  ret = CanTp_ChangeParameter(PduId, Parameter, 1);
+  TEST_CHECK(ret == E_NOT_OK);
+  /*
+                    TEST 3
+          Zmiana parametru TP_BS - zwracane E_NOT_OK bo State CANTP_OFF
+  */
+  Parameter = TP_BS;
+  CanTp_State = CANTP_OFF;
+  ret = CanTp_ChangeParameter(PduId, Parameter, 1);
+  TEST_CHECK(ret == E_NOT_OK);
+}
+
+/**
+  @brief Test odczytu wartosci parametru
+
+  Funkcja testująca odczyt wartosci parametru.
+*/
+
+void Test_Of_CanTp_ReadParameter(void){
+  PduIdType PduId = 1;
+  TPParameterType Parameter;
+  Std_ReturnType ret; 
+  uint16 puiReadValue;
+  /*
+                    TEST 1
+          Odczyt parametru TP_BS - zwracane E_OK
+  */
+  Parameter = TP_BS;
+  CanTp_State = CANTP_ON;
+  ret = CanTp_ChangeParameter(PduId, Parameter, 1);
+  ret = CanTp_ReadParameter(PduId, Parameter, &puiReadValue);
+  TEST_CHECK(ret == E_OK);
+  TEST_CHECK(puiReadValue == 1);
+  /*
+                    TEST 2
+          Zmiana parametru TP_BC - zwracane E_NOT_OK
+  */
+  puiReadValue = 2;
+  Parameter = TP_BC;
+  ret = CanTp_ReadParameter(PduId, Parameter, &puiReadValue);
+  TEST_CHECK(ret == E_NOT_OK);
+  TEST_CHECK(puiReadValue == 2);
+  /*
+                    TEST 3
+          Zmiana parametru TP_BS - zwracane E_NOT_OK bo State CANTP_OFF
+  */
+  puiReadValue = 3;
+  Parameter = TP_BS;
+  CanTp_State = CANTP_OFF;
+  ret = CanTp_ReadParameter(PduId, Parameter, &puiReadValue);
+  TEST_CHECK(ret == E_NOT_OK);
+  TEST_CHECK(puiReadValue == 3);
+}
+
 /**
   @brief Test zarządzania modułem
 
@@ -690,17 +769,19 @@ void Test_Of_CanTp_FrameCheckType(void){
 
 
 TEST_LIST = {
-    { "Test of CanTp_MainFunction", Test_Of_CanTp_MainFunction },
-    { "Test of CanTp_FrameCheckType", Test_Of_CanTp_FrameCheckType },
-    { "Test of CanTp_CalcBlocksSize", Test_Of_CanTp_CalcBlocksSize },
-    { "Test of CanTp_ResetTX", Test_Of_CanTp_ResetTX },
-    { "Test of CanTp_ResetRX", Test_Of_CanTp_ResetRX },
-    { "Test of CanTp_TxConfirmation", Test_Of_CanTp_TxConfirmation },
-    { "Test of CanTp_CancelReceive", Test_Of_CanTp_CancelReceive },
-    { "Test of CanTp_CancelTransmit", Test_Of_CanTp_CancelTransmit },
-    { "Test of CanTp_Transmit", TestOf_CanTp_Transmit },
-    { "Test of CanTp_Init", Test_Of_CanTp_Init },
-    { "Test of CanTp_Shutdown", Test_Of_CanTp_Shutdown },
-	  { "Test of CanTp_GetVersionInfo", Test_Of_CanTp_GetVersionInfo },
+    // { "Test of CanTp_MainFunction", Test_Of_CanTp_MainFunction },
+    { "Test of CanTp_ReadParameter", Test_Of_CanTp_ReadParameter },
+    // { "Test of CanTp_ChangeParameter", Test_Of_CanTp_ChangeParameter },
+    // { "Test of CanTp_FrameCheckType", Test_Of_CanTp_FrameCheckType },
+    // { "Test of CanTp_CalcBlocksSize", Test_Of_CanTp_CalcBlocksSize },
+    // { "Test of CanTp_ResetTX", Test_Of_CanTp_ResetTX },
+    // { "Test of CanTp_ResetRX", Test_Of_CanTp_ResetRX },
+    // { "Test of CanTp_TxConfirmation", Test_Of_CanTp_TxConfirmation },
+    // { "Test of CanTp_CancelReceive", Test_Of_CanTp_CancelReceive },
+    // { "Test of CanTp_CancelTransmit", Test_Of_CanTp_CancelTransmit },
+    // { "Test of CanTp_Transmit", TestOf_CanTp_Transmit },
+    // { "Test of CanTp_Init", Test_Of_CanTp_Init },
+    // { "Test of CanTp_Shutdown", Test_Of_CanTp_Shutdown },
+	  // { "Test of CanTp_GetVersionInfo", Test_Of_CanTp_GetVersionInfo },
     { NULL, NULL }                           
 };

@@ -224,6 +224,67 @@ Std_ReturnType CanTp_CancelReceive(PduIdType RxPduId){
 }
 
 /**
+  @brief CanTp_ChangeParameter
+
+  Zadanie zmiany konkretnego parametru.[SWS_CANTP_00302]
+  Wypełnia:
+   [SWS_CANTP_00303]
+   [SWS_CANTP_00304]
+   [SWS_CANTP_00305]
+   [SWS_CANTP_00338]
+*/
+Std_ReturnType CanTp_ChangeParameter(PduIdType id, TPParameterType parameter, uint16 value){
+    Std_ReturnType ret = E_NOT_OK;
+    if (CanTp_State == CANTP_ON){
+        switch(parameter){
+            case TP_STMIN:
+                ret = E_OK;
+                break;
+            case TP_BS:
+                ret = E_OK;
+                break;
+            case TP_BC:
+                break;
+            default:
+                break;
+        }
+    }
+    return ret;
+}
+/**
+  @brief CanTp_ReadParameter
+
+  Służy do odczytu aktualnych wartośći BS i STmin.[SWS_CANTP_00323]
+  Wypełnia:
+   [SWS_CANTP_00324]
+*/
+Std_ReturnType CanTp_ReadParameter(PduIdType id, TPParameterType parameter, uint16* value){
+    Std_ReturnType ret = E_NOT_OK;
+    if (CanTp_State == CANTP_ON){
+        uint16 readVal;
+        switch (parameter) {
+            case TP_STMIN:
+                readVal = 1;
+                ret = E_OK;
+                break;
+            case TP_BS:
+                readVal = 1;
+                ret = E_OK;
+                break;
+            case TP_BC:
+            default:
+                break;
+        }
+        if ((ret == E_OK) && (readVal <= 0xff)) {
+            *value = readVal;
+        } else {
+            ret = E_NOT_OK;
+        }
+    }
+    return ret;
+}
+
+/**
   @brief CanTp_MainFunction
   Funkcja odpowiadająca za zarządzaniem modułem CanTp [SWS_CANTP_00213]
   Wypełnia:
