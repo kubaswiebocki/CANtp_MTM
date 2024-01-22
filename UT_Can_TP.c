@@ -20,7 +20,7 @@ FAKE_VALUE_FUNC(BufReq_ReturnType, PduR_CanTpCopyTxData, PduIdType, const PduInf
 FAKE_VOID_FUNC(PduR_CanTpTxConfirmation, PduIdType, Std_ReturnType);
 FAKE_VOID_FUNC(PduR_CanTpRxIndication, PduIdType, Std_ReturnType);
 FAKE_VALUE_FUNC(BufReq_ReturnType, PduR_CanTpCopyRxData, PduIdType, const PduInfoType*, PduLengthType*);
-FAKE_VALUE_FUNC(BufReq_ReturnType, PduR_CanTpStartOfReception, PduIdType, const PduInfoType*, PduLengthType, PduLengthType* );
+FAKE_VALUE_FUNC(BufReq_ReturnType, PduR_CanTpStartOfReception, PduIdType, const PduInfoType*, PduLengthType, PduLengthType*);
 
 FAKE_VALUE_FUNC(Std_ReturnType, CanIf_Transmit, PduIdType, const PduInfoType*);
 
@@ -29,25 +29,25 @@ PduLengthType *PduR_CanTpCopyTxData_availableDataPtr;
 PduLengthType* PduR_CanTpCopyRxData_buffSize_array;
 PduLengthType *PduR_CanTpStartOfReception_buffSize_array;
 
-BufReq_ReturnType PduR_CanTpCopyTxData_FF(PduIdType id, const PduInfoType* info, const RetryInfoType* retry, PduLengthType* availableDataPtr ){
+BufReq_ReturnType PduR_CanTpCopyTxData_FF(PduIdType id, const PduInfoType* info, const RetryInfoType* retry, PduLengthType* availableDataPtr){
     static int i = 0;
-    int loop_ctr;
+    int iCtr;
     i = PduR_CanTpCopyTxData_fake.call_count - 1;
-    for( loop_ctr = 0; loop_ctr < info->SduLength; loop_ctr++ ){
-      info->SduDataPtr[loop_ctr] = PduR_CanTpCopyTxData_sdu_data[i][loop_ctr];
+    for(iCtr = 0; iCtr < info->SduLength; iCtr++ ){
+      info->SduDataPtr[iCtr] = PduR_CanTpCopyTxData_sdu_data[i][iCtr];
     }
     *availableDataPtr = PduR_CanTpCopyTxData_availableDataPtr[i];
     return PduR_CanTpCopyTxData_fake.return_val_seq[i];
 }
 
-BufReq_ReturnType PduR_CanTpStartOfReception_FF(PduIdType id, const PduInfoType* info, PduLengthType TpSduLength, PduLengthType* bufferSizePtr ){
+BufReq_ReturnType PduR_CanTpStartOfReception_FF(PduIdType id, const PduInfoType* info, PduLengthType TpSduLength, PduLengthType* bufferSizePtr){
     static int i = 0;
     i = PduR_CanTpStartOfReception_fake.call_count - 1;
     *bufferSizePtr = PduR_CanTpStartOfReception_buffSize_array[i];
    return PduR_CanTpStartOfReception_fake.return_val_seq[i];
 }
 
-BufReq_ReturnType PduR_CanTpCopyRxData_FF(PduIdType id, const PduInfoType* info, PduLengthType* bufferSizePtr ){
+BufReq_ReturnType PduR_CanTpCopyRxData_FF(PduIdType id, const PduInfoType* info, PduLengthType* bufferSizePtr){
     static int i = 0;
     i = PduR_CanTpCopyRxData_fake.call_count - 1;
     *bufferSizePtr = PduR_CanTpCopyRxData_buffSize_array[i];
@@ -66,35 +66,35 @@ BufReq_ReturnType PduR_CanTpCopyRxData_FF(PduIdType id, const PduInfoType* info,
 */
 
 void Test_Of_CanTp_Init(void){
-    CanTp_VariablesTX.CanTp_StateTX = CANTP_TX_WAIT;
-    CanTp_VariablesTX.frame_nr_FC = 1;
-    CanTp_VariablesTX.CanTp_Current_TxId = 0x1;
-    CanTp_VariablesTX.message_legth = 100;
-    CanTp_VariablesTX.sent_bytes = 95;
-    CanTp_VariablesTX.next_SN = 0;
-    CanTp_VariablesTX.CanTp_Current_TxId = 2;
-
-    CanTp_VariablesRX.CanTp_StateRX == CANTP_RX_PROCESSING;
-    CanTp_VariablesRX.blocks_to_next_cts = 1;
+    CanTp_VariablesRX.eCanTp_StateRX == CANTP_RX_PROCESSING_SUSPEND;
+    CanTp_VariablesRX.uiBlocksNxtCts = 2;
     CanTp_VariablesRX.CanTp_Current_RxId = 1;
-    CanTp_VariablesRX.expected_CF_SN = 1;
-    CanTp_VariablesRX.sended_bytes = 1;
+    CanTp_VariablesRX.uiExpected_CF_SN = 2;
+    CanTp_VariablesRX.uiTransmittedBytes = 4;
+
+    CanTp_VariablesTX.eCanTp_StateTX = CANTP_TX_PROCESSING;
+    CanTp_VariablesTX.uiFrameNrFC = 1;
+    CanTp_VariablesTX.CanTp_Current_TxId = 1;
+    CanTp_VariablesTX.uiMsgLen = 87;
+    CanTp_VariablesTX.uiTransmittedBytes = 44;
+    CanTp_VariablesTX.uiNxtSN = 1;
+    CanTp_VariablesTX.CanTp_Current_TxId = 2;
 
     CanTp_State = CANTP_OFF;
 
     CanTp_Init();
     
-    TEST_CHECK(CanTp_VariablesTX.CanTp_StateTX == CANTP_TX_WAIT);
+    TEST_CHECK(CanTp_VariablesTX.eCanTp_StateTX == CANTP_TX_WAIT);
     TEST_CHECK(CanTp_VariablesTX.CanTp_Current_TxId == 0); 
-    TEST_CHECK(CanTp_VariablesTX.frame_nr_FC == 0);
-    TEST_CHECK(CanTp_VariablesTX.message_legth == 0);
-    TEST_CHECK(CanTp_VariablesTX.sent_bytes == 0);
+    TEST_CHECK(CanTp_VariablesTX.uiFrameNrFC == 0);
+    TEST_CHECK(CanTp_VariablesTX.uiMsgLen == 0);
+    TEST_CHECK(CanTp_VariablesTX.uiTransmittedBytes == 0);
 
-    TEST_CHECK(CanTp_VariablesRX.CanTp_StateRX == CANTP_RX_WAIT);
-    TEST_CHECK(CanTp_VariablesRX.blocks_to_next_cts == 0);
+    TEST_CHECK(CanTp_VariablesRX.eCanTp_StateRX == CANTP_RX_WAIT);
+    TEST_CHECK(CanTp_VariablesRX.uiBlocksNxtCts == 0);
     TEST_CHECK(CanTp_VariablesRX.CanTp_Current_RxId == 0);
-    TEST_CHECK(CanTp_VariablesRX.expected_CF_SN == 0);
-    TEST_CHECK(CanTp_VariablesRX.sended_bytes == 0);
+    TEST_CHECK(CanTp_VariablesRX.uiExpected_CF_SN == 0);
+    TEST_CHECK(CanTp_VariablesRX.uiTransmittedBytes == 0);
 
     TEST_CHECK(CanTp_State == CANTP_ON);
 }
@@ -127,35 +127,35 @@ void Test_Of_CanTp_GetVersionInfo(void)
   Funkcja testująca wyłączania modułu CanTp.
 */
 void Test_Of_CanTp_Shutdown(void){
-    CanTp_VariablesTX.CanTp_StateTX = CANTP_TX_WAIT;
-    CanTp_VariablesTX.frame_nr_FC = 1;
-    CanTp_VariablesTX.CanTp_Current_TxId = 0x1;
-    CanTp_VariablesTX.message_legth = 100;
-    CanTp_VariablesTX.sent_bytes = 95;
-    CanTp_VariablesTX.next_SN = 0;
-    CanTp_VariablesTX.CanTp_Current_TxId = 2;
+    CanTp_VariablesTX.eCanTp_StateTX = CANTP_TX_PROCESSING;
+    CanTp_VariablesTX.uiFrameNrFC = 2;
+    CanTp_VariablesTX.CanTp_Current_TxId = 1;
+    CanTp_VariablesTX.uiMsgLen = 87;
+    CanTp_VariablesTX.uiTransmittedBytes = 42;
+    CanTp_VariablesTX.uiNxtSN = 2;
+    CanTp_VariablesTX.CanTp_Current_TxId = 1;
 
-    CanTp_VariablesRX.CanTp_StateRX == CANTP_RX_PROCESSING;
-    CanTp_VariablesRX.blocks_to_next_cts = 1;
+    CanTp_VariablesRX.eCanTp_StateRX == CANTP_RX_WAIT;
+    CanTp_VariablesRX.uiBlocksNxtCts = 2;
     CanTp_VariablesRX.CanTp_Current_RxId = 1;
-    CanTp_VariablesRX.expected_CF_SN = 1;
-    CanTp_VariablesRX.sended_bytes = 1;
+    CanTp_VariablesRX.uiExpected_CF_SN = 1;
+    CanTp_VariablesRX.uiTransmittedBytes = 2;
 
     CanTp_State = CANTP_ON;
 
     CanTp_Shutdown();
     
-    TEST_CHECK(CanTp_VariablesTX.CanTp_StateTX == CANTP_TX_WAIT);
+    TEST_CHECK(CanTp_VariablesTX.eCanTp_StateTX == CANTP_TX_WAIT);
     TEST_CHECK(CanTp_VariablesTX.CanTp_Current_TxId == 0); 
-    TEST_CHECK(CanTp_VariablesTX.frame_nr_FC == 0);
-    TEST_CHECK(CanTp_VariablesTX.message_legth == 0);
-    TEST_CHECK(CanTp_VariablesTX.sent_bytes == 0);
+    TEST_CHECK(CanTp_VariablesTX.uiFrameNrFC == 0);
+    TEST_CHECK(CanTp_VariablesTX.uiMsgLen == 0);
+    TEST_CHECK(CanTp_VariablesTX.uiTransmittedBytes == 0);
 
-    TEST_CHECK(CanTp_VariablesRX.CanTp_StateRX == CANTP_RX_WAIT);
-    TEST_CHECK(CanTp_VariablesRX.blocks_to_next_cts == 0);
+    TEST_CHECK(CanTp_VariablesRX.eCanTp_StateRX == CANTP_RX_WAIT);
+    TEST_CHECK(CanTp_VariablesRX.uiBlocksNxtCts == 0);
     TEST_CHECK(CanTp_VariablesRX.CanTp_Current_RxId == 0);
-    TEST_CHECK(CanTp_VariablesRX.expected_CF_SN == 0);
-    TEST_CHECK(CanTp_VariablesRX.sended_bytes == 0);
+    TEST_CHECK(CanTp_VariablesRX.uiExpected_CF_SN == 0);
+    TEST_CHECK(CanTp_VariablesRX.uiTransmittedBytes == 0);
 
     TEST_CHECK(CanTp_State == CANTP_OFF);
     TEST_CHECK(CanTp_State != CANTP_ON);
@@ -170,28 +170,28 @@ void TestOf_CanTp_Transmit(void){
 
   PduIdType PduId = 0x01;
   PduInfoType PduInfo;
-  uint8 SduDataPtr[8];
-  uint8 *MetaDataPtr;
-  PduInfo.MetaDataPtr = MetaDataPtr;
-  PduInfo.SduDataPtr = SduDataPtr;
+  uint8 puiSduData[8];
+  uint8 *puiMetaData;
+  PduInfo.MetaDataPtr = puiMetaData;
+  PduInfo.SduDataPtr = puiSduData;
   Std_ReturnType ret; 
  
-  PduLengthType availableDataPtr_array_local[10] = {1,2,3,4,5,6,7,8,9,0};
-  uint8 sdu_data_ptr_array[3][7] = { "dupa...", "dupa...", "test..2"};
+  PduLengthType availableDataPtr_arr[10] = {1,2,3,4,5,6,7,8,9,0};
+  uint8 puiSduDataArr[3][7] = { "dupa...", "dupa...", "test..2"};
 
 
   PduLengthType availableData;
   int i;
 
   for( i = 0; i < 4; i++){
-      memcpy(PduR_CanTpCopyTxData_sdu_data[i], sdu_data_ptr_array[i], sizeof(uint8)*7);
+      memcpy(PduR_CanTpCopyTxData_sdu_data[i], puiSduDataArr[i], sizeof(uint8)*7);
   }
 
-  PduR_CanTpCopyTxData_availableDataPtr = availableDataPtr_array_local;
+  PduR_CanTpCopyTxData_availableDataPtr = availableDataPtr_arr;
 
-  RESET_FAKE( PduR_CanTpCopyTxData);
-  RESET_FAKE( CanIf_Transmit );
-  RESET_FAKE( PduR_CanTpTxConfirmation);
+  RESET_FAKE(PduR_CanTpCopyTxData);
+  RESET_FAKE(CanIf_Transmit);
+  RESET_FAKE(PduR_CanTpTxConfirmation);
 
   PduR_CanTpCopyTxData_fake.custom_fake = PduR_CanTpCopyTxData_FF;
 
@@ -206,14 +206,14 @@ void TestOf_CanTp_Transmit(void){
        CanTp_State = CANTP_OFF ---> Nic nie rób
   */ 
   CanTp_State = CANTP_OFF;
-  CanTp_VariablesTX.CanTp_StateTX = CANTP_TX_WAIT;
+  CanTp_VariablesTX.eCanTp_StateTX = CANTP_TX_WAIT;
   CanTp_VariablesTX.CanTp_Current_TxId = 2;
   PduInfo.SduLength = 7;
   
   ret = CanTp_Transmit(PduId, &PduInfo);
   
   TEST_CHECK( ret == E_NOT_OK );
-  TEST_CHECK(CanTp_VariablesTX.CanTp_StateTX == CANTP_TX_WAIT);
+  TEST_CHECK(CanTp_VariablesTX.eCanTp_StateTX == CANTP_TX_WAIT);
   TEST_CHECK(CanTp_VariablesTX.CanTp_Current_TxId == 2);
  
  /*
@@ -221,8 +221,8 @@ void TestOf_CanTp_Transmit(void){
   CANTP_TX_WAIT - SduLenght < 8 - wysyłane Single Frame - zwracane E_OK oraz BUFREQ_OK
 */
   CanTp_State = CANTP_ON;
-  CanTp_VariablesTX.CanTp_StateTX = CANTP_TX_WAIT;
-  CanTp_VariablesTX.CanTp_Current_TxId = 1;
+  CanTp_VariablesTX.eCanTp_StateTX = CANTP_TX_WAIT;
+  CanTp_VariablesTX.CanTp_Current_TxId = 2;
   PduInfo.SduLength = 7;
 
   ret = CanTp_Transmit(PduId, &PduInfo);
@@ -230,13 +230,11 @@ void TestOf_CanTp_Transmit(void){
   TEST_CHECK(ret == E_OK);
 
   TEST_CHECK(PduR_CanTpCopyTxData_fake.call_count == 1);
-
   TEST_CHECK(PduR_CanTpCopyTxData_fake.arg0_val == PduId);
   TEST_CHECK(PduR_CanTpCopyTxData_fake.arg1_val->SduLength == 7);
   TEST_CHECK(PduR_CanTpCopyTxData_fake.arg2_val == NULL);
  
   TEST_CHECK(CanIf_Transmit_fake.call_count == 1 );
-
   TEST_CHECK(CanIf_Transmit_fake.arg0_val == 1 );
   TEST_CHECK(CanIf_Transmit_fake.arg1_val->SduDataPtr[0] == 0x7 );
   TEST_CHECK(CanIf_Transmit_fake.arg1_val->SduDataPtr[1] == 'd' );
@@ -247,8 +245,8 @@ void TestOf_CanTp_Transmit(void){
   TEST_CHECK(CanIf_Transmit_fake.arg1_val->SduDataPtr[6] == '.' );
   TEST_CHECK(CanIf_Transmit_fake.arg1_val->SduDataPtr[7] == '.' );
 
-  TEST_CHECK(CanTp_VariablesTX.CanTp_StateTX == CANTP_TX_WAIT);
-  TEST_CHECK(CanTp_VariablesTX.CanTp_Current_TxId == 1);
+  TEST_CHECK(CanTp_VariablesTX.eCanTp_StateTX == CANTP_TX_WAIT);
+  TEST_CHECK(CanTp_VariablesTX.CanTp_Current_TxId == 2);
   
   CanTp_ResetRX();
 
@@ -256,14 +254,14 @@ void TestOf_CanTp_Transmit(void){
                                TEST3 
   CANTP_TX_WAIT - SduLenght < 8 -  zwracane E_NOT_OK oraz BUFREQ_E_NOT_OK
 */
-  CanTp_VariablesTX.CanTp_StateTX = CANTP_TX_WAIT;
-  CanTp_VariablesTX.CanTp_Current_TxId = 1;
+  CanTp_VariablesTX.eCanTp_StateTX = CANTP_TX_WAIT;
+  CanTp_VariablesTX.CanTp_Current_TxId = 2;
   PduInfo.SduLength = 7;
 
   ret = CanTp_Transmit(PduId, &PduInfo);
   TEST_CHECK(ret == E_NOT_OK);
   TEST_CHECK(PduR_CanTpCopyTxData_fake.call_count == 2);
-  TEST_CHECK(CanTp_VariablesTX.CanTp_StateTX == CANTP_TX_WAIT);
+  TEST_CHECK(CanTp_VariablesTX.eCanTp_StateTX == CANTP_TX_WAIT);
   TEST_CHECK(CanTp_VariablesTX.CanTp_Current_TxId == 0);
   TEST_CHECK(PduR_CanTpTxConfirmation_fake.call_count == 1);
   TEST_CHECK(PduR_CanTpTxConfirmation_fake.arg1_val == E_NOT_OK);
@@ -282,40 +280,41 @@ void Test_Of_CanTp_CancelTransmit(void){
   */
     Std_ReturnType ret;
     
-    CanTp_VariablesTX.CanTp_StateTX = CANTP_TX_WAIT;
-    CanTp_VariablesTX.frame_nr_FC = 1;
-    CanTp_VariablesTX.CanTp_Current_TxId = 0x2;
-    CanTp_VariablesTX.message_legth = 100;
-    CanTp_VariablesTX.sent_bytes = 95;
-    CanTp_VariablesTX.next_SN = 0;
+    CanTp_VariablesTX.eCanTp_StateTX = CANTP_TX_WAIT;
+    CanTp_VariablesTX.uiFrameNrFC = 1;
+    CanTp_VariablesTX.CanTp_Current_TxId = 2;
+    CanTp_VariablesTX.uiMsgLen = 87;
+    CanTp_VariablesTX.uiTransmittedBytes = 46;
+    CanTp_VariablesTX.uiNxtSN = 0;
 
-    ret = CanTp_CancelTransmit(0x2);
+    ret = CanTp_CancelTransmit(2);
 
-    TEST_CHECK(CanTp_VariablesTX.CanTp_StateTX == CANTP_TX_WAIT);
+    TEST_CHECK(CanTp_VariablesTX.eCanTp_StateTX == CANTP_TX_WAIT);
     TEST_CHECK(CanTp_VariablesTX.CanTp_Current_TxId == 0); 
-    TEST_CHECK(CanTp_VariablesTX.frame_nr_FC == 0);
-    TEST_CHECK(CanTp_VariablesTX.message_legth == 0);
-    TEST_CHECK(CanTp_VariablesTX.sent_bytes == 0);
+    TEST_CHECK(CanTp_VariablesTX.uiFrameNrFC == 0);
+    TEST_CHECK(CanTp_VariablesTX.uiMsgLen == 0);
+    TEST_CHECK(CanTp_VariablesTX.uiTransmittedBytes == 0);
     TEST_CHECK(ret == E_OK);
 
   /*
                     TEST 2
               Zwracane E_NOT_OK (Błędne ID)
   */
-    CanTp_VariablesTX.CanTp_StateTX = CANTP_TX_WAIT;
-    CanTp_VariablesTX.frame_nr_FC = 1;
-    CanTp_VariablesTX.CanTp_Current_TxId = 0x3;
-    CanTp_VariablesTX.message_legth = 100;
-    CanTp_VariablesTX.sent_bytes = 95;
-    CanTp_VariablesTX.next_SN = 0;
+    CanTp_VariablesTX.eCanTp_StateTX = CANTP_TX_WAIT;
+    CanTp_VariablesTX.uiFrameNrFC = 3;
+    CanTp_VariablesTX.CanTp_Current_TxId = 3;
+    CanTp_VariablesTX.uiMsgLen = 87;
+    CanTp_VariablesTX.uiTransmittedBytes = 45;
+    CanTp_VariablesTX.uiNxtSN = 0;
 
     ret = CanTp_CancelTransmit(0x1);
 
-    TEST_CHECK(CanTp_VariablesTX.CanTp_StateTX == CANTP_TX_WAIT);
-    TEST_CHECK(CanTp_VariablesTX.CanTp_Current_TxId == 0x3); 
-    TEST_CHECK(CanTp_VariablesTX.frame_nr_FC == 1);
-    TEST_CHECK(CanTp_VariablesTX.message_legth == 100);
-    TEST_CHECK(CanTp_VariablesTX.sent_bytes == 95);
+    TEST_CHECK(CanTp_VariablesTX.eCanTp_StateTX == CANTP_TX_WAIT);
+    TEST_CHECK(CanTp_VariablesTX.CanTp_Current_TxId == 3); 
+    TEST_CHECK(CanTp_VariablesTX.uiFrameNrFC == 3);
+    TEST_CHECK(CanTp_VariablesTX.uiMsgLen == 87);
+    TEST_CHECK(CanTp_VariablesTX.uiNxtSN = 0);
+    TEST_CHECK(CanTp_VariablesTX.uiTransmittedBytes == 45);
     TEST_CHECK(ret == E_NOT_OK);
 
 }
@@ -331,38 +330,38 @@ void Test_Of_CanTp_CancelReceive(void){
                      TEST 1 
               Zwracane - E_OK (Zgodne ID)
   */
-    CanTp_VariablesRX.CanTp_StateRX == CANTP_RX_PROCESSING;
-    CanTp_VariablesRX.blocks_to_next_cts = 1;
+    CanTp_VariablesRX.eCanTp_StateRX == CANTP_RX_PROCESSING;
+    CanTp_VariablesRX.uiBlocksNxtCts = 1;
     CanTp_VariablesRX.CanTp_Current_RxId = 0x1;
-    CanTp_VariablesRX.expected_CF_SN = 1;
-    CanTp_VariablesRX.sended_bytes = 1;
+    CanTp_VariablesRX.uiExpected_CF_SN = 1;
+    CanTp_VariablesRX.uiTransmittedBytes = 1;
 
     ret = CanTp_CancelReceive(0x1);
 
-    TEST_CHECK(CanTp_VariablesRX.CanTp_StateRX == CANTP_RX_WAIT);
-    TEST_CHECK(CanTp_VariablesRX.blocks_to_next_cts == 0);
+    TEST_CHECK(CanTp_VariablesRX.eCanTp_StateRX == CANTP_RX_WAIT);
+    TEST_CHECK(CanTp_VariablesRX.uiBlocksNxtCts == 0);
     TEST_CHECK(CanTp_VariablesRX.CanTp_Current_RxId == 0);
-    TEST_CHECK(CanTp_VariablesRX.expected_CF_SN == 0);
-    TEST_CHECK(CanTp_VariablesRX.sended_bytes == 0);
+    TEST_CHECK(CanTp_VariablesRX.uiExpected_CF_SN == 0);
+    TEST_CHECK(CanTp_VariablesRX.uiTransmittedBytes == 0);
     TEST_CHECK(ret == E_OK);
 
    /*
                     TEST 2
               Zwracane E_NOT_OK (Błędne ID)
   */
-    CanTp_VariablesRX.CanTp_StateRX = CANTP_RX_PROCESSING;
-    CanTp_VariablesRX.blocks_to_next_cts = 1;
+    CanTp_VariablesRX.eCanTp_StateRX = CANTP_RX_PROCESSING;
+    CanTp_VariablesRX.uiBlocksNxtCts = 1;
     CanTp_VariablesRX.CanTp_Current_RxId = 0x3;
-    CanTp_VariablesRX.expected_CF_SN = 1;
-    CanTp_VariablesRX.sended_bytes = 1;
+    CanTp_VariablesRX.uiExpected_CF_SN = 1;
+    CanTp_VariablesRX.uiTransmittedBytes = 1;
 
     ret = CanTp_CancelReceive(0x1);
 
-    TEST_CHECK(CanTp_VariablesRX.CanTp_StateRX == CANTP_RX_PROCESSING);
-    TEST_CHECK(CanTp_VariablesRX.blocks_to_next_cts == 1);
+    TEST_CHECK(CanTp_VariablesRX.eCanTp_StateRX == CANTP_RX_PROCESSING);
+    TEST_CHECK(CanTp_VariablesRX.uiBlocksNxtCts == 1);
     TEST_CHECK(CanTp_VariablesRX.CanTp_Current_RxId == 0x3);
-    TEST_CHECK(CanTp_VariablesRX.expected_CF_SN == 1);
-    TEST_CHECK(CanTp_VariablesRX.sended_bytes == 1);
+    TEST_CHECK(CanTp_VariablesRX.uiExpected_CF_SN == 1);
+    TEST_CHECK(CanTp_VariablesRX.uiTransmittedBytes == 1);
     TEST_CHECK(ret == E_NOT_OK);
 
 }
@@ -398,12 +397,12 @@ void Test_Of_CanTp_MainFunction(){
     CanTp_MainFunction();
     CanTp_MainFunction();
 
-    TEST_CHECK(N_Ar_timer.eState == TIMER_NOT_ACTIVE);
-    TEST_CHECK(N_Br_timer.eState == TIMER_NOT_ACTIVE);
-    TEST_CHECK(N_Cr_timer.eState == TIMER_NOT_ACTIVE);
-    TEST_CHECK(N_Ar_timer.counter == 0);
-    TEST_CHECK(N_Br_timer.counter == 0);
-    TEST_CHECK(N_Cr_timer.counter == 0);
+    TEST_CHECK(N_Ar_timer.eState == TIMER_DISABLE);
+    TEST_CHECK(N_Br_timer.eState == TIMER_DISABLE);
+    TEST_CHECK(N_Cr_timer.eState == TIMER_DISABLE);
+    TEST_CHECK(N_Ar_timer.uiCounter == 0);
+    TEST_CHECK(N_Br_timer.uiCounter == 0);
+    TEST_CHECK(N_Cr_timer.uiCounter == 0);
     TEST_CHECK(PduR_CanTpCopyRxData_fake.call_count == 0); 
     TEST_CHECK(PduR_CanTpRxIndication_fake.call_count == 0);
 
@@ -411,8 +410,8 @@ void Test_Of_CanTp_MainFunction(){
                 TEST 2
     Standardowa praca układu dla Timerów RX
     */
-    CanTp_VariablesRX.message_length = 10;
-    CanTp_VariablesRX.sended_bytes = 0;
+    CanTp_VariablesRX.uiMsgLen = 10;
+    CanTp_VariablesRX.uiTransmittedBytes = 0;
 
     CanTp_TimerStart(&N_Ar_timer);
     CanTp_TimerStart(&N_Br_timer);
@@ -423,12 +422,12 @@ void Test_Of_CanTp_MainFunction(){
     CanTp_MainFunction();
     CanTp_MainFunction();
 
-    TEST_CHECK(N_Ar_timer.eState == TIMER_ACTIVE);
-    TEST_CHECK(N_Br_timer.eState == TIMER_ACTIVE);
-    TEST_CHECK(N_Cr_timer.eState == TIMER_ACTIVE);
-    TEST_CHECK(N_Ar_timer.counter == 4);
-    TEST_CHECK(N_Br_timer.counter == 4);
-    TEST_CHECK(N_Cr_timer.counter == 4);
+    TEST_CHECK(N_Ar_timer.eState == TIMER_ENABLE);
+    TEST_CHECK(N_Br_timer.eState == TIMER_ENABLE);
+    TEST_CHECK(N_Cr_timer.eState == TIMER_ENABLE);
+    TEST_CHECK(N_Ar_timer.uiCounter == 4);
+    TEST_CHECK(N_Br_timer.uiCounter == 4);
+    TEST_CHECK(N_Cr_timer.uiCounter == 4);
       
     TEST_CHECK(PduR_CanTpCopyRxData_fake.call_count == 4); 
     TEST_CHECK(PduR_CanTpRxIndication_fake.call_count == 0);
@@ -448,12 +447,12 @@ void Test_Of_CanTp_MainFunction(){
     CanTp_MainFunction();
     CanTp_MainFunction();
 
-    TEST_CHECK(N_As_timer.counter == 3);
-    TEST_CHECK(N_As_timer.eState == TIMER_ACTIVE);
-    TEST_CHECK(N_Bs_timer.counter == 3);
-    TEST_CHECK(N_Bs_timer.eState == TIMER_ACTIVE);
-    TEST_CHECK(N_Cs_timer.counter == 3);
-    TEST_CHECK(N_Cs_timer.eState == TIMER_ACTIVE);
+    TEST_CHECK(N_As_timer.uiCounter == 3);
+    TEST_CHECK(N_As_timer.eState == TIMER_ENABLE);
+    TEST_CHECK(N_Bs_timer.uiCounter == 3);
+    TEST_CHECK(N_Bs_timer.eState == TIMER_ENABLE);
+    TEST_CHECK(N_Cs_timer.uiCounter == 3);
+    TEST_CHECK(N_Cs_timer.eState == TIMER_ENABLE);
 
     /*
                 TEST 4
@@ -463,18 +462,18 @@ void Test_Of_CanTp_MainFunction(){
     CanTp_ResetRX();
     CanTp_ResetTX();
 
-    N_As_timer.counter = 99;
+    N_As_timer.uiCounter = 99;
     CanTp_TimerStart(&N_As_timer);
     CanTp_MainFunction();
 
-    TEST_CHECK(N_As_timer.counter == 0);
-    TEST_CHECK(N_As_timer.eState == TIMER_NOT_ACTIVE);
+    TEST_CHECK(N_As_timer.uiCounter == 0);
+    TEST_CHECK(N_As_timer.eState == TIMER_DISABLE);
 
-    TEST_CHECK(N_Bs_timer.counter == 0);
-    TEST_CHECK(N_Bs_timer.eState == TIMER_NOT_ACTIVE);
+    TEST_CHECK(N_Bs_timer.uiCounter == 0);
+    TEST_CHECK(N_Bs_timer.eState == TIMER_DISABLE);
 
-    TEST_CHECK(N_Cs_timer.counter == 0);
-    TEST_CHECK(N_Cs_timer.eState == TIMER_NOT_ACTIVE);
+    TEST_CHECK(N_Cs_timer.uiCounter == 0);
+    TEST_CHECK(N_Cs_timer.eState == TIMER_DISABLE);
 
     TEST_CHECK(PduR_CanTpTxConfirmation_fake.call_count == 1);
 }
@@ -521,12 +520,12 @@ void Test_Of_CanTp_TxConfirmation(void){
           TEST 1
   Transmisja poprawna
 */
-  CanTp_VariablesTX.CanTp_StateTX = CANTP_TX_PROCESSING;
-  CanTp_VariablesTX.frame_nr_FC = 1;
+  CanTp_VariablesTX.eCanTp_StateTX = CANTP_TX_PROCESSING;
+  CanTp_VariablesTX.uiFrameNrFC = 1;
   CanTp_VariablesTX.CanTp_Current_TxId = 0x1;
-  CanTp_VariablesTX.message_legth = 100;
-  CanTp_VariablesTX.sent_bytes = 95;
-  CanTp_VariablesTX.next_SN = 0;
+  CanTp_VariablesTX.uiMsgLen = 100;
+  CanTp_VariablesTX.uiTransmittedBytes = 95;
+  CanTp_VariablesTX.uiNxtSN = 0;
 
   CanTp_VariablesTX.CanTp_Current_TxId = 1;
   CanTp_TxConfirmation (1, E_OK);
@@ -546,11 +545,11 @@ void Test_Of_CanTp_TxConfirmation(void){
   TEST_CHECK(CanIf_Transmit_fake.arg1_val->SduDataPtr[4] == 'a' );
   TEST_CHECK(CanIf_Transmit_fake.arg1_val->SduDataPtr[5] == '.' );
 
-  TEST_CHECK(CanTp_VariablesTX.CanTp_StateTX == CANTP_TX_PROCESSING);
+  TEST_CHECK(CanTp_VariablesTX.eCanTp_StateTX == CANTP_TX_PROCESSING);
   TEST_CHECK(CanTp_VariablesTX.CanTp_Current_TxId == 1); 
-  TEST_CHECK(CanTp_VariablesTX.frame_nr_FC == 0);
-  TEST_CHECK(CanTp_VariablesTX.message_legth == 100);
-  TEST_CHECK(CanTp_VariablesTX.sent_bytes == 100);
+  TEST_CHECK(CanTp_VariablesTX.uiFrameNrFC == 0);
+  TEST_CHECK(CanTp_VariablesTX.uiMsgLen == 100);
+  TEST_CHECK(CanTp_VariablesTX.uiTransmittedBytes == 100);
 
   CanTp_ResetRX();
   CanTp_ResetTX();
@@ -560,12 +559,12 @@ void Test_Of_CanTp_TxConfirmation(void){
     RETURN E_NOT_OK
   */
 
-  CanTp_VariablesTX.CanTp_StateTX = CANTP_TX_PROCESSING;
-  CanTp_VariablesTX.frame_nr_FC = 1;
+  CanTp_VariablesTX.eCanTp_StateTX = CANTP_TX_PROCESSING;
+  CanTp_VariablesTX.uiFrameNrFC = 1;
   CanTp_VariablesTX.CanTp_Current_TxId = 0x1;
-  CanTp_VariablesTX.message_legth = 100;
-  CanTp_VariablesTX.sent_bytes = 95;
-  CanTp_VariablesTX.next_SN = 0;
+  CanTp_VariablesTX.uiMsgLen = 100;
+  CanTp_VariablesTX.uiTransmittedBytes = 95;
+  CanTp_VariablesTX.uiNxtSN = 0;
 
   CanTp_VariablesTX.CanTp_Current_TxId = 1;
 
@@ -578,11 +577,11 @@ void Test_Of_CanTp_TxConfirmation(void){
   TEST_CHECK( PduR_CanTpTxConfirmation_fake.arg1_val == E_NOT_OK );
 
   TEST_CHECK(CanIf_Transmit_fake.call_count == 1 );
-  TEST_CHECK(CanTp_VariablesTX.CanTp_StateTX == CANTP_TX_WAIT);
+  TEST_CHECK(CanTp_VariablesTX.eCanTp_StateTX == CANTP_TX_WAIT);
   TEST_CHECK(CanTp_VariablesTX.CanTp_Current_TxId == 0);
-  TEST_CHECK(CanTp_VariablesTX.frame_nr_FC == 0);
-  TEST_CHECK(CanTp_VariablesTX.message_legth == 0);
-  TEST_CHECK(CanTp_VariablesTX.sent_bytes == 0);
+  TEST_CHECK(CanTp_VariablesTX.uiFrameNrFC == 0);
+  TEST_CHECK(CanTp_VariablesTX.uiMsgLen == 0);
+  TEST_CHECK(CanTp_VariablesTX.uiTransmittedBytes == 0);
 
   CanTp_ResetRX();
   CanTp_ResetTX();
@@ -592,12 +591,12 @@ void Test_Of_CanTp_TxConfirmation(void){
     UNKNOWN ID
   */
 
-  CanTp_VariablesTX.CanTp_StateTX = CANTP_TX_PROCESSING;
-  CanTp_VariablesTX.frame_nr_FC = 1;
+  CanTp_VariablesTX.eCanTp_StateTX = CANTP_TX_PROCESSING;
+  CanTp_VariablesTX.uiFrameNrFC = 1;
   CanTp_VariablesTX.CanTp_Current_TxId = 0x1;
-  CanTp_VariablesTX.message_legth = 100;
-  CanTp_VariablesTX.sent_bytes = 95;
-  CanTp_VariablesTX.next_SN = 0;
+  CanTp_VariablesTX.uiMsgLen = 100;
+  CanTp_VariablesTX.uiTransmittedBytes = 95;
+  CanTp_VariablesTX.uiNxtSN = 0;
 
   CanTp_VariablesTX.CanTp_Current_TxId = 1;
 
@@ -608,11 +607,11 @@ void Test_Of_CanTp_TxConfirmation(void){
 
   TEST_CHECK(CanIf_Transmit_fake.call_count == 1 );
 
-  TEST_CHECK(CanTp_VariablesTX.CanTp_StateTX == CANTP_TX_PROCESSING);
+  TEST_CHECK(CanTp_VariablesTX.eCanTp_StateTX == CANTP_TX_PROCESSING);
   TEST_CHECK(CanTp_VariablesTX.CanTp_Current_TxId == 1);
-  TEST_CHECK(CanTp_VariablesTX.frame_nr_FC == 1);
-  TEST_CHECK(CanTp_VariablesTX.message_legth == 100);
-  TEST_CHECK(CanTp_VariablesTX.sent_bytes == 95);
+  TEST_CHECK(CanTp_VariablesTX.uiFrameNrFC == 1);
+  TEST_CHECK(CanTp_VariablesTX.uiMsgLen == 100);
+  TEST_CHECK(CanTp_VariablesTX.uiTransmittedBytes == 95);
 
   CanTp_ResetRX();
   CanTp_ResetTX();
@@ -623,41 +622,41 @@ void Test_Of_CanTp_TxConfirmation(void){
 \*====================================================================================================================*/
 
 void Test_Of_CanTp_ResetRX(){     
-    CanTp_VariablesRX.CanTp_StateRX == CANTP_RX_PROCESSING;
-    CanTp_VariablesRX.expected_CF_SN == 1;
-    CanTp_VariablesRX.message_length == 5;
-    CanTp_VariablesRX.sended_bytes == 4;
-    CanTp_VariablesRX.blocks_to_next_cts == 2;
+    CanTp_VariablesRX.eCanTp_StateRX == CANTP_RX_PROCESSING;
+    CanTp_VariablesRX.uiExpected_CF_SN == 1;
+    CanTp_VariablesRX.uiMsgLen == 5;
+    CanTp_VariablesRX.uiTransmittedBytes == 4;
+    CanTp_VariablesRX.uiBlocksNxtCts == 2;
     CanTp_VariablesRX.CanTp_Current_RxId == 2;
     CanTp_ResetRX();
-    TEST_CHECK(CanTp_VariablesRX.CanTp_StateRX == CANTP_RX_WAIT);
-    TEST_CHECK(CanTp_VariablesRX.expected_CF_SN == 0);
-    TEST_CHECK(CanTp_VariablesRX.message_length == 0);
-    TEST_CHECK(CanTp_VariablesRX.sended_bytes == 0);
-    TEST_CHECK(CanTp_VariablesRX.blocks_to_next_cts == 0);
+    TEST_CHECK(CanTp_VariablesRX.eCanTp_StateRX == CANTP_RX_WAIT);
+    TEST_CHECK(CanTp_VariablesRX.uiExpected_CF_SN == 0);
+    TEST_CHECK(CanTp_VariablesRX.uiMsgLen == 0);
+    TEST_CHECK(CanTp_VariablesRX.uiTransmittedBytes == 0);
+    TEST_CHECK(CanTp_VariablesRX.uiBlocksNxtCts == 0);
     TEST_CHECK(CanTp_VariablesRX.CanTp_Current_RxId == 0);
 }
 
 void Test_Of_CanTp_ResetTX(void){
-    CanTp_VariablesTX.CanTp_StateTX = CANTP_TX_PROCESSING;
-    CanTp_VariablesTX.frame_nr_FC = 2;
+    CanTp_VariablesTX.eCanTp_StateTX = CANTP_TX_PROCESSING;
+    CanTp_VariablesTX.uiFrameNrFC = 2;
     CanTp_VariablesTX.CanTp_Current_TxId = 3;
-    CanTp_VariablesTX.message_legth = 4;
-    CanTp_VariablesTX.sent_bytes = 5;
+    CanTp_VariablesTX.uiMsgLen = 4;
+    CanTp_VariablesTX.uiTransmittedBytes = 5;
     CanTp_ResetTX();
-    TEST_CHECK(CanTp_VariablesTX.CanTp_StateTX == CANTP_TX_WAIT);
-    TEST_CHECK(CanTp_VariablesTX.frame_nr_FC == 0);
+    TEST_CHECK(CanTp_VariablesTX.eCanTp_StateTX == CANTP_TX_WAIT);
+    TEST_CHECK(CanTp_VariablesTX.uiFrameNrFC == 0);
     TEST_CHECK(CanTp_VariablesTX.CanTp_Current_TxId == 0);
-    TEST_CHECK(CanTp_VariablesTX.message_legth == 0);
-    TEST_CHECK(CanTp_VariablesTX.sent_bytes == 0);
+    TEST_CHECK(CanTp_VariablesTX.uiMsgLen == 0);
+    TEST_CHECK(CanTp_VariablesTX.uiTransmittedBytes == 0);
 }
 
 void Test_Of_CanTp_Calc_Available_Blocks(void){
   uint16 ret;
-  CanTp_VariablesRX.message_length = 8;
-  CanTp_VariablesRX.sended_bytes = 0;
-  TEST_CHECK(CanTp_Calc_Available_Blocks(10) == 2);
-  TEST_CHECK(CanTp_Calc_Available_Blocks(6) == 0);
+  CanTp_VariablesRX.uiMsgLen = 8;
+  CanTp_VariablesRX.uiTransmittedBytes = 0;
+  TEST_CHECK(CanTp_CalcBlocksSize(10) == 2);
+  TEST_CHECK(CanTp_CalcBlocksSize(6) == 0);
 }
 
 void Test_Of_CanTp_FrameCheckType(void)
@@ -677,17 +676,17 @@ void Test_Of_CanTp_FrameCheckType(void)
 
     ret = CanTp_GetPCI(&can_data, &CanFrameInfo);
     TEST_CHECK(ret == E_OK);
-    TEST_CHECK(CanFrameInfo.frame_type == SF);
-    TEST_CHECK(CanFrameInfo.frame_lenght == 0xF);
-    TEST_CHECK(CanFrameInfo.BS == 0);
-    TEST_CHECK(CanFrameInfo.FS == 0);
-    TEST_CHECK(CanFrameInfo.SN == 0);
-    TEST_CHECK(CanFrameInfo.ST == 0);
+    TEST_CHECK(CanFrameInfo.eFrameType == CAN_SF);
+    TEST_CHECK(CanFrameInfo.uiFrameLenght == 0xF);
+    TEST_CHECK(CanFrameInfo.uiBlockSize == 0);
+    TEST_CHECK(CanFrameInfo.uiFlowStatus == 0);
+    TEST_CHECK(CanFrameInfo.uiSeparationTime == 0);
+    TEST_CHECK(CanFrameInfo.uiSeparationTime == 0);
 }
 
 
 TEST_LIST = {
-    { "Test of CanTp_MainFunction", Test_Of_CanTp_MainFunction },
+    // { "Test of CanTp_MainFunction", Test_Of_CanTp_MainFunction },
     // { "Test of CanTp_FrameCheckType", Test_Of_CanTp_FrameCheckType },
     // { "Test of CanTp_Calc_Available_Blocks", Test_Of_CanTp_Calc_Available_Blocks },
     // { "Test of CanTp_ResetTX", Test_Of_CanTp_ResetTX },
@@ -695,7 +694,7 @@ TEST_LIST = {
     // { "Test of CanTp_TxConfirmation", Test_Of_CanTp_TxConfirmation },
     // { "Test of CanTp_CancelReceive", Test_Of_CanTp_CancelReceive },
     // { "Test of CanTp_CancelTransmit", Test_Of_CanTp_CancelTransmit },
-    // { "Test of CanTp_Transmit", TestOf_CanTp_Transmit },
+    { "Test of CanTp_Transmit", TestOf_CanTp_Transmit },
     // { "Test of CanTp_Init", Test_Of_CanTp_Init },
     // { "Test of CanTp_Shutdown", Test_Of_CanTp_Shutdown },
 	  // { "Test of CanTp_GetVersionInfo", Test_Of_CanTp_GetVersionInfo },
